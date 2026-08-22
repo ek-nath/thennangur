@@ -351,14 +351,16 @@ export default function App() {
             {/* Logo and branding */}
             <div className="flex items-center">
               <a href="#/" className="flex items-center gap-3 group">
-                <img 
-                  src="/images/logo.png" 
-                  alt="Thennangur Logo" 
-                  className="h-14 w-auto drop-shadow transition-transform duration-300 group-hover:scale-105"
-                  onError={(e) => {
-                    e.target.src = '/images/radhe-krishna-logo.png'; // Fallback
-                  }}
-                />
+                <div className="h-14 w-14 bg-temple-maroon-900 rounded-full flex items-center justify-center p-1 shadow-md border border-temple-saffron-600/30 transition-transform duration-300 group-hover:scale-105">
+                  <img 
+                    src="/images/logo.png" 
+                    alt="Thennangur Logo" 
+                    className="h-full w-auto object-contain"
+                    onError={(e) => {
+                      e.target.src = '/images/radhe-krishna-logo.png'; // Fallback
+                    }}
+                  />
+                </div>
                 <div>
                   <h1 className="font-serif text-lg sm:text-xl font-bold tracking-wide text-temple-maroon-800 leading-tight">
                     THENNANGUR
