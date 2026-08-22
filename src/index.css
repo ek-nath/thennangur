@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+@theme {
+  --color-temple-maroon-50: #fef2f2;
+  --color-temple-maroon-100: #fee2e2;
+  --color-temple-maroon-500: #b91c1c;
+  --color-temple-maroon-800: #7c1516;
+  --color-temple-maroon-850: #6c1112;
+  --color-temple-maroon-900: #5c0f10;
+  
+  --color-temple-saffron-50: #fffbeb;
+  --color-temple-saffron-100: #fef3c7;
+  --color-temple-saffron-300: #fcd34d;
+  --color-temple-saffron-400: #fbbf24;
+  --color-temple-saffron-500: #d97706;
+  --color-temple-saffron-600: #b45309;
+  --color-temple-saffron-700: #78350f;
+  
+  --color-temple-stone-50: #faf6f0;
+  --color-temple-stone-100: #f5efe6;
+  --color-temple-stone-150: #ebe5db;
+  --color-temple-stone-200: #e6dfd3;
+  --color-temple-stone-250: #dcd6cb;
+  --color-temple-stone-500: #78716c;
+  --color-temple-stone-600: #57534e;
+  --color-temple-stone-650: #44403c;
+  --color-temple-stone-700: #292524;
+  --color-temple-stone-750: #1c1917;
+  --color-temple-stone-800: #3f3a36;
+  --color-temple-stone-850: #2d2926;
+  --color-temple-stone-900: #262220;
+  --color-temple-stone-950: #1c1917;
+  
+  --font-serif: "Cinzel", "Georgia", "ui-serif", "serif";
+  --font-sans: "Inter", "system-ui", "sans-serif";
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+/* Custom styling for a smooth, peaceful, tactile interface */
+.bg-spiritual-gradient {
+  background: linear-gradient(135deg, #7c1516 0%, #5c0f10 100%);
+}
+
+.text-gold-gradient {
+  background: linear-gradient(135deg, #f5efe6 0%, #d97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Custom scrollbar matching temple theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f5efe6;
+}
+::-webkit-scrollbar-thumb {
+  background: #b45309;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #78350f;
+}
+
+/* Styling for rich text content from parsed Markdown */
+.prose {
+  @apply text-temple-stone-800 leading-relaxed space-y-4;
+}
+.prose h2 {
+  @apply text-2xl font-semibold text-temple-maroon-800 mt-8 mb-4 border-b border-temple-stone-200 pb-2;
+}
+.prose h3 {
+  @apply text-xl font-medium text-temple-saffron-700 mt-6 mb-3;
+}
+.prose p {
+  @apply text-base text-temple-stone-800 leading-relaxed mb-4;
+}
+.prose ul {
+  @apply list-disc list-inside space-y-2 my-4 pl-4;
+}
+.prose ol {
+  @apply list-decimal list-inside space-y-2 my-4 pl-4;
+}
+.prose strong {
+  @apply font-semibold text-temple-maroon-900;
+}
+.prose img {
+  @apply rounded-lg shadow-md max-w-full my-6 border border-temple-stone-200 mx-auto max-h-[400px] object-cover;
+}
+.prose a {
+  @apply text-temple-maroon-800 hover:text-temple-saffron-600 underline font-medium transition-colors;
+}
+
+/* Hide images in prose layout when custom gallery is used */
+.prose-no-images img {
+  display: none !important;
+}
