@@ -87,6 +87,14 @@ const TEMPLE_METADATA = {
     established: '1996 Consecration',
     subtitle: 'Dakshina Pandharpur'
   },
+  'shree-matham': {
+    heroImage: '/images/temples/shree-matham-temple.jpg',
+    deity: 'Maha Shodasi & Holy Samadhies',
+    style: 'Spiritual Complex / Ashram Core',
+    highlight: 'Goddess Maha Shodasi & Gurus Samadhi',
+    established: 'Thennangur Ashram Sanctuary',
+    subtitle: 'Heart of the Ashram'
+  },
   'maha-shodasi-temple': {
     heroImage: '/images/temples/maha-shodasi.jpg',
     deity: 'Goddess Maha Shodasi (16-handed)',
@@ -120,6 +128,18 @@ const TEMPLE_TIMINGS = {
     { time: '12:00 PM - 4:00 PM', event: 'Temple Closed for afternoon' },
     { time: '6:30 PM', event: 'Deepa Aradhanai' },
     { time: '8:00 PM', event: 'Panduranga Rakhumayi Temple Closes' }
+  ],
+  'shree-matham': [
+    { time: '5:30 AM', event: 'Suprabhatam and Gho Pooja' },
+    { time: '6:15 AM', event: 'Prarthana and Deepa Jyoti' },
+    { time: '6:30 AM', event: 'Ganapathy Homam/Abhishekham' },
+    { time: '7:00 AM', event: 'Pada Pooja and Swami Gnanananda Sannidhi Pooja' },
+    { time: '7:30 AM', event: 'Guruji Brindavan and Namaji Adhishthan Pooja' },
+    { time: '9:00 AM', event: 'Naivedyam and Deepa Aradhanai' },
+    { time: '12:00 PM - 4:00 PM', event: 'Temple Closed for afternoon' },
+    { time: '4:30 PM', event: 'Navavarna Pooja in Maha Shodasi Adhisthanam' },
+    { time: '7:30 PM', event: 'Deepa Aradhanai' },
+    { time: '8:00 PM', event: 'Shree Matham closes' }
   ],
   'maha-shodasi-temple': [
     { time: '5:30 AM', event: 'Suprabhatam and Gho Pooja' },
@@ -382,12 +402,27 @@ export default function App() {
                 <a href="#/temples" className={`px-2 xl:px-3 py-2 text-sm font-medium tracking-wide border-b-2 transition-colors duration-200 flex items-center gap-1 ${isRoute('#/temples') ? 'border-temple-saffron-500 text-temple-maroon-800' : 'border-transparent text-temple-stone-800 hover:text-temple-maroon-800 hover:border-temple-stone-200'}`}>
                   Temples
                 </a>
-                <div className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="absolute left-0 mt-2 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                   <div className="py-1">
-                    <a href="#/temples/panduranga-rakhumayi-temple" className="block px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Panduranga Rakhumayi</a>
-                    <a href="#/temples/maha-shodasi-temple" className="block px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Maha Shodasi</a>
-                    <a href="#/temples/meenakshi-sundareshwar-temple" className="block px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Meenakshi Sundareshwar</a>
-                    <a href="#/temples/lakshmi-narayan-temple" className="block px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Lakshmi Narayan Temple</a>
+                    <a href="#/temples/panduranga-rakhumayi-temple" className="block px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800 font-medium">Panduranga Rakhumayi</a>
+                    <a href="#/temples/meenakshi-sundareshwar-temple" className="block px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800 font-medium">Meenakshi Sundareshwar</a>
+                    <a href="#/temples/lakshmi-narayan-temple" className="block px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800 font-medium">Lakshmi Narayan Temple</a>
+                    
+                    {/* Shree Matham Sub-Dropdown */}
+                    <div className="relative group/sub">
+                      <div className="flex items-center justify-between w-full px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800 cursor-pointer font-medium">
+                        <span>Shree Matham</span>
+                        <ChevronRight size={14} className="text-temple-stone-400 group-hover/sub:text-temple-maroon-800" />
+                      </div>
+                      <div className="absolute left-full top-0 w-72 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible transition-all duration-200 z-50">
+                        <div className="py-1">
+                          <a href="#/temples/maha-shodasi-temple" className="block px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Maha Shodasi Temple</a>
+                          <a href="#/ashram/swami-haridhos-giri-brindavan" className="block px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Swami Haridhos Giri Brindavanam</a>
+                          <a href="#/ashram/swami-namananda-giri-adhisthanam" className="block px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Swami Namananda Giri Adishthanam</a>
+                          <a href="#/ashram/sathguru-gnanananda-giri" className="block px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Sathguru Gnanananda Giri Sannidhi</a>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -402,7 +437,6 @@ export default function App() {
                     <a href="#/ashram/sathguru-gnanananda-giri" className="block px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Sathguru Gnanananda Giri</a>
                     <a href="#/ashram/swami-haridhos-giri" className="block px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Swami Haridhos Giri (Guruji)</a>
                     <a href="#/ashram/swami-namananda-giri-adhisthanam" className="block px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Swami Namananda Giri (Namaji)</a>
-                    <a href="#/ashram/swami-haridhos-giri-brindavan" className="block px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Swami Haridhos Giri Brindavan</a>
                   </div>
                 </div>
               </div>
@@ -439,9 +473,17 @@ export default function App() {
               <div className="border-t border-temple-stone-100 my-1 pt-1">
                 <span className="block px-3 py-1 text-xs font-bold text-temple-saffron-600 uppercase tracking-wider">Temples</span>
                 <a href="#/temples/panduranga-rakhumayi-temple" className="block pl-6 pr-3 py-2 rounded-md text-base font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Panduranga Rakhumayi</a>
-                <a href="#/temples/maha-shodasi-temple" className="block pl-6 pr-3 py-2 rounded-md text-base font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Maha Shodasi</a>
                 <a href="#/temples/meenakshi-sundareshwar-temple" className="block pl-6 pr-3 py-2 rounded-md text-base font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Meenakshi Sundareshwar</a>
                 <a href="#/temples/lakshmi-narayan-temple" className="block pl-6 pr-3 py-2 rounded-md text-base font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Lakshmi Narayan Temple</a>
+                
+                {/* Shree Matham Mobile Submenu */}
+                <div className="pl-4 border-l-2 border-temple-stone-200 my-1 ml-6 space-y-1">
+                  <span className="block px-3 py-1 text-xs font-bold text-temple-stone-500 uppercase tracking-wider">Shree Matham</span>
+                  <a href="#/temples/maha-shodasi-temple" className="block pl-3 pr-3 py-1.5 rounded-md text-sm font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Maha Shodasi Temple</a>
+                  <a href="#/ashram/swami-haridhos-giri-brindavan" className="block pl-3 pr-3 py-1.5 rounded-md text-sm font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Swami Haridhos Giri Brindavanam</a>
+                  <a href="#/ashram/swami-namananda-giri-adhisthanam" className="block pl-3 pr-3 py-1.5 rounded-md text-sm font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Swami Namananda Giri Adishthanam</a>
+                  <a href="#/ashram/sathguru-gnanananda-giri" className="block pl-3 pr-3 py-1.5 rounded-md text-sm font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Sathguru Gnanananda Giri Sannidhi</a>
+                </div>
               </div>
               
               <div className="border-t border-temple-stone-100 my-1 pt-1">
@@ -449,7 +491,6 @@ export default function App() {
                 <a href="#/ashram/sathguru-gnanananda-giri" className="block pl-6 pr-3 py-2 rounded-md text-base font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Sathguru Gnanananda Giri</a>
                 <a href="#/ashram/swami-haridhos-giri" className="block pl-6 pr-3 py-2 rounded-md text-base font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Swami Haridhos Giri</a>
                 <a href="#/ashram/swami-namananda-giri-adhisthanam" className="block pl-6 pr-3 py-2 rounded-md text-base font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Swami Namananda Giri</a>
-                <a href="#/ashram/swami-haridhos-giri-brindavan" className="block pl-6 pr-3 py-2 rounded-md text-base font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Swami Haridhos Giri Brindavan</a>
               </div>
 
               <a href="#/pooja-booking" className="block px-3 py-2 rounded-md text-base font-medium text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Pooja Bookings</a>
@@ -609,24 +650,23 @@ export default function App() {
                   <div className="bg-white rounded-xl shadow-md border border-temple-stone-200 overflow-hidden flex flex-col hover:shadow-xl transition-all duration-300 group">
                     <div className="relative h-48 overflow-hidden">
                       <img 
-                        src="/images/temples/maha-shodasi.jpg" 
-                        alt="Maha Shodasi Temple" 
+                        src="/images/temples/shree-matham-temple.jpg" 
+                        alt="Shree Matham" 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         loading="lazy"
-                        onError={(e) => e.target.src = '/images/daily-events-lakshmi.jpg'}
                       />
-                      <div className="absolute top-3 right-3 bg-temple-maroon-900 text-temple-saffron-300 text-xs px-2 py-1 rounded font-semibold font-serif">First in World</div>
+                      <div className="absolute top-3 right-3 bg-temple-maroon-900 text-temple-saffron-300 text-xs px-2 py-1 rounded font-semibold font-serif">Ashram Core</div>
                     </div>
                     <div className="p-6 flex-grow flex flex-col justify-between">
                       <div className="space-y-3">
-                        <h3 className="font-serif text-lg font-bold text-temple-maroon-800">Maha Shodasi Temple</h3>
+                        <h3 className="font-serif text-lg font-bold text-temple-maroon-800">Shree Matham</h3>
                         <p className="text-sm text-temple-stone-700 line-clamp-3">
-                          The first temple in the world to give idol form to the Maha Shodasi mantra, representing the 16-handed cosmic Goddess.
+                          The spiritual core of Thennangur Ashram. It houses the world-unique Maha Shodasi Temple, Sathguru Gnanananda Giri Sannidhi, Swami Haridhos Giri Brindavanam, and Swami Namananda Giri Adishthanam.
                         </p>
                       </div>
                       <div className="pt-6">
-                        <a href="#/temples/maha-shodasi-temple" className="text-temple-saffron-600 hover:text-temple-maroon-800 font-bold text-sm flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                          Explore Temple &rarr;
+                        <a href="#/temples/shree-matham" className="text-temple-saffron-600 hover:text-temple-maroon-805 font-bold text-sm flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                          Explore Shree Matham &rarr;
                         </a>
                       </div>
                     </div>
@@ -1325,35 +1365,34 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Card 2: Maha Shodasi */}
+                  {/* Card 2: Shree Matham */}
                   <div className="bg-white rounded-2xl shadow-md border border-temple-stone-200 overflow-hidden flex flex-col group hover:shadow-xl hover:border-temple-saffron-300/30 transition-all duration-300">
                     <div className="relative h-72 overflow-hidden bg-temple-stone-100">
                       <img 
-                        src="/images/temples/maha-shodasi.jpg" 
-                        alt="Maha Shodasi Temple" 
+                        src="/images/temples/shree-matham-temple.jpg" 
+                        alt="Shree Matham" 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
-                        onError={(e) => e.target.src = '/images/daily-events-lakshmi.jpg'}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>
                       <span className="absolute top-4 right-4 bg-temple-maroon-900 text-temple-saffron-300 text-xs font-bold px-3 py-1.5 rounded-lg font-serif border border-temple-saffron-600/30 shadow">
-                        First in the World
+                        Spiritual Complex
                       </span>
                     </div>
                     <div className="p-6 flex-grow flex flex-col justify-between space-y-5">
                       <div className="space-y-2">
-                        <span className="text-xs text-temple-saffron-600 font-bold uppercase tracking-wider">Sri Vidya Upasana</span>
+                        <span className="text-xs text-temple-saffron-600 font-bold uppercase tracking-wider">Ashram Core</span>
                         <h3 className="font-serif text-2xl font-bold text-temple-maroon-800 group-hover:text-temple-maroon-900">
-                          Maha Shodasi Temple
+                          Shree Matham
                         </h3>
                         <p className="text-sm text-temple-stone-700 leading-relaxed line-clamp-3">
-                          Located in the Shree Matham, this is the first temple in the world to present the Maha Shodasi mantra in full 16-handed idol form. Seated in Srividya posture, the Goddess offers profound blessings of self-realization and prosperity.
+                          Serving as the sacred core of the Thennangur Ashram complex, Shree Matham houses the world-unique Maha Shodasi Temple, Sathguru Gnanananda Giri Sannidhi, Swami Haridhos Giri Brindavanam, and Swami Namananda Giri Adishthanam.
                         </p>
                       </div>
                       <a 
-                        href="#/temples/maha-shodasi-temple" 
+                        href="#/temples/shree-matham" 
                         className="group flex items-center justify-between w-full bg-temple-stone-100 group-hover:bg-temple-maroon-800 group-hover:text-white px-5 py-3.5 rounded-xl font-bold text-sm text-temple-maroon-800 transition-all duration-300 border border-temple-stone-200 group-hover:border-transparent"
                       >
-                        <span>Explore Sthala Puranam & Darshan</span>
+                        <span>Explore Shrines & Darshan</span>
                         <ChevronRight size={16} className="transform transition-transform group-hover:translate-x-1" />
                       </a>
                     </div>
@@ -1499,57 +1538,43 @@ export default function App() {
                   <span className="text-temple-saffron-600 font-bold uppercase tracking-widest text-xs">Auspicious Lineage</span>
                   <h2 className="text-3xl sm:text-4xl font-serif font-bold text-temple-maroon-800">Our Spiritual Masters</h2>
                   <div className="w-16 h-1 bg-temple-saffron-500 mx-auto"></div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                  {/* Master 1 */}
-                  <div className="bg-white rounded-xl shadow border border-temple-stone-200 overflow-hidden flex flex-col items-center p-8 text-center space-y-4">
-                    <img src="/images/guruji/swami-haridhos-giri.jpg" alt="Swami Haridhos Giri" className="w-40 h-40 rounded-full object-cover border-4 border-temple-saffron-100" />
-                    <h3 className="font-serif text-xl font-bold text-temple-maroon-800">Swami Haridhos Giri (Guruji)</h3>
-                    <p className="text-sm text-temple-stone-600">
-                      The founder master of Thennangur Ashram. An incredible master who popularized Namasankirtan, traveled widely, and transformed a cursed village into a spiritual legacy.
-                    </p>
-                    <a href="#/ashram/swami-haridhos-giri" className="bg-temple-maroon-850 hover:bg-temple-maroon-900 text-white text-sm font-semibold px-6 py-2 rounded-lg transition-colors">
-                      View Biography
-                    </a>
-                  </div>
-
-                  {/* Master 2 */}
-                  <div className="bg-white rounded-xl shadow border border-temple-stone-200 overflow-hidden flex flex-col items-center p-8 text-center space-y-4">
-                    <img src="/images/gnanananda/gnanananda-portrait.jpg" alt="Sathguru Gnanananda Giri" className="w-40 h-40 rounded-full object-cover border-4 border-temple-saffron-100" />
-                    <h3 className="font-serif text-xl font-bold text-temple-maroon-800">Sathguru Gnanananda Giri</h3>
-                    <p className="text-sm text-temple-stone-600">
-                      The great Master of Swami Haridhos Giri. His teachings of self-realization, meditation, and chanting lay at the foundational heart of the Ashram's daily operations.
-                    </p>
-                    <a href="#/ashram/sathguru-gnanananda-giri" className="bg-temple-maroon-850 hover:bg-temple-maroon-900 text-white text-sm font-semibold px-6 py-2 rounded-lg transition-colors">
-                      View Biography
-                    </a>
-                  </div>
-
-                  {/* Master 3 */}
-                  <div className="bg-white rounded-xl shadow border border-temple-stone-200 overflow-hidden flex flex-col items-center p-8 text-center space-y-4">
-                    <img src="/images/gnanananda/namananda-portrait.jpg" alt="Swami Namananda Giri" className="w-40 h-40 rounded-full object-cover border-4 border-temple-saffron-100" />
-                    <h3 className="font-serif text-xl font-bold text-temple-maroon-800">Swami Namananda Giri (Namaji)</h3>
-                    <p className="text-sm text-temple-stone-600">
-                      Chief disciple and direct administrative successor to Swami Haridhos Giri. He strictly maintained Ashram traditions, poojas, and charitable activities.
-                    </p>
-                    <a href="#/ashram/swami-namananda-giri-adhisthanam" className="bg-temple-maroon-850 hover:bg-temple-maroon-900 text-white text-sm font-semibold px-6 py-2 rounded-lg transition-colors">
-                      View Biography
-                    </a>
-                  </div>
-
-                  {/* Master 4 */}
-                  <div className="bg-white rounded-xl shadow border border-temple-stone-200 overflow-hidden flex flex-col items-center p-8 text-center space-y-4">
-                    <div className="w-40 h-40 rounded-full bg-temple-stone-100 flex items-center justify-center border-4 border-temple-saffron-100 overflow-hidden">
-                      <BookOpen size={48} className="text-temple-maroon-800" />
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                    {/* Master 1 */}
+                    <div className="bg-white rounded-xl shadow border border-temple-stone-200 overflow-hidden flex flex-col items-center p-8 text-center space-y-4">
+                      <img src="/images/guruji/swami-haridhos-giri.jpg" alt="Swami Haridhos Giri" className="w-40 h-40 rounded-full object-cover border-4 border-temple-saffron-100" />
+                      <h3 className="font-serif text-xl font-bold text-temple-maroon-800">Swami Haridhos Giri (Guruji)</h3>
+                      <p className="text-sm text-temple-stone-600">
+                        The founder master of Thennangur Ashram. An incredible master who popularized Namasankirtan, traveled widely, and transformed a cursed village into a spiritual legacy.
+                      </p>
+                      <a href="#/ashram/swami-haridhos-giri" className="bg-temple-maroon-850 hover:bg-temple-maroon-900 text-white text-sm font-semibold px-6 py-2 rounded-lg transition-colors">
+                        View Biography
+                      </a>
                     </div>
-                    <h3 className="font-serif text-xl font-bold text-temple-maroon-800">Swami Haridhos Giri Brindavan</h3>
-                    <p className="text-sm text-temple-stone-600">
-                      The sacred Samadhi shrine (Brindavanam) of Swami Haridhos Giri, where devotees meditate and offer daily flowers and prayers to the master.
-                    </p>
-                    <a href="#/ashram/swami-haridhos-giri-brindavan" className="bg-temple-maroon-850 hover:bg-temple-maroon-900 text-white text-sm font-semibold px-6 py-2 rounded-lg transition-colors">
-                      View Details
-                    </a>
+
+                    {/* Master 2 */}
+                    <div className="bg-white rounded-xl shadow border border-temple-stone-200 overflow-hidden flex flex-col items-center p-8 text-center space-y-4">
+                      <img src="/images/gnanananda/gnanananda-portrait.jpg" alt="Sathguru Gnanananda Giri" className="w-40 h-40 rounded-full object-cover border-4 border-temple-saffron-100" />
+                      <h3 className="font-serif text-xl font-bold text-temple-maroon-800">Sathguru Gnanananda Giri</h3>
+                      <p className="text-sm text-temple-stone-600">
+                        The great Master of Swami Haridhos Giri. His teachings of self-realization, meditation, and chanting lay at the foundational heart of the Ashram's daily operations.
+                      </p>
+                      <a href="#/ashram/sathguru-gnanananda-giri" className="bg-temple-maroon-850 hover:bg-temple-maroon-900 text-white text-sm font-semibold px-6 py-2 rounded-lg transition-colors">
+                        View Biography
+                      </a>
+                    </div>
+
+                    {/* Master 3 */}
+                    <div className="bg-white rounded-xl shadow border border-temple-stone-200 overflow-hidden flex flex-col items-center p-8 text-center space-y-4">
+                      <img src="/images/gnanananda/namananda-portrait.jpg" alt="Swami Namananda Giri" className="w-40 h-40 rounded-full object-cover border-4 border-temple-saffron-100" />
+                      <h3 className="font-serif text-xl font-bold text-temple-maroon-800">Swami Namananda Giri (Namaji)</h3>
+                      <p className="text-sm text-temple-stone-600">
+                        Chief disciple and direct administrative successor to Swami Haridhos Giri. He strictly maintained Ashram traditions, poojas, and charitable activities.
+                      </p>
+                      <a href="#/ashram/swami-namananda-giri-adhisthanam" className="bg-temple-maroon-850 hover:bg-temple-maroon-900 text-white text-sm font-semibold px-6 py-2 rounded-lg transition-colors">
+                        View Biography
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -3057,7 +3082,7 @@ export default function App() {
             <h4 className="font-serif text-sm font-bold uppercase tracking-wider text-temple-saffron-400">Our Temples</h4>
             <ul className="space-y-2">
               <li><a href="#/temples/panduranga-rakhumayi-temple" className="hover:text-temple-saffron-300 transition-colors">Panduranga Rakhumayi</a></li>
-              <li><a href="#/temples/maha-shodasi-temple" className="hover:text-temple-saffron-300 transition-colors">Maha Shodasi Temple</a></li>
+              <li><a href="#/temples/shree-matham" className="hover:text-temple-saffron-300 transition-colors">Shree Matham</a></li>
               <li><a href="#/temples/meenakshi-sundareshwar-temple" className="hover:text-temple-saffron-300 transition-colors">Meenakshi Sundareshwar</a></li>
               <li><a href="#/temples/lakshmi-narayan-temple" className="hover:text-temple-saffron-300 transition-colors">Lakshmi Narayan Sannidhi</a></li>
             </ul>
