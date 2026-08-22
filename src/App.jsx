@@ -479,7 +479,7 @@ export default function App() {
                 
                 {/* Shree Matham Mobile Section */}
                 <div className="my-1">
-                  <a href="#/temples/shree-matham" className="block pl-6 pr-3 py-2 rounded-md text-base font-semibold text-temple-maroon-800 hover:bg-temple-stone-50">Shree Matham Complex</a>
+                  <a href="#/temples/shree-matham" className="block pl-6 pr-3 py-2 rounded-md text-base font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Shree Matham Complex</a>
                   <div className="pl-4 border-l-2 border-temple-stone-200 ml-8 space-y-1.5 mt-1">
                     <a href="#/temples/maha-shodasi-temple" className="block pl-3 pr-3 py-1 rounded-md text-sm font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Maha Shodasi Temple</a>
                     <a href="#/ashram/swami-haridhos-giri-brindavan" className="block pl-3 pr-3 py-1 rounded-md text-sm font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Swami Haridhos Giri Brindavanam</a>
