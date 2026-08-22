@@ -477,14 +477,16 @@ export default function App() {
                 <a href="#/temples/meenakshi-sundareshwar-temple" className="block pl-6 pr-3 py-2 rounded-md text-base font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Meenakshi Sundareshwar</a>
                 <a href="#/temples/lakshmi-narayan-temple" className="block pl-6 pr-3 py-2 rounded-md text-base font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Lakshmi Narayan Temple</a>
                 
-                {/* Shree Matham Mobile Submenu */}
-                <div className="pl-4 border-l-2 border-temple-stone-200 my-1 ml-6 space-y-1">
-                  <span className="block px-3 py-1 text-xs font-bold text-temple-stone-500 uppercase tracking-wider">Shree Matham</span>
-                  <a href="#/temples/maha-shodasi-temple" className="block pl-3 pr-3 py-1.5 rounded-md text-sm font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Maha Shodasi Temple</a>
-                  <a href="#/ashram/swami-haridhos-giri-brindavan" className="block pl-3 pr-3 py-1.5 rounded-md text-sm font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Swami Haridhos Giri Brindavanam</a>
-                  <a href="#/ashram/swami-namananda-giri-adhisthanam" className="block pl-3 pr-3 py-1.5 rounded-md text-sm font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Swami Namananda Giri Adishthanam</a>
-                  <a href="#/ashram/sathguru-gnanananda-giri" className="block pl-3 pr-3 py-1.5 rounded-md text-sm font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Sathguru Gnanananda Giri Sannidhi</a>
-                  <a href="#/ashram/guruji-mani-mandapam" className="block pl-3 pr-3 py-1.5 rounded-md text-sm font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Guruji Mani Mandapam</a>
+                {/* Shree Matham Mobile Section */}
+                <div className="my-1">
+                  <a href="#/temples/shree-matham" className="block pl-6 pr-3 py-2 rounded-md text-base font-semibold text-temple-maroon-800 hover:bg-temple-stone-50">Shree Matham Complex</a>
+                  <div className="pl-4 border-l-2 border-temple-stone-200 ml-8 space-y-1.5 mt-1">
+                    <a href="#/temples/maha-shodasi-temple" className="block pl-3 pr-3 py-1 rounded-md text-sm font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Maha Shodasi Temple</a>
+                    <a href="#/ashram/swami-haridhos-giri-brindavan" className="block pl-3 pr-3 py-1 rounded-md text-sm font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Swami Haridhos Giri Brindavanam</a>
+                    <a href="#/ashram/swami-namananda-giri-adhisthanam" className="block pl-3 pr-3 py-1 rounded-md text-sm font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Swami Namananda Giri Adishthanam</a>
+                    <a href="#/ashram/sathguru-gnanananda-giri" className="block pl-3 pr-3 py-1 rounded-md text-sm font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Sathguru Gnanananda Giri Sannidhi</a>
+                    <a href="#/ashram/guruji-mani-mandapam" className="block pl-3 pr-3 py-1 rounded-md text-sm font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Guruji Mani Mandapam</a>
+                  </div>
                 </div>
               </div>
               
