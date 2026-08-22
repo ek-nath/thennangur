@@ -1448,7 +1448,7 @@ export default function App() {
                 let imgUrl = '/images/guruji/swami-haridhos-giri.jpg';
                 if (guruId.includes('gnanananda')) imgUrl = '/images/gnanananda/gnanananda-portrait.jpg';
                 else if (guruId.includes('namananda')) imgUrl = '/images/gnanananda/namananda-portrait.jpg';
-                else if (guruId.includes('brindavan')) imgUrl = '/images/ashram/SadguruBhavan1.jpg'; // fallback
+                else if (guruId.includes('brindavan')) imgUrl = '/images/ashram/swami-haridhos-giri-brindavan.jpg';
 
                 return (
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
