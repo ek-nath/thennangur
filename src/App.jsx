@@ -420,6 +420,7 @@ export default function App() {
                           <a href="#/ashram/swami-haridhos-giri-brindavan" className="block px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Swami Haridhos Giri Brindavanam</a>
                           <a href="#/ashram/swami-namananda-giri-adhisthanam" className="block px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Swami Namananda Giri Adishthanam</a>
                           <a href="#/ashram/sathguru-gnanananda-giri" className="block px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Sathguru Gnanananda Giri Sannidhi</a>
+                          <a href="#/ashram/guruji-mani-mandapam" className="block px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Guruji Mani Mandapam</a>
                         </div>
                       </div>
                     </div>
@@ -483,6 +484,7 @@ export default function App() {
                   <a href="#/ashram/swami-haridhos-giri-brindavan" className="block pl-3 pr-3 py-1.5 rounded-md text-sm font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Swami Haridhos Giri Brindavanam</a>
                   <a href="#/ashram/swami-namananda-giri-adhisthanam" className="block pl-3 pr-3 py-1.5 rounded-md text-sm font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Swami Namananda Giri Adishthanam</a>
                   <a href="#/ashram/sathguru-gnanananda-giri" className="block pl-3 pr-3 py-1.5 rounded-md text-sm font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Sathguru Gnanananda Giri Sannidhi</a>
+                  <a href="#/ashram/guruji-mani-mandapam" className="block pl-3 pr-3 py-1.5 rounded-md text-sm font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Guruji Mani Mandapam</a>
                 </div>
               </div>
               
@@ -1488,6 +1490,7 @@ export default function App() {
                 if (guruId.includes('gnanananda')) imgUrl = '/images/gnanananda/gnanananda-portrait.jpg';
                 else if (guruId.includes('namananda')) imgUrl = '/images/gnanananda/namananda-portrait.jpg';
                 else if (guruId.includes('brindavan')) imgUrl = '/images/ashram/swami-haridhos-giri-brindavan.jpg';
+                else if (guruId.includes('mandapam')) imgUrl = '/images/temples/guruji-mani-mandapam.jpg';
 
                 return (
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">

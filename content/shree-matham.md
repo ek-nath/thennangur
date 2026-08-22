@@ -10,6 +10,7 @@ The Shree Matham encompasses several sacred sannidhies and temples:
 *   **[Swami Haridhos Giri Brindavanam](#/ashram/swami-haridhos-giri-brindavan)**: The sacred Samadhi shrine of Sri Guruji.
 *   **[Swami Namananda Giri Adishthanam](#/ashram/swami-namananda-giri-adhisthanam)**: The sacred Samadhi shrine of Sri Namaji.
 *   **[Sathguru Gnanananda Giri Sannidhi](#/ashram/sathguru-gnanananda-giri)**: The shrine dedicated to the great master Sathguru Gnanananda Giri.
+*   **[Guruji Mani Mandapam](#/ashram/guruji-mani-mandapam)**: The beautiful dome-shaped monument with the marble statue of Sri Guruji.
 
 ![Shree Matham Temple](/images/temples/shree-matham-temple.jpg)
 
