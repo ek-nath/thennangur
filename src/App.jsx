@@ -212,6 +212,33 @@ export default function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
+  // Global image path fix for GitHub Pages subfolder hosting
+  useEffect(() => {
+    const base = import.meta.env.BASE_URL || '/';
+    if (base === '/') return;
+    
+    const fixImages = () => {
+      document.querySelectorAll('img').forEach(img => {
+        const src = img.getAttribute('src');
+        if (src && src.startsWith('/images/')) {
+          img.setAttribute('src', base + src.substring(1));
+        }
+      });
+    };
+    
+    fixImages();
+    
+    const observer = new MutationObserver(fixImages);
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['src']
+    });
+    
+    return () => observer.disconnect();
+  }, [route]);
+
   // Auto-slide carousel
   useEffect(() => {
     if (route !== '#/') return;
