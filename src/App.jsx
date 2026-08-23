@@ -374,17 +374,21 @@ const getValidDatesForPooja = (pooja) => {
     let current = new Date();
     current.setDate(current.getDate() + 1);
     
-    // Scan next 180 days (approx. 6 months) to find matching dates
-    for (let i = 0; i < 180; i++) {
+    // Scan next 270 days (approx. 9 months) to cover the full calendar year through May 2027
+    for (let i = 0; i < 270; i++) {
       const year = current.getFullYear();
       const month = current.getMonth();
       const dateVal = current.getDate();
       
-      // Calculate noon (12:00 PM) for Nakshatras and daytime Tithis
+      // Calculate sunrise (6:00 AM) for morning transitions
+      const sunriseTime = new Date(year, month, dateVal, 6, 0, 0);
+      const panchangSunrise = getPanchangForDate(sunriseTime);
+      
+      // Calculate noon (12:00 PM) for midday positions
       const noonTime = new Date(year, month, dateVal, 12, 0, 0);
       const panchangNoon = getPanchangForDate(noonTime);
       
-      // Calculate evening (6:00 PM) for evening Tithis (Pradosham, Chaturthi, Pournami)
+      // Calculate evening (6:00 PM) for evening Tithis
       const sunsetTime = new Date(year, month, dateVal, 18, 0, 0);
       const panchangSunset = getPanchangForDate(sunsetTime);
       
@@ -397,9 +401,9 @@ const getValidDatesForPooja = (pooja) => {
       } else if (isChaturthi) {
         matches = (panchangNoon.tithi === 19 || panchangSunset.tithi === 19);
       } else if (isUttarathathi) {
-        matches = (panchangNoon.nakshatra === 26);
+        matches = (panchangSunrise.nakshatra === 26 || panchangNoon.nakshatra === 26 || panchangSunset.nakshatra === 26);
       } else if (isMrigashirsha) {
-        matches = (panchangNoon.nakshatra === 5);
+        matches = (panchangSunrise.nakshatra === 5 || panchangNoon.nakshatra === 5 || panchangSunset.nakshatra === 5);
       }
       
       if (matches) {
