@@ -469,7 +469,6 @@ export default function AdminPortal() {
 - *Nakshatram:* ${booking.nakshatram || 'N/A'} ${booking.rasi ? `(${booking.rasi})` : ''}
 - *Family Members:* ${booking.familyMembers || 'N/A'}
 - *Sankalpam:* ${booking.sankalpam || 'N/A'}
-- *Contact Phone:* ${booking.phone || 'N/A'}
 
 Radhe Krishna.`;
 
@@ -523,8 +522,7 @@ ${idx + 1}. *${b.poojaName}*
    - *Gotram:* ${b.gotram || 'N/A'}
    - *Nakshatram:* ${b.nakshatram || 'N/A'} ${b.rasi ? `(${b.rasi})` : ''}
    - *Family Members:* ${b.familyMembers || 'N/A'}
-   - *Sankalpam:* ${b.sankalpam || 'N/A'}
-   - *Contact Phone:* ${b.phone || 'N/A'}`;
+   - *Sankalpam:* ${b.sankalpam || 'N/A'}`;
     });
 
     message += `
