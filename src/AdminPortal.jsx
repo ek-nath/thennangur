@@ -1,99 +1,106 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Trash2, Search, RefreshCw } from 'lucide-react';
+import { Shield, Trash2, Search, RefreshCw, Lock, User, LogOut } from 'lucide-react';
 
 export default function AdminPortal() {
   const [dbData, setDbData] = useState({ transactions: [], bookings: [], donations: [] });
-  const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('bookings'); // bookings, donations, transactions
   const [searchQuery, setSearchQuery] = useState('');
   const [isClearing, setIsClearing] = useState(false);
 
-  const fetchRecords = async () => {
+  // Authentication states
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return sessionStorage.getItem('thennangur_admin_auth') === 'true';
+  });
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  const fetchRecords = () => {
     setIsLoading(true);
     try {
-      // First check health
-      const healthRes = await fetch('/api/health');
-      if (healthRes.ok) {
-        setIsConnected(true);
-        const recordsRes = await fetch('/api/records');
-        if (recordsRes.ok) {
-          const data = await recordsRes.json();
-          setDbData(data);
-        }
-      } else {
-        throw new Error('Health check failed');
-      }
-    } catch (error) {
-      console.warn('Backend server is offline or unreachable. Loading local storage data.', error);
-      setIsConnected(false);
+      const localTxns = JSON.parse(localStorage.getItem('thennangur_local_txns') || '[]');
+      const bookings = [];
+      const donations = [];
       
-      // Load local storage fallback
-      try {
-        const localTxns = JSON.parse(localStorage.getItem('thennangur_local_txns') || '[]');
-        const bookings = [];
-        const donations = [];
-        
-        localTxns.forEach(txn => {
-          txn.items.forEach(item => {
-            if (item.type === 'pooja') {
-              bookings.push({
-                id: item.id,
-                txnId: txn.txnId,
-                date: txn.date,
-                poojaName: item.name,
-                price: item.price,
-                ...item.details
-              });
-            } else if (item.type === 'donation') {
-              donations.push({
-                id: item.id,
-                txnId: txn.txnId,
-                date: txn.date,
-                cause: item.cause || item.details.cause,
-                amount: item.price,
-                ...item.details
-              });
-            }
-          });
+      localTxns.forEach(txn => {
+        txn.items.forEach(item => {
+          if (item.type === 'pooja') {
+            bookings.push({
+              id: item.id,
+              txnId: txn.txnId,
+              date: txn.date,
+              poojaName: item.name,
+              price: item.price,
+              ...item.details
+            });
+          } else if (item.type === 'donation') {
+            donations.push({
+              id: item.id,
+              txnId: txn.txnId,
+              date: txn.date,
+              cause: item.cause || item.details.cause,
+              amount: item.price,
+              ...item.details
+            });
+          }
         });
-        
-        setDbData({
-          transactions: localTxns,
-          bookings,
-          donations
-        });
-      } catch (e) {
-        console.error('Failed to parse local transactions:', e);
-      }
+      });
+      
+      setDbData({
+        transactions: localTxns,
+        bookings,
+        donations
+      });
+    } catch (e) {
+      console.error('Failed to parse local transactions:', e);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchRecords();
-  }, []);
+    if (isAuthenticated) {
+      fetchRecords();
+    }
+  }, [isAuthenticated]);
 
-  const handleClearRecords = async () => {
+  const handleLogin = (e) => {
+    e.preventDefault();
+    setLoginError('');
+    setIsLoggingIn(true);
+    
+    // Pure in-browser authentication
+    if (username === 'admin' && password === 'admin') {
+      sessionStorage.setItem('thennangur_admin_auth', 'true');
+      sessionStorage.setItem('thennangur_admin_token', 'local-token');
+      setIsAuthenticated(true);
+    } else {
+      setLoginError('Invalid username or password');
+    }
+    setIsLoggingIn(false);
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('thennangur_admin_auth');
+    sessionStorage.removeItem('thennangur_admin_token');
+    setIsAuthenticated(false);
+    setUsername('');
+    setPassword('');
+    setLoginError('');
+  };
+
+  const handleClearRecords = () => {
     if (!window.confirm('Are you sure you want to clear all booking and donation records? This action cannot be undone.')) {
       return;
     }
     
     setIsClearing(true);
-    if (isConnected) {
-      try {
-        await fetch('/api/records/clear', { method: 'POST' });
-      } catch (error) {
-        console.error('Failed to clear server records:', error);
-      }
-    } else {
-      localStorage.removeItem('thennangur_local_txns');
-    }
-    
-    await fetchRecords();
+    localStorage.removeItem('thennangur_local_txns');
+    fetchRecords();
     setIsClearing(false);
-    alert('Database cleared successfully!');
+    alert('Ledger cleared successfully!');
   };
 
   // Stats calculation
@@ -123,6 +130,79 @@ export default function AdminPortal() {
     t.items.some(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-temple-stone-50 font-sans">
+        <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-lg border border-temple-stone-200 my-12">
+          <div className="text-center">
+            <div className="mx-auto h-12 w-12 bg-temple-maroon-900 rounded-full flex items-center justify-center p-1.5 shadow-md border border-temple-saffron-600/30">
+              <Shield className="h-6 w-6 text-temple-saffron-300" />
+            </div>
+            <h2 className="mt-4 text-center text-2xl sm:text-3xl font-serif font-bold text-temple-maroon-800">
+              Admin Access Gate
+            </h2>
+            <p className="mt-2 text-center text-xs text-temple-stone-600">
+              Authorized personnel only. Please sign in to view the ashram register ledger.
+            </p>
+          </div>
+          <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+            {loginError && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2.5 rounded-lg text-xs font-semibold text-center">
+                {loginError}
+              </div>
+            )}
+            <div className="rounded-md shadow-sm space-y-4">
+              <div className="relative">
+                <label htmlFor="username" className="sr-only">Username</label>
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-temple-stone-400">
+                  <User size={16} />
+                </div>
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  autoComplete="username"
+                  required
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="appearance-none rounded-lg relative block w-full pl-10 pr-3 py-3 border border-temple-stone-300 placeholder-temple-stone-400 text-temple-stone-900 focus:outline-none focus:ring-2 focus:ring-temple-saffron-500 focus:border-temple-saffron-500 focus:z-10 text-sm"
+                  placeholder="Username"
+                />
+              </div>
+              <div className="relative">
+                <label htmlFor="password" className="sr-only">Password</label>
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-temple-stone-400">
+                  <Lock size={16} />
+                </div>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="appearance-none rounded-lg relative block w-full pl-10 pr-3 py-3 border border-temple-stone-300 placeholder-temple-stone-400 text-temple-stone-900 focus:outline-none focus:ring-2 focus:ring-temple-saffron-500 focus:border-temple-saffron-500 focus:z-10 text-sm"
+                  placeholder="Password"
+                />
+              </div>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                disabled={isLoggingIn}
+                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-lg text-white bg-temple-maroon-800 hover:bg-temple-maroon-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-temple-maroon-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              >
+                {isLoggingIn ? 'Verifying...' : 'Sign In'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
       {/* Header */}
@@ -139,11 +219,9 @@ export default function AdminPortal() {
         
         <div className="flex flex-wrap items-center gap-3">
           {/* Status Indicator */}
-          <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
-            isConnected ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
-          }`}>
-            <span className={`w-2.5 h-2.5 rounded-full ${isConnected ? 'bg-green-600 animate-pulse' : 'bg-amber-500'}`}></span>
-            {isConnected ? 'Connected to Backend' : 'Offline / Local Storage'}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200">
+            <span className="w-2.5 h-2.5 rounded-full bg-green-600 animate-pulse"></span>
+            Browser Local Storage
           </div>
 
           <button 
@@ -159,6 +237,13 @@ export default function AdminPortal() {
             className="bg-red-50 hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed text-red-700 border border-red-200 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 cursor-pointer transition-colors"
           >
             <Trash2 size={12} /> Clear Database
+          </button>
+
+          <button 
+            onClick={handleLogout}
+            className="bg-temple-maroon-800 hover:bg-temple-maroon-900 text-white font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 cursor-pointer transition-colors"
+          >
+            <LogOut size={12} /> Logout
           </button>
         </div>
       </div>

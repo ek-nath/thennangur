@@ -7,7 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 // Middleware
 app.use(cors());
@@ -25,8 +25,28 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Thennangur Ashram Backend is active (In-Memory Database)' });
 });
 
+// Simple token verification middleware
+const authenticateAdmin = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  if (authHeader === 'Bearer simple-admin-token') {
+    next();
+  } else {
+    res.status(401).json({ error: 'Unauthorized' });
+  }
+};
+
+// Admin login endpoint
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+  if (username === 'admin' && password === 'admin') {
+    res.json({ success: true, token: 'simple-admin-token' });
+  } else {
+    res.status(401).json({ error: 'Invalid username or password' });
+  }
+});
+
 // Get all records
-app.get('/api/records', (req, res) => {
+app.get('/api/records', authenticateAdmin, (req, res) => {
   res.json({
     transactions: db.transactions,
     bookings: db.bookings,
@@ -35,7 +55,7 @@ app.get('/api/records', (req, res) => {
 });
 
 // Clear all records
-app.post('/api/records/clear', (req, res) => {
+app.post('/api/records/clear', authenticateAdmin, (req, res) => {
   db.transactions = [];
   db.bookings = [];
   db.donations = [];
