@@ -34,6 +34,28 @@ export default function AdminPortal() {
   const [isClearing, setIsClearing] = useState(false);
   const [selectedSheetDate, setSelectedSheetDate] = useState(getTomorrowString());
 
+  const [bookingFilters, setBookingFilters] = useState({
+    date: '',
+    devoteeName: '',
+    poojaName: '',
+    gothraNakshatra: '',
+    poojaDate: '',
+    contact: '',
+    sankalpam: '',
+    txnId: ''
+  });
+
+  const [donationFilters, setDonationFilters] = useState({
+    date: '',
+    donorName: '',
+    cause: '',
+    minAmount: '',
+    contact: '',
+    panCard: '',
+    address: '',
+    txnId: ''
+  });
+
   // Authentication states
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return sessionStorage.getItem('thennangur_admin_auth') === 'true';
@@ -532,20 +554,93 @@ Radhe Krishna.`;
   const totalBookings = dbData.bookings.length;
   const totalDonations = dbData.donations.length;
 
-  // Filter lists based on search
-  const filteredBookings = dbData.bookings.filter(b => 
-    b.devoteeName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    b.poojaName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    b.txnId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    b.phone?.includes(searchQuery)
-  );
+  // Helper data & filter flags for column filters
+  const uniquePoojaNames = Array.from(new Set(dbData.bookings.map(b => b.poojaName))).filter(Boolean);
+  const uniqueCauses = Array.from(new Set(dbData.donations.map(d => d.cause))).filter(Boolean);
+  
+  const isBookingFiltered = Object.values(bookingFilters).some(v => v !== '');
+  const isDonationFiltered = Object.values(donationFilters).some(v => v !== '');
 
-  const filteredDonations = dbData.donations.filter(d => 
-    d.donorName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    d.cause?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    d.txnId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    d.phone?.includes(searchQuery)
-  );
+  // Filter lists based on global search & column-specific filters
+  const filteredBookings = dbData.bookings.filter(b => {
+    // Check Date filter
+    if (bookingFilters.date && !b.date?.toLowerCase().includes(bookingFilters.date.toLowerCase())) return false;
+    // Check Devotee Name
+    if (bookingFilters.devoteeName && !b.devoteeName?.toLowerCase().includes(bookingFilters.devoteeName.toLowerCase())) return false;
+    // Check Pooja Name
+    if (bookingFilters.poojaName && b.poojaName !== bookingFilters.poojaName) return false;
+    // Check Gothram / Nakshatram
+    if (bookingFilters.gothraNakshatra) {
+      const g = b.gotram?.toLowerCase() || '';
+      const n = b.nakshatram?.toLowerCase() || '';
+      const r = b.rasi?.toLowerCase() || '';
+      const search = bookingFilters.gothraNakshatra.toLowerCase();
+      if (!g.includes(search) && !n.includes(search) && !r.includes(search)) return false;
+    }
+    // Check Pooja Date
+    if (bookingFilters.poojaDate && b.poojaDate !== bookingFilters.poojaDate) return false;
+    // Check Contact (phone / email)
+    if (bookingFilters.contact) {
+      const p = b.phone || '';
+      const e = b.email?.toLowerCase() || '';
+      const search = bookingFilters.contact.toLowerCase();
+      if (!p.includes(search) && !e.includes(search)) return false;
+    }
+    // Check Sankalpam
+    if (bookingFilters.sankalpam && !b.sankalpam?.toLowerCase().includes(bookingFilters.sankalpam.toLowerCase())) return false;
+    // Check Txn ID
+    if (bookingFilters.txnId && !b.txnId?.toLowerCase().includes(bookingFilters.txnId.toLowerCase())) return false;
+    
+    // Also respect global search if any
+    if (searchQuery) {
+      const globalSearch = searchQuery.toLowerCase();
+      const match = 
+        b.devoteeName?.toLowerCase().includes(globalSearch) ||
+        b.poojaName?.toLowerCase().includes(globalSearch) ||
+        b.txnId?.toLowerCase().includes(globalSearch) ||
+        b.phone?.includes(globalSearch);
+      if (!match) return false;
+    }
+    
+    return true;
+  });
+
+  const filteredDonations = dbData.donations.filter(d => {
+    // Check Date filter
+    if (donationFilters.date && !d.date?.toLowerCase().includes(donationFilters.date.toLowerCase())) return false;
+    // Check Donor Name
+    if (donationFilters.donorName && !d.donorName?.toLowerCase().includes(donationFilters.donorName.toLowerCase())) return false;
+    // Check Cause / Seva
+    if (donationFilters.cause && d.cause !== donationFilters.cause) return false;
+    // Check Min Amount
+    if (donationFilters.minAmount && d.amount < parseFloat(donationFilters.minAmount)) return false;
+    // Check Contact
+    if (donationFilters.contact) {
+      const p = d.phone || '';
+      const e = d.email?.toLowerCase() || '';
+      const search = donationFilters.contact.toLowerCase();
+      if (!p.includes(search) && !e.includes(search)) return false;
+    }
+    // Check PAN Card
+    if (donationFilters.panCard && !d.panCard?.toLowerCase().includes(donationFilters.panCard.toLowerCase())) return false;
+    // Check Address
+    if (donationFilters.address && !d.address?.toLowerCase().includes(donationFilters.address.toLowerCase())) return false;
+    // Check Txn ID
+    if (donationFilters.txnId && !d.txnId?.toLowerCase().includes(donationFilters.txnId.toLowerCase())) return false;
+
+    // Also respect global search if any
+    if (searchQuery) {
+      const globalSearch = searchQuery.toLowerCase();
+      const match = 
+        d.donorName?.toLowerCase().includes(globalSearch) ||
+        d.cause?.toLowerCase().includes(globalSearch) ||
+        d.txnId?.toLowerCase().includes(globalSearch) ||
+        d.phone?.includes(globalSearch);
+      if (!match) return false;
+    }
+
+    return true;
+  });
 
   const filteredTransactions = dbData.transactions.filter(t => 
     t.txnId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -854,16 +949,52 @@ Radhe Krishna.`;
             </button>
           </div>
 
-          {/* Search bar */}
-          <div className="relative max-w-xs w-full">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-temple-stone-400" />
-            <input
-              type="text"
-              placeholder="Search register..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-temple-stone-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-temple-saffron-500 bg-white"
-            />
+          {/* Search bar & Filter reset */}
+          <div className="flex items-center gap-2 max-w-sm w-full">
+            {(activeTab === 'bookings' && isBookingFiltered) && (
+              <button
+                onClick={() => setBookingFilters({
+                  date: '',
+                  devoteeName: '',
+                  poojaName: '',
+                  gothraNakshatra: '',
+                  poojaDate: '',
+                  contact: '',
+                  sankalpam: '',
+                  txnId: ''
+                })}
+                className="text-[10px] text-temple-maroon-800 hover:underline font-bold whitespace-nowrap cursor-pointer"
+              >
+                Reset Filters
+              </button>
+            )}
+            {(activeTab === 'donations' && isDonationFiltered) && (
+              <button
+                onClick={() => setDonationFilters({
+                  date: '',
+                  donorName: '',
+                  cause: '',
+                  minAmount: '',
+                  contact: '',
+                  panCard: '',
+                  address: '',
+                  txnId: ''
+                })}
+                className="text-[10px] text-temple-maroon-800 hover:underline font-bold whitespace-nowrap cursor-pointer"
+              >
+                Reset Filters
+              </button>
+            )}
+            <div className="relative flex-1">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-temple-stone-400" />
+              <input
+                type="text"
+                placeholder="Search register..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 border border-temple-stone-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-temple-saffron-500 bg-white"
+              />
+            </div>
           </div>
         </div>
 
@@ -889,6 +1020,82 @@ Radhe Krishna.`;
                       <th className="p-4">Contact Info</th>
                       <th className="p-4">Sankalpam</th>
                       <th className="p-4">Txn ID</th>
+                    </tr>
+                    <tr className="bg-temple-stone-50 border-b border-temple-stone-200">
+                      <td className="p-2">
+                        <input
+                          type="text"
+                          value={bookingFilters.date}
+                          onChange={e => setBookingFilters({ ...bookingFilters, date: e.target.value })}
+                          placeholder="Filter date..."
+                          className="w-full px-2 py-1 text-[11px] border border-temple-stone-200 rounded focus:outline-none focus:ring-1 focus:ring-temple-saffron-500 bg-white"
+                        />
+                      </td>
+                      <td className="p-2">
+                        <input
+                          type="text"
+                          value={bookingFilters.devoteeName}
+                          onChange={e => setBookingFilters({ ...bookingFilters, devoteeName: e.target.value })}
+                          placeholder="Filter name..."
+                          className="w-full px-2 py-1 text-[11px] border border-temple-stone-200 rounded focus:outline-none focus:ring-1 focus:ring-temple-saffron-500 bg-white"
+                        />
+                      </td>
+                      <td className="p-2">
+                        <select
+                          value={bookingFilters.poojaName}
+                          onChange={e => setBookingFilters({ ...bookingFilters, poojaName: e.target.value })}
+                          className="w-full px-1 py-1 text-[11px] border border-temple-stone-200 rounded focus:outline-none focus:ring-1 focus:ring-temple-saffron-500 bg-white cursor-pointer"
+                        >
+                          <option value="">All Poojas</option>
+                          {uniquePoojaNames.map(name => (
+                            <option key={name} value={name}>{name}</option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="p-2">
+                        <input
+                          type="text"
+                          value={bookingFilters.gothraNakshatra}
+                          onChange={e => setBookingFilters({ ...bookingFilters, gothraNakshatra: e.target.value })}
+                          placeholder="Filter gothra/nakshatram..."
+                          className="w-full px-2 py-1 text-[11px] border border-temple-stone-200 rounded focus:outline-none focus:ring-1 focus:ring-temple-saffron-500 bg-white"
+                        />
+                      </td>
+                      <td className="p-2">
+                        <input
+                          type="date"
+                          value={bookingFilters.poojaDate}
+                          onChange={e => setBookingFilters({ ...bookingFilters, poojaDate: e.target.value })}
+                          className="w-full px-1 py-1 text-[11px] border border-temple-stone-200 rounded focus:outline-none focus:ring-1 focus:ring-temple-saffron-500 bg-white cursor-pointer"
+                        />
+                      </td>
+                      <td className="p-2">
+                        <input
+                          type="text"
+                          value={bookingFilters.contact}
+                          onChange={e => setBookingFilters({ ...bookingFilters, contact: e.target.value })}
+                          placeholder="Filter contact..."
+                          className="w-full px-2 py-1 text-[11px] border border-temple-stone-200 rounded focus:outline-none focus:ring-1 focus:ring-temple-saffron-500 bg-white"
+                        />
+                      </td>
+                      <td className="p-2">
+                        <input
+                          type="text"
+                          value={bookingFilters.sankalpam}
+                          onChange={e => setBookingFilters({ ...bookingFilters, sankalpam: e.target.value })}
+                          placeholder="Filter sankalpam..."
+                          className="w-full px-2 py-1 text-[11px] border border-temple-stone-200 rounded focus:outline-none focus:ring-1 focus:ring-temple-saffron-500 bg-white"
+                        />
+                      </td>
+                      <td className="p-2">
+                        <input
+                          type="text"
+                          value={bookingFilters.txnId}
+                          onChange={e => setBookingFilters({ ...bookingFilters, txnId: e.target.value })}
+                          placeholder="Filter Txn ID..."
+                          className="w-full px-2 py-1 text-[11px] border border-temple-stone-200 rounded focus:outline-none focus:ring-1 focus:ring-temple-saffron-500 bg-white"
+                        />
+                      </td>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-temple-stone-200">
@@ -935,6 +1142,83 @@ Radhe Krishna.`;
                       <th className="p-4">PAN Card</th>
                       <th className="p-4">Address</th>
                       <th className="p-4">Txn ID</th>
+                    </tr>
+                    <tr className="bg-temple-stone-50 border-b border-temple-stone-200">
+                      <td className="p-2">
+                        <input
+                          type="text"
+                          value={donationFilters.date}
+                          onChange={e => setDonationFilters({ ...donationFilters, date: e.target.value })}
+                          placeholder="Filter date..."
+                          className="w-full px-2 py-1 text-[11px] border border-temple-stone-200 rounded focus:outline-none focus:ring-1 focus:ring-temple-saffron-500 bg-white"
+                        />
+                      </td>
+                      <td className="p-2">
+                        <input
+                          type="text"
+                          value={donationFilters.donorName}
+                          onChange={e => setDonationFilters({ ...donationFilters, donorName: e.target.value })}
+                          placeholder="Filter donor..."
+                          className="w-full px-2 py-1 text-[11px] border border-temple-stone-200 rounded focus:outline-none focus:ring-1 focus:ring-temple-saffron-500 bg-white"
+                        />
+                      </td>
+                      <td className="p-2">
+                        <select
+                          value={donationFilters.cause}
+                          onChange={e => setDonationFilters({ ...donationFilters, cause: e.target.value })}
+                          className="w-full px-1 py-1 text-[11px] border border-temple-stone-200 rounded focus:outline-none focus:ring-1 focus:ring-temple-saffron-500 bg-white cursor-pointer"
+                        >
+                          <option value="">All Causes</option>
+                          {uniqueCauses.map(cause => (
+                            <option key={cause} value={cause}>{cause}</option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="p-2">
+                        <input
+                          type="number"
+                          value={donationFilters.minAmount}
+                          onChange={e => setDonationFilters({ ...donationFilters, minAmount: e.target.value })}
+                          placeholder="Min ₹..."
+                          className="w-full px-2 py-1 text-[11px] border border-temple-stone-200 rounded focus:outline-none focus:ring-1 focus:ring-temple-saffron-500 bg-white"
+                        />
+                      </td>
+                      <td className="p-2">
+                        <input
+                          type="text"
+                          value={donationFilters.contact}
+                          onChange={e => setDonationFilters({ ...donationFilters, contact: e.target.value })}
+                          placeholder="Filter contact..."
+                          className="w-full px-2 py-1 text-[11px] border border-temple-stone-200 rounded focus:outline-none focus:ring-1 focus:ring-temple-saffron-500 bg-white"
+                        />
+                      </td>
+                      <td className="p-2">
+                        <input
+                          type="text"
+                          value={donationFilters.panCard}
+                          onChange={e => setDonationFilters({ ...donationFilters, panCard: e.target.value })}
+                          placeholder="Filter PAN..."
+                          className="w-full px-2 py-1 text-[11px] border border-temple-stone-200 rounded focus:outline-none focus:ring-1 focus:ring-temple-saffron-500 bg-white"
+                        />
+                      </td>
+                      <td className="p-2">
+                        <input
+                          type="text"
+                          value={donationFilters.address}
+                          onChange={e => setDonationFilters({ ...donationFilters, address: e.target.value })}
+                          placeholder="Filter address..."
+                          className="w-full px-2 py-1 text-[11px] border border-temple-stone-200 rounded focus:outline-none focus:ring-1 focus:ring-temple-saffron-500 bg-white"
+                        />
+                      </td>
+                      <td className="p-2">
+                        <input
+                          type="text"
+                          value={donationFilters.txnId}
+                          onChange={e => setDonationFilters({ ...donationFilters, txnId: e.target.value })}
+                          placeholder="Filter Txn ID..."
+                          className="w-full px-2 py-1 text-[11px] border border-temple-stone-200 rounded focus:outline-none focus:ring-1 focus:ring-temple-saffron-500 bg-white"
+                        />
+                      </td>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-temple-stone-200">
