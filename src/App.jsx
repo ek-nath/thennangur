@@ -432,7 +432,8 @@ const getValidDatesForPooja = (pooja) => {
     let current = new Date();
     current.setDate(current.getDate() + 1);
     
-    while (dates.length < 12) {
+    // Scan next 270 days to cover the active booking window through May 2027
+    for (let i = 0; i < 270; i++) {
       const dayOfWeek = current.getDay();
       if (allowedDays.includes(dayOfWeek)) {
         const y = current.getFullYear();
@@ -450,7 +451,8 @@ const getValidDatesForPooja = (pooja) => {
     let current = new Date();
     current.setDate(current.getDate() + 1);
     
-    for (let i = 0; i < 6; i++) {
+    // Scan next 9 months to cover the active booking window through May 2027
+    for (let i = 0; i < 9; i++) {
       const targetMonth = current.getMonth() + i;
       const targetYear = current.getFullYear() + Math.floor(targetMonth / 12);
       const monthIndex = targetMonth % 12;
