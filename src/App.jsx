@@ -14,6 +14,16 @@ const GALLERY_IMAGES = Array.from({ length: 35 }, (_, i) => ({
   alt: `Sacred Moment ${i + 1}`
 }));
 
+// Helper to get tomorrow's date string in YYYY-MM-DD format
+function getTomorrowString() {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const yyyy = tomorrow.getFullYear();
+  const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+  const dd = String(tomorrow.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 // Helper to format date strings for Google Calendar
 // Format: 30 Mar 2026 or 01 Apr 2026 or 01–03 May 2026
 function getGoogleCalendarUrl(event) {
@@ -2101,6 +2111,7 @@ export default function App() {
                         <input 
                           type="date" 
                           required
+                          min={getTomorrowString()}
                           value={bookingForm.poojaDate}
                           onChange={(e) => setBookingForm({...bookingForm, poojaDate: e.target.value})}
                           className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none"

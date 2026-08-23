@@ -17,12 +17,13 @@ const getPriestInfo = (category) => {
   }
 };
 
-const getTodayString = () => {
-  const d = new Date();
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+const getTomorrowString = () => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const yyyy = tomorrow.getFullYear();
+  const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+  const dd = String(tomorrow.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
 };
 
 export default function AdminPortal() {
@@ -31,7 +32,7 @@ export default function AdminPortal() {
   const [activeTab, setActiveTab] = useState('bookings'); // bookings, donations, transactions
   const [searchQuery, setSearchQuery] = useState('');
   const [isClearing, setIsClearing] = useState(false);
-  const [selectedSheetDate, setSelectedSheetDate] = useState(getTodayString());
+  const [selectedSheetDate, setSelectedSheetDate] = useState(getTomorrowString());
 
   // Authentication states
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -162,6 +163,12 @@ Radhe Krishna.`;
   };
 
   const handleSendConsolidatedWhatsApp = (category, templeName) => {
+    const tomorrowStr = getTomorrowString();
+    if (selectedSheetDate < tomorrowStr) {
+      alert("Consolidated lists can only be sent for tomorrow and future dates.");
+      return;
+    }
+
     const list = getPoojaListForCategory(category, selectedSheetDate);
     if (list.length === 0) {
       alert(`No pooja bookings scheduled for ${templeName} on ${selectedSheetDate}.`);
@@ -393,6 +400,7 @@ Radhe Krishna.`;
             <label className="text-xs font-bold text-temple-stone-700 whitespace-nowrap">Perform Date:</label>
             <input
               type="date"
+              min={getTomorrowString()}
               value={selectedSheetDate}
               onChange={(e) => setSelectedSheetDate(e.target.value)}
               className="border border-temple-stone-300 rounded px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-temple-saffron-500 bg-white"
