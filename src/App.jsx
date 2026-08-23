@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   Menu, X, Phone, Mail, MapPin, Calendar, BookOpen, Heart, 
   Image as ImageIcon, HelpCircle, FileText, ChevronLeft, ChevronRight, 
-  Search, Shield, CheckCircle, Download, ExternalLink, Compass, Clock, Award, Coffee
+  Search, Shield, CheckCircle, Download, ExternalLink, Compass, Clock, Award, Coffee,
+  ShoppingCart, Trash2, Edit2, Plus, Gift, Info
 } from 'lucide-react';
 import contentDb from './data/content.json';
 
@@ -207,6 +208,9 @@ export default function App() {
   // Checkout & Receipt states
   const [paymentStep, setPaymentStep] = useState(0); // 0: None, 1: Process, 2: Receipt
   const [receiptData, setReceiptData] = useState(null);
+  const [cart, setCart] = useState([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [editingCartItem, setEditingCartItem] = useState(null);
   
   // Event Calendar states
   const [eventSearch, setEventSearch] = useState('');
@@ -268,51 +272,139 @@ export default function App() {
     return () => clearInterval(timer);
   }, [route]);
 
-  // Handle Pooja booking submit
+  // Auto-fill donation form details from first cart item if it exists
+  useEffect(() => {
+    if (cart.length > 0) {
+      const firstItem = cart[0];
+      const fd = firstItem.details;
+      setDonationForm(prev => ({
+        ...prev,
+        donorName: prev.donorName || fd.devoteeName || fd.donorName || '',
+        email: prev.email || fd.email || '',
+        phone: prev.phone || fd.phone || '',
+        address: prev.address || fd.address || ''
+      }));
+    }
+  }, [cart, route]);
+
+  // Click handler to book a pooja and pre-fill details from cart
+  const handleBookPoojaClick = (pooja) => {
+    setSelectedPooja(pooja);
+    setEditingCartItem(null);
+    if (cart.length > 0) {
+      const firstItem = cart[0];
+      const fd = firstItem.details;
+      setBookingForm({
+        devoteeName: fd.devoteeName || fd.donorName || '',
+        gotram: fd.gotram || '',
+        nakshatram: fd.nakshatram || '',
+        rasi: fd.rasi || '',
+        poojaDate: '', // Specific to each pooja, let them fill
+        familyMembers: fd.familyMembers || '',
+        email: fd.email || '',
+        phone: fd.phone || '',
+        sankalpam: '' // Specific to each pooja
+      });
+    } else {
+      setBookingForm({
+        devoteeName: '', gotram: '', nakshatram: '', rasi: '',
+        poojaDate: '', familyMembers: '', email: '', phone: '', sankalpam: ''
+      });
+    }
+  };
+
+  // Handle Pooja booking submit (Add to Cart / Save Changes)
   const handlePoojaSubmit = (e) => {
     e.preventDefault();
-    setPaymentStep(1); // Go to payment simulation
+    if (editingCartItem) {
+      setCart(cart.map(item => item.id === editingCartItem.id ? {
+        ...item,
+        details: { ...bookingForm }
+      } : item));
+      setEditingCartItem(null);
+      setSelectedPooja(null);
+      setIsCartOpen(true);
+    } else {
+      const newItem = {
+        id: 'cart-' + Math.random().toString(36).substr(2, 9),
+        type: 'pooja',
+        pooja: selectedPooja,
+        price: selectedPooja.price,
+        details: { ...bookingForm }
+      };
+      setCart([...cart, newItem]);
+      setSelectedPooja(null);
+      setIsCartOpen(true);
+    }
   };
 
-  // Handle Donation submit
+  // Handle Donation submit (Add to Cart)
   const handleDonationSubmit = (e) => {
     e.preventDefault();
-    setPaymentStep(1); // Go to payment simulation
+    const finalAmt = donationForm.amount === 'custom' ? donationForm.customAmount : donationForm.amount;
+    const newItem = {
+      id: 'cart-' + Math.random().toString(36).substr(2, 9),
+      type: 'donation',
+      cause: donationForm.cause,
+      price: parseInt(finalAmt, 10),
+      details: { ...donationForm }
+    };
+    setCart([...cart, newItem]);
+    setIsCartOpen(true);
   };
 
-  const completePayment = (type) => {
+  // Handle Editing an existing cart item
+  const handleEditCartItem = (item) => {
+    setEditingCartItem(item);
+    setIsCartOpen(false);
+    if (item.type === 'pooja') {
+      setSelectedPooja(item.pooja);
+      setBookingForm({ ...item.details });
+    } else {
+      setDonationForm({ ...item.details });
+    }
+  };
+
+  // Close modals safely without clearing the cart
+  const closePoojaModal = () => {
+    setSelectedPooja(null);
+    if (editingCartItem) {
+      setEditingCartItem(null);
+      setIsCartOpen(true);
+    }
+  };
+
+  const closeDonationEditModal = () => {
+    setEditingCartItem(null);
+    setIsCartOpen(true);
+  };
+
+  const completePayment = () => {
     const randNum = Math.floor(10000 + Math.random() * 90000);
     const txnId = 'TXN-' + Math.random().toString(36).substr(2, 9).toUpperCase();
     
-    if (type === 'pooja') {
-      setReceiptData({
-        type: 'pooja',
-        receiptNo: `GA-PJB-2026-${randNum}`,
-        txnId,
-        date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }),
-        poojaName: selectedPooja.name,
-        price: selectedPooja.price,
-        details: { ...bookingForm }
-      });
-    } else {
-      const finalAmt = donationForm.amount === 'custom' ? donationForm.customAmount : donationForm.amount;
-      setReceiptData({
-        type: 'donation',
-        receiptNo: `GA-DON-2026-${randNum}`,
-        txnId,
-        date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }),
-        cause: donationForm.cause,
-        price: parseInt(finalAmt, 10),
-        details: { ...donationForm }
-      });
-    }
+    setReceiptData({
+      receiptNo: `GA-TXN-2026-${randNum}`,
+      txnId,
+      date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }),
+      items: cart.map(item => ({
+        id: item.id,
+        type: item.type,
+        name: item.type === 'pooja' ? item.pooja.name : item.cause,
+        price: item.price,
+        details: { ...item.details }
+      })),
+      totalPrice: cart.reduce((sum, item) => sum + item.price, 0)
+    });
     setPaymentStep(2); // Go to receipt screen
   };
 
   const resetPortals = () => {
     setSelectedPooja(null);
+    setEditingCartItem(null);
     setPaymentStep(0);
     setReceiptData(null);
+    setCart([]); // Clear the cart after successful payment checkout
     setBookingForm({
       devoteeName: '', gotram: '', nakshatram: '', rasi: '',
       poojaDate: '', familyMembers: '', email: '', phone: '', sankalpam: ''
@@ -359,6 +451,18 @@ export default function App() {
             <a href="#/donations" className="bg-white hover:bg-temple-stone-100 text-temple-maroon-900 font-semibold px-3 py-1 rounded transition-colors duration-200">
               Donate Seva
             </a>
+            <button 
+              onClick={() => setIsCartOpen(true)}
+              className="relative flex items-center gap-1 bg-temple-saffron-700 hover:bg-temple-saffron-800 text-white font-semibold px-3 py-1 rounded transition-colors duration-200 cursor-pointer"
+            >
+              <ShoppingCart size={12} />
+              <span>Cart</span>
+              {cart.length > 0 && (
+                <span className="bg-white text-temple-maroon-900 text-[9px] h-4 w-4 rounded-full flex items-center justify-center font-bold">
+                  {cart.length}
+                </span>
+              )}
+            </button>
           </div>
         </div>
       </div>
@@ -449,6 +553,18 @@ export default function App() {
               <a href="#/gallery" className={`px-2 xl:px-3 py-2 text-sm font-medium tracking-wide border-b-2 transition-colors duration-200 ${isRoute('#/gallery') ? 'border-temple-saffron-500 text-temple-maroon-800' : 'border-transparent text-temple-stone-800 hover:text-temple-maroon-800 hover:border-temple-stone-200'}`}>Gallery</a>
               <a href="#/facilities" className={`px-2 xl:px-3 py-2 text-sm font-medium tracking-wide border-b-2 transition-colors duration-200 ${isRoute('#/facilities') ? 'border-temple-saffron-500 text-temple-maroon-800' : 'border-transparent text-temple-stone-800 hover:text-temple-maroon-800 hover:border-temple-stone-200'}`}>Facilities</a>
               <a href="#/contact" className={`px-2 xl:px-3 py-2 text-sm font-medium tracking-wide border-b-2 transition-colors duration-200 ${isRoute('#/contact') ? 'border-temple-saffron-500 text-temple-maroon-800' : 'border-transparent text-temple-stone-800 hover:text-temple-maroon-800 hover:border-temple-stone-200'}`}>Contact</a>
+              <button 
+                onClick={() => setIsCartOpen(true)}
+                className="relative px-2 xl:px-3 py-2 text-sm font-medium tracking-wide text-temple-stone-800 hover:text-temple-maroon-800 flex items-center gap-1 cursor-pointer transition-colors duration-200"
+              >
+                <ShoppingCart size={15} className="text-temple-maroon-800" />
+                <span>Cart</span>
+                {cart.length > 0 && (
+                  <span className="bg-temple-maroon-800 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-1">
+                    {cart.length}
+                  </span>
+                )}
+              </button>
             </nav>
 
             {/* Mobile Menu Button */}
@@ -504,6 +620,23 @@ export default function App() {
               <a href="#/gallery" className="block px-3 py-2 rounded-md text-base font-medium text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Gallery</a>
               <a href="#/facilities" className="block px-3 py-2 rounded-md text-base font-medium text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Facilities</a>
               <a href="#/contact" className="block px-3 py-2 rounded-md text-base font-medium text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Contact Us</a>
+              <button 
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setIsCartOpen(true);
+                }}
+                className="w-full text-left flex items-center justify-between px-3 py-2 rounded-md text-base font-medium text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800 cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <ShoppingCart size={20} className="text-temple-maroon-800" />
+                  <span>Your Cart</span>
+                </div>
+                {cart.length > 0 && (
+                  <span className="bg-temple-maroon-800 text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                    {cart.length}
+                  </span>
+                )}
+              </button>
             </div>
           </div>
         )}
@@ -511,6 +644,229 @@ export default function App() {
 
       {/* 3. MAIN DYNAMIC BODY VIEW */}
       <main className="flex-grow">
+        {paymentStep === 1 ? (
+          <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl border border-temple-stone-200 overflow-hidden my-12 w-full px-4 sm:px-0">
+            <div className="bg-temple-maroon-800 p-6 text-white text-center font-sans">
+              <div className="flex justify-center mb-2"><Shield size={36} className="text-temple-saffron-300" /></div>
+              <h3 className="font-serif font-bold text-lg">GA Trust Secure Gateway</h3>
+              <p className="text-xs text-temple-stone-200 mt-1">Secured by 256-bit SSL encryption</p>
+            </div>
+            
+            <div className="p-8 space-y-6">
+              <div className="bg-temple-stone-50 p-4 rounded-lg border border-temple-stone-150 space-y-3 text-sm text-temple-stone-900 font-sans">
+                <div className="flex justify-between">
+                  <span className="text-temple-stone-600">Merchant:</span>
+                  <span className="font-bold">GA Trust Thennangur</span>
+                </div>
+                
+                {/* Items Summary list */}
+                <div className="border-t border-b border-temple-stone-200 py-2 space-y-1.5 max-h-40 overflow-y-auto">
+                  <span className="block text-xs font-bold text-temple-stone-650 uppercase tracking-wider mb-1">Selected Offerings:</span>
+                  {cart.map((item, idx) => (
+                    <div key={item.id} className="flex justify-between text-xs">
+                      <span className="truncate max-w-[250px] font-sans">
+                        {idx + 1}. {item.type === 'pooja' ? item.pooja.name : item.cause}
+                      </span>
+                      <span className="font-semibold">₹{item.price.toLocaleString('en-IN')}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex justify-between pt-1 font-semibold text-base text-temple-maroon-800">
+                  <span>Grand Total:</span>
+                  <span>
+                    ₹{cart.reduce((sum, item) => sum + item.price, 0).toLocaleString('en-IN')}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <span className="block text-xs font-bold text-temple-stone-700 uppercase tracking-wider font-sans">Select Payment Mode</span>
+                <div className="grid grid-cols-3 gap-2">
+                  <button type="button" className="border border-temple-saffron-500 bg-temple-saffron-50 text-temple-saffron-700 p-3 rounded-lg text-xs font-bold flex flex-col items-center gap-1 cursor-pointer">
+                    <span>UPI / GPay</span>
+                  </button>
+                  <button type="button" className="border border-temple-stone-200 hover:bg-temple-stone-50 p-3 rounded-lg text-xs font-bold flex flex-col items-center gap-1 cursor-pointer">
+                    <span>Card</span>
+                  </button>
+                  <button type="button" className="border border-temple-stone-200 hover:bg-temple-stone-50 p-3 rounded-lg text-xs font-bold flex flex-col items-center gap-1 cursor-pointer">
+                    <span>NetBanking</span>
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={completePayment}
+                className="w-full bg-temple-maroon-800 hover:bg-temple-maroon-900 text-white font-bold py-3 rounded-lg shadow-md transition-colors cursor-pointer"
+              >
+                Simulate Successful Payment
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaymentStep(0)}
+                className="w-full text-center text-xs text-temple-stone-500 hover:text-temple-stone-850 py-1 cursor-pointer"
+              >
+                Cancel & Go Back
+              </button>
+            </div>
+          </div>
+        ) : paymentStep === 2 && receiptData ? (
+          <div className="max-w-2xl mx-auto my-12 space-y-6 w-full px-4 sm:px-0">
+            
+            {/* Visual success notice */}
+            <div className="text-center space-y-3">
+              <div className="inline-flex items-center justify-center p-3 bg-green-50 text-green-600 rounded-full border border-green-200 shadow-md">
+                <CheckCircle size={40} />
+              </div>
+              <h2 className="text-2xl font-serif font-bold text-green-700">Payment Processed Successfully!</h2>
+              <p className="text-sm text-temple-stone-600 max-w-md mx-auto">
+                Your contributions and booking details have been recorded in the ashram register. A copy of the receipt has been sent to your email.
+              </p>
+            </div>
+
+            {/* Printable Certificate/Receipt */}
+            <div className="bg-white border-4 border-double border-temple-saffron-600 p-6 sm:p-8 rounded-xl shadow-xl space-y-6 font-sans relative overflow-hidden print:border-0 print:shadow-none">
+              
+              {/* Subtle Background OM Symbol watermarked */}
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-[0.02] pointer-events-none select-none text-[250px] font-bold text-temple-maroon-800">
+                ॐ
+              </div>
+
+              {/* Receipt Header */}
+              <div className="text-center border-b-2 border-temple-saffron-200 pb-6 space-y-2 text-temple-stone-900">
+                <span className="text-sm tracking-widest text-temple-saffron-600 uppercase font-semibold">Radhe Krishna</span>
+                <h3 className="font-serif text-xl sm:text-2xl font-extrabold text-temple-maroon-800">G.A. TRUST — THENNANGUR ASHRAM</h3>
+                <p className="text-xs text-temple-stone-600">
+                  Swami Haridhos Giri Ashram Complex, Vandavasi Taluk, Tamil Nadu 604408
+                </p>
+                <p className="text-[10px] text-temple-stone-500 font-sans font-sans">Regd. Charity No: GA-1984/THN</p>
+              </div>
+
+              {/* Receipt Metadata */}
+              <div className="grid grid-cols-2 gap-4 text-xs border-b border-temple-stone-150 pb-4 text-temple-stone-900 font-sans">
+                <div>
+                  <p className="text-temple-stone-500 font-semibold uppercase tracking-wider">Receipt Number</p>
+                  <p className="font-bold mt-1">{receiptData.receiptNo}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-temple-stone-500 font-semibold uppercase tracking-wider">Transaction Date</p>
+                  <p className="font-bold mt-1">{receiptData.date}</p>
+                </div>
+                <div>
+                  <p className="text-temple-stone-500 font-semibold uppercase tracking-wider">Transaction ID</p>
+                  <p className="font-mono mt-1 text-[11px]">{receiptData.txnId}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-temple-stone-500 font-semibold uppercase tracking-wider">Status</p>
+                  <p className="font-bold text-green-600 mt-1 uppercase font-sans">✓ Confirmed</p>
+                </div>
+              </div>
+
+              {/* Devotee / Cause details */}
+              <div className="space-y-4">
+                <h4 className="font-serif font-bold text-temple-maroon-800 text-sm border-l-2 border-temple-saffron-500 pl-2 uppercase tracking-wide">
+                  Transaction Summary
+                </h4>
+
+                <div className="border border-temple-stone-200 rounded-lg overflow-hidden">
+                  <table className="w-full text-left border-collapse text-xs sm:text-sm text-temple-stone-900">
+                    <thead>
+                      <tr className="bg-temple-stone-100 border-b border-temple-stone-200 text-[10px] sm:text-xs font-bold uppercase text-temple-stone-600">
+                        <th className="p-3">Offering / Seva</th>
+                        <th className="p-3">Details</th>
+                        <th className="p-3 text-right">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {receiptData.items.map((item) => (
+                        <tr key={item.id} className="border-b border-temple-stone-150 last:border-0 bg-white">
+                          <td className="p-3 align-top">
+                            <span className="font-serif font-bold text-temple-maroon-800 block text-xs sm:text-sm leading-snug">{item.name}</span>
+                            <span className="text-[9px] text-temple-stone-500 font-semibold uppercase tracking-wider block mt-0.5 font-sans font-sans">
+                              {item.type === 'pooja' ? 'Pooja Booking' : 'Charity Donation'}
+                            </span>
+                          </td>
+                          <td className="p-3 align-top text-[11px] text-temple-stone-700 font-sans">
+                            {item.type === 'pooja' ? (
+                              <div className="space-y-0.5">
+                                <p><span className="font-semibold text-temple-stone-600">Devotee:</span> {item.details.devoteeName}</p>
+                                <p><span className="font-semibold text-temple-stone-600">Date:</span> {new Date(item.details.poojaDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                                {(item.details.gotram || item.details.nakshatram || item.details.rasi) && (
+                                  <p>
+                                    {item.details.gotram && <span>Gotram: {item.details.gotram} </span>}
+                                    {item.details.nakshatram && <span>Star: {item.details.nakshatram} </span>}
+                                    {item.details.rasi && <span>Rasi: {item.details.rasi}</span>}
+                                  </p>
+                                )}
+                                {item.details.sankalpam && <p><span className="font-semibold text-temple-stone-600">Sankalpam:</span> {item.details.sankalpam}</p>}
+                              </div>
+                            ) : (
+                              <div className="space-y-0.5">
+                                <p><span className="font-semibold text-temple-stone-600">Donor:</span> {item.details.donorName}</p>
+                                {item.details.panNumber && <p><span className="font-semibold text-temple-stone-600">PAN:</span> {item.details.panNumber}</p>}
+                                <p className="text-[9px] text-green-700 font-semibold mt-1">✓ Eligible for tax exemption under 80G</p>
+                              </div>
+                            )}
+                          </td>
+                          <td className="p-3 align-top text-right font-bold text-temple-stone-850 font-sans">
+                            ₹{item.price.toLocaleString('en-IN')}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Financial Statement */}
+              <div className="border-t border-temple-stone-250 pt-4 flex flex-col sm:flex-row justify-between items-center gap-4 text-temple-stone-900 font-sans">
+                <div className="text-xs text-temple-stone-600 text-center sm:text-left">
+                  <p className="font-semibold">Payment Confirmed</p>
+                  <p className="mt-0.5 text-[9px] text-temple-stone-500">Automated digital signature. May the blessings of Lord Panduranga and Sri Guruji bring prosperity.</p>
+                </div>
+                <div className="bg-temple-maroon-50 border border-temple-maroon-200 rounded px-6 py-3 text-center sm:text-right flex-shrink-0 font-sans">
+                  <span className="text-[10px] text-temple-maroon-900 font-semibold uppercase block">Grand Total Paid</span>
+                  <span className="text-xl sm:text-2xl font-bold font-serif text-temple-maroon-800">
+                    ₹{receiptData.totalPrice.toLocaleString('en-IN')}.00
+                  </span>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Print/Reset Actions */}
+            <div className="flex gap-4 print:hidden font-sans">
+              <button 
+                type="button"
+                onClick={() => window.print()}
+                className="flex-1 py-3 bg-white hover:bg-temple-stone-100 border border-temple-stone-300 rounded-lg font-bold text-temple-stone-850 flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer text-sm"
+              >
+                <Download size={18} /> Print / Save PDF Receipt
+              </button>
+              <button 
+                type="button"
+                onClick={resetPortals}
+                className="flex-1 py-3 bg-temple-saffron-600 hover:bg-temple-saffron-700 text-white rounded-lg font-bold shadow-md transition-colors text-center cursor-pointer text-sm"
+              >
+                Go Back / Done
+              </button>
+            </div>
+
+            {/* WhatsApp notification simulation preview */}
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex gap-3 text-xs text-green-800 print:hidden items-center font-sans">
+              <div className="bg-green-100 text-green-600 p-2 rounded-full flex-shrink-0"><Coffee size={18} /></div>
+              <div>
+                <span className="font-bold block text-green-900">WhatsApp Notification Sent:</span>
+                <p className="mt-0.5 italic text-green-700">
+                  "Radhe Krishna {receiptData.items[0]?.details.devoteeName || receiptData.items[0]?.details.donorName || 'Devotee'}! Your transaction for {receiptData.items.map(item => item.type === 'pooja' ? `${item.name} (${new Date(item.details.poojaDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })})` : item.name).join(', ')} is successfully confirmed. Receipt: {receiptData.receiptNo}. May the grace of Lord Panduranga and Guruji Swami Haridhos Giri be with you."
+                </p>
+              </div>
+            </div>
+
+          </div>
+        ) : (
+          <>
 
         {/* ========================================================
             HOME ROUTE (#/ or #) 
@@ -1187,7 +1543,7 @@ export default function App() {
                                       </div>
                                       <button 
                                         onClick={() => {
-                                          setSelectedPooja(p);
+                                          handleBookPoojaClick(p);
                                           setPaymentStep(0);
                                           window.location.hash = '#/pooja-booking';
                                         }}
@@ -1676,7 +2032,7 @@ export default function App() {
                               ₹{pooja.price.toLocaleString('en-IN')}
                             </span>
                             <button
-                              onClick={() => setSelectedPooja(pooja)}
+                              onClick={() => handleBookPoojaClick(pooja)}
                               className="bg-temple-saffron-600 hover:bg-temple-saffron-700 text-white font-bold text-xs px-4 py-2.5 rounded-lg shadow-sm transition-colors"
                             >
                               Book Pooja
@@ -1700,11 +2056,13 @@ export default function App() {
                   <div className="bg-temple-maroon-800 text-white p-6 flex justify-between items-center">
                     <div>
                       <span className="text-xs uppercase text-temple-saffron-300 font-bold tracking-wider">{selectedPooja.category}</span>
-                      <h3 className="font-serif font-bold text-xl">{selectedPooja.name}</h3>
+                      <h3 className="font-serif font-bold text-xl">
+                        {editingCartItem ? `Edit Booking: ${selectedPooja.name}` : selectedPooja.name}
+                      </h3>
                     </div>
-                    <button onClick={resetPortals} className="text-white/80 hover:text-white"><X size={24} /></button>
+                    <button onClick={closePoojaModal} className="text-white/80 hover:text-white cursor-pointer"><X size={24} /></button>
                   </div>
-
+ 
                   {/* Body Form */}
                   <form onSubmit={handlePoojaSubmit} className="p-6 space-y-4 overflow-y-auto flex-grow">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1720,7 +2078,7 @@ export default function App() {
                           className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none"
                         />
                       </div>
-
+ 
                       <div>
                         <label className="block text-xs font-bold uppercase text-temple-stone-700 mb-1">Pooja Date *</label>
                         <input 
@@ -1731,7 +2089,7 @@ export default function App() {
                           className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none"
                         />
                       </div>
-
+ 
                       <div>
                         <label className="block text-xs font-bold uppercase text-temple-stone-700 mb-1">Gotram (Lineage)</label>
                         <input 
@@ -1742,7 +2100,7 @@ export default function App() {
                           className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none"
                         />
                       </div>
-
+ 
                       <div>
                         <label className="block text-xs font-bold uppercase text-temple-stone-700 mb-1">Nakshatram (Birth Star)</label>
                         <input 
@@ -1753,7 +2111,7 @@ export default function App() {
                           className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none"
                         />
                       </div>
-
+ 
                       <div>
                         <label className="block text-xs font-bold uppercase text-temple-stone-700 mb-1">Rasi (Zodiac)</label>
                         <input 
@@ -1764,7 +2122,7 @@ export default function App() {
                           className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none"
                         />
                       </div>
-
+ 
                       <div>
                         <label className="block text-xs font-bold uppercase text-temple-stone-700 mb-1">WhatsApp / Phone *</label>
                         <input 
@@ -1776,9 +2134,9 @@ export default function App() {
                           className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none"
                         />
                       </div>
-
+ 
                     </div>
-
+ 
                     <div>
                       <label className="block text-xs font-bold uppercase text-temple-stone-700 mb-1">Email Address *</label>
                       <input 
@@ -1790,7 +2148,7 @@ export default function App() {
                         className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none"
                       />
                     </div>
-
+ 
                     <div>
                       <label className="block text-xs font-bold uppercase text-temple-stone-700 mb-1">Other Family Members (Names & Stars)</label>
                       <textarea 
@@ -1801,7 +2159,7 @@ export default function App() {
                         className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none text-sm"
                       />
                     </div>
-
+ 
                     <div>
                       <label className="block text-xs font-bold uppercase text-temple-stone-700 mb-1">Special Sankalpam Purpose (Optional)</label>
                       <input 
@@ -1812,264 +2170,31 @@ export default function App() {
                         className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none"
                       />
                     </div>
-
+ 
                     {/* Cost Info */}
                     <div className="bg-temple-stone-100 p-4 rounded-lg flex justify-between items-center border border-temple-stone-200 mt-2">
                       <span className="font-semibold text-temple-stone-750 text-sm">Total Dakshina Amount:</span>
                       <span className="text-xl font-bold font-serif text-temple-maroon-800">₹{selectedPooja.price.toLocaleString('en-IN')}</span>
                     </div>
-
+ 
                     {/* Actions */}
                     <div className="flex gap-4 pt-4 border-t border-temple-stone-200">
                       <button 
                         type="button" 
-                        onClick={resetPortals}
-                        className="flex-1 py-3 border border-temple-stone-300 rounded-lg text-temple-stone-850 font-bold hover:bg-temple-stone-50 transition-colors"
+                        onClick={closePoojaModal}
+                        className="flex-1 py-3 border border-temple-stone-300 rounded-lg text-temple-stone-850 font-bold hover:bg-temple-stone-50 transition-colors cursor-pointer"
                       >
                         Cancel
                       </button>
                       <button 
                         type="submit" 
-                        className="flex-1 py-3 bg-temple-saffron-600 hover:bg-temple-saffron-700 text-white rounded-lg font-bold shadow-md transition-colors"
+                        className="flex-1 py-3 bg-temple-saffron-600 hover:bg-temple-saffron-700 text-white rounded-lg font-bold shadow-md transition-colors cursor-pointer"
                       >
-                        Proceed to Pay
+                        {editingCartItem ? 'Save Changes' : 'Add to Cart'}
                       </button>
                     </div>
                   </form>
                 </div>
-              </div>
-            )}
-
-            {/* PAYMENT GATEWAY SIMULATION */}
-            {paymentStep === 1 && (
-              <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl border border-temple-stone-200 overflow-hidden my-12">
-                <div className="bg-temple-maroon-800 p-6 text-white text-center">
-                  <div className="flex justify-center mb-2"><Shield size={36} className="text-temple-saffron-300" /></div>
-                  <h3 className="font-serif font-bold text-lg">GA Trust Secure Gateway</h3>
-                  <p className="text-xs text-temple-stone-200 mt-1">Secured by 256-bit SSL encryption</p>
-                </div>
-                
-                <div className="p-8 space-y-6">
-                  <div className="bg-temple-stone-50 p-4 rounded-lg border border-temple-stone-150 space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-temple-stone-600">Merchant:</span>
-                      <span className="font-bold text-temple-stone-800">GA Trust Thennangur</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-temple-stone-600">Service:</span>
-                      <span className="font-bold text-temple-stone-800">
-                        {selectedPooja ? `Pooja Booking: ${selectedPooja.name}` : `Charitable Donation: ${donationForm.cause}`}
-                      </span>
-                    </div>
-                    <div className="flex justify-between pt-2 border-t border-temple-stone-200 font-semibold text-base text-temple-maroon-800">
-                      <span>Total Amount:</span>
-                      <span>
-                        ₹{selectedPooja 
-                          ? selectedPooja.price.toLocaleString('en-IN') 
-                          : parseInt(donationForm.amount === 'custom' ? donationForm.customAmount : donationForm.amount, 10).toLocaleString('en-IN')
-                        }
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <span className="block text-xs font-bold text-temple-stone-700 uppercase tracking-wider">Select Payment Mode</span>
-                    <div className="grid grid-cols-3 gap-2">
-                      <button className="border border-temple-saffron-500 bg-temple-saffron-50 text-temple-saffron-700 p-3 rounded-lg text-xs font-bold flex flex-col items-center gap-1">
-                        <span>UPI / GPay</span>
-                      </button>
-                      <button className="border border-temple-stone-200 hover:bg-temple-stone-50 p-3 rounded-lg text-xs font-bold flex flex-col items-center gap-1">
-                        <span>Card</span>
-                      </button>
-                      <button className="border border-temple-stone-200 hover:bg-temple-stone-50 p-3 rounded-lg text-xs font-bold flex flex-col items-center gap-1">
-                        <span>NetBanking</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => completePayment(selectedPooja ? 'pooja' : 'donation')}
-                    className="w-full bg-temple-maroon-800 hover:bg-temple-maroon-900 text-white font-bold py-3 rounded-lg shadow-md transition-colors"
-                  >
-                    Simulate Successful Payment
-                  </button>
-                  <button
-                    onClick={() => setPaymentStep(0)}
-                    className="w-full text-center text-xs text-temple-stone-500 hover:text-temple-stone-800 py-1"
-                  >
-                    Cancel & Go Back
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* DIGITAL RECEIPT SCREEN */}
-            {paymentStep === 2 && receiptData && (
-              <div className="max-w-2xl mx-auto my-12 space-y-6">
-                
-                {/* Visual success notice */}
-                <div className="text-center space-y-3">
-                  <div className="inline-flex items-center justify-center p-3 bg-green-50 text-green-600 rounded-full border border-green-200 shadow-md">
-                    <CheckCircle size={40} />
-                  </div>
-                  <h2 className="text-2xl font-serif font-bold text-green-700">Payment Processed Successfully!</h2>
-                  <p className="text-sm text-temple-stone-600 max-w-md mx-auto">
-                    Your contribution has been recorded in the temple records. A copy of the receipt has been emailed to you.
-                  </p>
-                </div>
-
-                {/* Printable Certificate/Receipt */}
-                <div className="bg-white border-4 border-double border-temple-saffron-600 p-8 rounded-xl shadow-xl space-y-6 font-sans relative overflow-hidden print:border-0 print:shadow-none">
-                  
-                  {/* Subtle Background OM Symbol watermarked */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-[0.03] pointer-events-none select-none text-[250px] font-bold text-temple-maroon-800">
-                    ॐ
-                  </div>
-
-                  {/* Receipt Header */}
-                  <div className="text-center border-b-2 border-temple-saffron-200 pb-6 space-y-2">
-                    <span className="text-sm tracking-widest text-temple-saffron-600 uppercase font-semibold">Radhe Krishna</span>
-                    <h3 className="font-serif text-xl sm:text-2xl font-extrabold text-temple-maroon-800">G.A. TRUST — THENNANGUR ASHRAM</h3>
-                    <p className="text-xs text-temple-stone-600">
-                      Swami Haridhos Giri Ashram Complex, Vandavasi Taluk, Tamil Nadu 604408
-                    </p>
-                    <p className="text-[10px] text-temple-stone-500">Regd. Charity No: GA-1984/THN</p>
-                  </div>
-
-                  {/* Receipt Metadata */}
-                  <div className="grid grid-cols-2 gap-4 text-xs border-b border-temple-stone-150 pb-4">
-                    <div>
-                      <p className="text-temple-stone-500 font-semibold uppercase tracking-wider">Receipt Number</p>
-                      <p className="font-bold text-temple-stone-900 mt-1">{receiptData.receiptNo}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-temple-stone-500 font-semibold uppercase tracking-wider">Transaction Date</p>
-                      <p className="font-bold text-temple-stone-900 mt-1">{receiptData.date}</p>
-                    </div>
-                    <div>
-                      <p className="text-temple-stone-500 font-semibold uppercase tracking-wider">Transaction ID</p>
-                      <p className="font-mono text-temple-stone-850 mt-1">{receiptData.txnId}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-temple-stone-500 font-semibold uppercase tracking-wider">Status</p>
-                      <p className="font-bold text-green-600 mt-1 uppercase">✓ Confirmed</p>
-                    </div>
-                  </div>
-
-                  {/* Devotee / Cause details */}
-                  <div className="space-y-4">
-                    <h4 className="font-serif font-bold text-temple-maroon-800 text-sm border-l-2 border-temple-saffron-500 pl-2 uppercase tracking-wide">
-                      Transaction Summary
-                    </h4>
-
-                    {receiptData.type === 'pooja' ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm bg-temple-stone-50 p-4 rounded border border-temple-stone-200">
-                        <div>
-                          <span className="text-xs text-temple-stone-500">Devotee Name:</span>
-                          <p className="font-bold text-temple-stone-950">{receiptData.details.devoteeName}</p>
-                        </div>
-                        <div>
-                          <span className="text-xs text-temple-stone-500">Pooja Ritual:</span>
-                          <p className="font-bold text-temple-maroon-800">{receiptData.poojaName}</p>
-                        </div>
-                        {receiptData.details.gotram && (
-                          <div>
-                            <span className="text-xs text-temple-stone-500">Gotram:</span>
-                            <p className="font-medium text-temple-stone-800">{receiptData.details.gotram}</p>
-                          </div>
-                        )}
-                        {receiptData.details.nakshatram && (
-                          <div>
-                            <span className="text-xs text-temple-stone-500">Nakshatram / Star:</span>
-                            <p className="font-medium text-temple-stone-800">{receiptData.details.nakshatram}</p>
-                          </div>
-                        )}
-                        {receiptData.details.rasi && (
-                          <div>
-                            <span className="text-xs text-temple-stone-500">Rasi:</span>
-                            <p className="font-medium text-temple-stone-800">{receiptData.details.rasi}</p>
-                          </div>
-                        )}
-                        <div>
-                          <span className="text-xs text-temple-stone-500">Scheduled Date:</span>
-                          <p className="font-medium text-temple-stone-800">
-                            {new Date(receiptData.details.poojaDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
-                          </p>
-                        </div>
-                        {receiptData.details.familyMembers && (
-                          <div className="sm:col-span-2">
-                            <span className="text-xs text-temple-stone-500">Family Members:</span>
-                            <p className="text-xs text-temple-stone-800 mt-0.5">{receiptData.details.familyMembers}</p>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm bg-temple-stone-50 p-4 rounded border border-temple-stone-200">
-                        <div>
-                          <span className="text-xs text-temple-stone-500">Donor Name:</span>
-                          <p className="font-bold text-temple-stone-950">{receiptData.details.donorName}</p>
-                        </div>
-                        <div>
-                          <span className="text-xs text-temple-stone-500">Charity Seva Cause:</span>
-                          <p className="font-bold text-temple-maroon-800">{receiptData.cause}</p>
-                        </div>
-                        {receiptData.details.panNumber && (
-                          <div>
-                            <span className="text-xs text-temple-stone-500">PAN Exemption Number:</span>
-                            <p className="font-mono font-medium text-temple-stone-850 uppercase">{receiptData.details.panNumber}</p>
-                          </div>
-                        )}
-                        <div>
-                          <span className="text-xs text-temple-stone-500">Tax Relief:</span>
-                          <p className="font-semibold text-green-700">Eligible under Section 80G</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Financial Statement */}
-                  <div className="border-t border-temple-stone-250 pt-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <div className="text-xs text-temple-stone-600 text-center sm:text-left">
-                      <p className="font-semibold">Payment Confirmed</p>
-                      <p className="mt-0.5 text-[10px]">Automated digital signature. May the blessings of Lord Panduranga bring prosperity.</p>
-                    </div>
-                    <div className="bg-temple-maroon-50 border border-temple-maroon-200 rounded px-6 py-3 text-center sm:text-right">
-                      <span className="text-xs text-temple-maroon-900 font-semibold uppercase block">Amount Paid</span>
-                      <span className="text-2xl font-bold font-serif text-temple-maroon-800">
-                        ₹{receiptData.price.toLocaleString('en-IN')}.00
-                      </span>
-                    </div>
-                  </div>
-
-                </div>
-
-                {/* Print/Reset Actions */}
-                <div className="flex gap-4 print:hidden">
-                  <button 
-                    onClick={() => window.print()}
-                    className="flex-1 py-3 bg-white hover:bg-temple-stone-100 border border-temple-stone-300 rounded-lg font-bold text-temple-stone-850 flex items-center justify-center gap-2 transition-colors shadow-sm"
-                  >
-                    <Download size={18} /> Print / Save PDF Receipt
-                  </button>
-                  <button 
-                    onClick={resetPortals}
-                    className="flex-1 py-3 bg-temple-saffron-600 hover:bg-temple-saffron-700 text-white rounded-lg font-bold shadow-md transition-colors text-center"
-                  >
-                    Go Back / Done
-                  </button>
-                </div>
-
-                {/* WhatsApp notification simulation preview */}
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex gap-3 text-xs text-green-800 print:hidden items-center">
-                  <div className="bg-green-100 text-green-600 p-2 rounded-full"><Coffee size={18} /></div>
-                  <div>
-                    <span className="font-bold block text-green-900">WhatsApp Notification Sent:</span>
-                    <p className="mt-0.5 italic">
-                      "Radhe Krishna {receiptData.type === 'pooja' ? receiptData.details.devoteeName : receiptData.details.donorName}! Your {receiptData.type === 'pooja' ? `booking for ${receiptData.poojaName}` : `donation of ₹${receiptData.price} to ${receiptData.cause}`} is successfully confirmed at Thennangur Ashram. Receipt: {receiptData.receiptNo}. Prasadam tracking details will be sent shortly."
-                    </p>
-                  </div>
-                </div>
-
               </div>
             )}
 
@@ -2309,195 +2434,6 @@ export default function App() {
                       </button>
 
                     </form>
-                  </div>
-                </div>
-
-              </div>
-            )}
-
-            {/* Simulated Payment for donation & receipt screens */}
-            {paymentStep === 1 && (
-              <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl border border-temple-stone-200 overflow-hidden my-12 w-full">
-                <div className="bg-temple-maroon-800 p-6 text-white text-center">
-                  <div className="flex justify-center mb-2"><Shield size={36} className="text-temple-saffron-300" /></div>
-                  <h3 className="font-serif font-bold text-lg">GA Trust Secure Gateway</h3>
-                  <p className="text-xs text-temple-stone-200 mt-1">Secured by 256-bit SSL encryption</p>
-                </div>
-                
-                <div className="p-8 space-y-6">
-                  <div className="bg-temple-stone-50 p-4 rounded-lg border border-temple-stone-150 space-y-2 text-sm text-temple-stone-900">
-                    <div className="flex justify-between">
-                      <span className="text-temple-stone-600">Merchant:</span>
-                      <span className="font-bold">GA Trust Thennangur</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-temple-stone-600">Service:</span>
-                      <span className="font-bold">
-                        Charitable Donation: {donationForm.cause}
-                      </span>
-                    </div>
-                    <div className="flex justify-between pt-2 border-t border-temple-stone-200 font-semibold text-base text-temple-maroon-800">
-                      <span>Total Amount:</span>
-                      <span>
-                        ₹{parseInt(donationForm.amount === 'custom' ? donationForm.customAmount : donationForm.amount, 10).toLocaleString('en-IN')}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <span className="block text-xs font-bold text-temple-stone-700 uppercase tracking-wider">Select Payment Mode</span>
-                    <div className="grid grid-cols-3 gap-2">
-                      <button type="button" className="border border-temple-saffron-500 bg-temple-saffron-50 text-temple-saffron-700 p-3 rounded-lg text-xs font-bold flex flex-col items-center gap-1">
-                        <span>UPI / GPay</span>
-                      </button>
-                      <button type="button" className="border border-temple-stone-200 hover:bg-temple-stone-50 p-3 rounded-lg text-xs font-bold flex flex-col items-center gap-1">
-                        <span>Card</span>
-                      </button>
-                      <button type="button" className="border border-temple-stone-200 hover:bg-temple-stone-50 p-3 rounded-lg text-xs font-bold flex flex-col items-center gap-1">
-                        <span>NetBanking</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => completePayment('donation')}
-                    className="w-full bg-temple-maroon-800 hover:bg-temple-maroon-900 text-white font-bold py-3 rounded-lg shadow-md transition-colors"
-                  >
-                    Simulate Successful Payment
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentStep(0)}
-                    className="w-full text-center text-xs text-temple-stone-500 hover:text-temple-stone-850 py-1"
-                  >
-                    Cancel & Go Back
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {paymentStep === 2 && receiptData && (
-              <div className="max-w-2xl mx-auto my-12 space-y-6 w-full">
-                
-                {/* Visual success notice */}
-                <div className="text-center space-y-3">
-                  <div className="inline-flex items-center justify-center p-3 bg-green-50 text-green-600 rounded-full border border-green-200 shadow-md">
-                    <CheckCircle size={40} />
-                  </div>
-                  <h2 className="text-2xl font-serif font-bold text-green-700">Payment Processed Successfully!</h2>
-                  <p className="text-sm text-temple-stone-600 max-w-md mx-auto">
-                    Your contribution has been recorded in the temple records. A copy of the receipt has been emailed to you.
-                  </p>
-                </div>
-
-                {/* Printable Certificate/Receipt */}
-                <div className="bg-white border-4 border-double border-temple-saffron-600 p-8 rounded-xl shadow-xl space-y-6 font-sans relative overflow-hidden print:border-0 print:shadow-none">
-                  
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-[0.03] pointer-events-none select-none text-[250px] font-bold text-temple-maroon-800">
-                    ॐ
-                  </div>
-
-                  {/* Receipt Header */}
-                  <div className="text-center border-b-2 border-temple-saffron-200 pb-6 space-y-2 text-temple-stone-900">
-                    <span className="text-sm tracking-widest text-temple-saffron-600 uppercase font-semibold">Radhe Krishna</span>
-                    <h3 className="font-serif text-xl sm:text-2xl font-extrabold text-temple-maroon-800">G.A. TRUST — THENNANGUR ASHRAM</h3>
-                    <p className="text-xs text-temple-stone-600">
-                      Swami Haridhos Giri Ashram Complex, Vandavasi Taluk, Tamil Nadu 604408
-                    </p>
-                    <p className="text-[10px] text-temple-stone-500">Regd. Charity No: GA-1984/THN</p>
-                  </div>
-
-                  {/* Receipt Metadata */}
-                  <div className="grid grid-cols-2 gap-4 text-xs border-b border-temple-stone-150 pb-4 text-temple-stone-900">
-                    <div>
-                      <p className="text-temple-stone-500 font-semibold uppercase tracking-wider">Receipt Number</p>
-                      <p className="font-bold mt-1">{receiptData.receiptNo}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-temple-stone-500 font-semibold uppercase tracking-wider">Transaction Date</p>
-                      <p className="font-bold mt-1">{receiptData.date}</p>
-                    </div>
-                    <div>
-                      <p className="text-temple-stone-500 font-semibold uppercase tracking-wider">Transaction ID</p>
-                      <p className="font-mono mt-1">{receiptData.txnId}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-temple-stone-500 font-semibold uppercase tracking-wider">Status</p>
-                      <p className="font-bold text-green-600 mt-1 uppercase">✓ Confirmed</p>
-                    </div>
-                  </div>
-
-                  {/* Devotee / Cause details */}
-                  <div className="space-y-4">
-                    <h4 className="font-serif font-bold text-temple-maroon-800 text-sm border-l-2 border-temple-saffron-500 pl-2 uppercase tracking-wide">
-                      Transaction Summary
-                    </h4>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm bg-temple-stone-50 p-4 rounded border border-temple-stone-200 text-temple-stone-900">
-                      <div>
-                        <span className="text-xs text-temple-stone-500">Donor Name:</span>
-                        <p className="font-bold">{receiptData.details.donorName}</p>
-                      </div>
-                      <div>
-                        <span className="text-xs text-temple-stone-500">Charity Seva Cause:</span>
-                        <p className="font-bold text-temple-maroon-800">{receiptData.cause}</p>
-                      </div>
-                      {receiptData.details.panNumber && (
-                        <div>
-                          <span className="text-xs text-temple-stone-500">PAN Exemption Number:</span>
-                          <p className="font-mono font-medium uppercase">{receiptData.details.panNumber}</p>
-                        </div>
-                      )}
-                      <div>
-                        <span className="text-xs text-temple-stone-500">Tax Relief:</span>
-                        <p className="font-semibold text-green-700 font-sans">Eligible under Section 80G</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Financial Statement */}
-                  <div className="border-t border-temple-stone-250 pt-4 flex flex-col sm:flex-row justify-between items-center gap-4 text-temple-stone-900">
-                    <div className="text-xs text-temple-stone-600 text-center sm:text-left">
-                      <p className="font-semibold">Payment Confirmed</p>
-                      <p className="mt-0.5 text-[10px]">Automated digital signature. May the blessings of Lord Panduranga bring prosperity.</p>
-                    </div>
-                    <div className="bg-temple-maroon-50 border border-temple-maroon-200 rounded px-6 py-3 text-center sm:text-right">
-                      <span className="text-xs text-temple-maroon-900 font-semibold uppercase block">Amount Paid</span>
-                      <span className="text-2xl font-bold font-serif text-temple-maroon-800">
-                        ₹{receiptData.price.toLocaleString('en-IN')}.00
-                      </span>
-                    </div>
-                  </div>
-
-                </div>
-
-                {/* Print/Reset Actions */}
-                <div className="flex gap-4 print:hidden">
-                  <button 
-                    type="button"
-                    onClick={() => window.print()}
-                    className="flex-1 py-3 bg-white hover:bg-temple-stone-100 border border-temple-stone-300 rounded-lg font-bold text-temple-stone-850 flex items-center justify-center gap-2 transition-colors shadow-sm"
-                  >
-                    <Download size={18} /> Print / Save PDF Receipt
-                  </button>
-                  <button 
-                    type="button"
-                    onClick={resetPortals}
-                    className="flex-1 py-3 bg-temple-saffron-600 hover:bg-temple-saffron-700 text-white rounded-lg font-bold shadow-md transition-colors text-center"
-                  >
-                    Go Back / Done
-                  </button>
-                </div>
-
-                {/* WhatsApp notification simulation preview */}
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex gap-3 text-xs text-green-800 print:hidden items-center">
-                  <div className="bg-green-100 text-green-600 p-2 rounded-full"><Coffee size={18} /></div>
-                  <div>
-                    <span className="font-bold block text-green-900 font-sans">WhatsApp Notification Sent:</span>
-                    <p className="mt-0.5 italic">
-                      "Radhe Krishna {receiptData.details.donorName}! Your donation of ₹{receiptData.price.toLocaleString('en-IN')} to {receiptData.cause} is successfully confirmed at Thennangur Ashram. Receipt: {receiptData.receiptNo}. May the grace of Lord Panduranga be with you."
-                    </p>
                   </div>
                 </div>
 
@@ -3052,8 +2988,353 @@ export default function App() {
             );
           })()
         )}
+          </>
+        )}
 
       </main>
+
+      {/* PERSISTENT FLOATING CART ACTION BUTTON */}
+      {cart.length > 0 && !isCartOpen && (
+        <button 
+          onClick={() => setIsCartOpen(true)}
+          className="fixed bottom-6 right-6 bg-temple-saffron-600 hover:bg-temple-saffron-700 text-white p-4 rounded-full shadow-2xl z-40 transition-all hover:scale-105 duration-200 border border-temple-saffron-500 flex items-center gap-2 group cursor-pointer"
+        >
+          <ShoppingCart size={24} />
+          <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 ease-in-out font-bold text-sm whitespace-nowrap">
+            View Cart
+          </span>
+          <span className="bg-temple-maroon-900 text-white text-xs h-6 w-6 rounded-full flex items-center justify-center border border-white/20 font-bold">
+            {cart.length}
+          </span>
+        </button>
+      )}
+
+      {/* CART DRAWER MODAL */}
+      {isCartOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex justify-end z-50 animate-fade-in font-sans">
+          <div className="bg-temple-stone-50 w-full max-w-md h-full shadow-2xl flex flex-col justify-between border-l border-temple-stone-200 animate-slide-in">
+            
+            {/* Header */}
+            <div className="bg-temple-maroon-800 text-white p-6 flex justify-between items-center shadow-md">
+              <div className="flex items-center gap-2">
+                <ShoppingCart size={22} className="text-temple-saffron-300" />
+                <h3 className="font-serif font-bold text-xl">Your Sacred Cart</h3>
+              </div>
+              <button 
+                onClick={() => setIsCartOpen(false)}
+                className="text-white/80 hover:text-white p-1 hover:bg-white/10 rounded transition-colors cursor-pointer"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="flex-grow overflow-y-auto p-6 space-y-4">
+              {cart.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center space-y-4 py-20 text-temple-stone-500">
+                  <ShoppingCart size={48} className="text-temple-stone-300 stroke-[1.5]" />
+                  <div className="space-y-1">
+                    <p className="font-serif font-bold text-lg text-temple-maroon-850">Your Cart is Empty</p>
+                    <p className="text-xs max-w-xs">Explore our sacred pooja services and charitable causes to offer your devotion.</p>
+                  </div>
+                  <a 
+                    href="#/pooja-booking" 
+                    onClick={() => setIsCartOpen(false)}
+                    className="mt-2 bg-temple-saffron-600 hover:bg-temple-saffron-700 text-white font-bold text-xs px-6 py-2.5 rounded-lg shadow-sm transition-colors"
+                  >
+                    Browse Poojas
+                  </a>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center text-xs text-temple-stone-500 font-bold uppercase tracking-wider pb-1 border-b border-temple-stone-200">
+                    <span>Selected Offerings ({cart.length})</span>
+                    <button 
+                      onClick={() => setCart([])}
+                      className="text-red-600 hover:text-red-700 font-bold lowercase hover:underline cursor-pointer"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                  
+                  {cart.map((item) => (
+                    <div 
+                      key={item.id} 
+                      className="bg-white rounded-xl shadow-sm border border-temple-stone-200 p-4 relative flex flex-col justify-between hover:shadow-md transition-shadow"
+                    >
+                      <div className="space-y-2">
+                        {/* Header line of item */}
+                        <div className="flex justify-between items-start gap-2">
+                          <span className="text-[9px] font-bold text-temple-saffron-600 tracking-wider bg-temple-saffron-50 px-2 py-0.5 rounded uppercase">
+                            {item.type === 'pooja' ? 'Pooja Booking' : 'Charity Donation'}
+                          </span>
+                          <span className="font-semibold text-sm text-temple-stone-900">
+                            ₹{item.price.toLocaleString('en-IN')}
+                          </span>
+                        </div>
+                        
+                        {/* Title */}
+                        <h4 className="font-serif font-bold text-temple-maroon-800 leading-snug">
+                          {item.type === 'pooja' ? item.pooja.name : item.cause}
+                        </h4>
+                        
+                        {/* Details */}
+                        {item.type === 'pooja' ? (
+                          <div className="text-[11px] text-temple-stone-600 space-y-0.5 bg-temple-stone-50 p-2.5 rounded border border-temple-stone-150 font-sans">
+                            <p><span className="font-bold text-temple-stone-750">Devotee:</span> {item.details.devoteeName}</p>
+                            <p><span className="font-bold text-temple-stone-750">Date:</span> {new Date(item.details.poojaDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                            {(item.details.gotram || item.details.nakshatram || item.details.rasi) && (
+                              <p>
+                                {item.details.gotram && <span><span className="font-bold text-temple-stone-750">Gotram:</span> {item.details.gotram} </span>}
+                                {item.details.nakshatram && <span><span className="font-bold text-temple-stone-750">Star:</span> {item.details.nakshatram}</span>}
+                              </p>
+                            )}
+                            {item.details.sankalpam && <p><span className="font-bold text-temple-stone-750">Purpose:</span> {item.details.sankalpam}</p>}
+                          </div>
+                        ) : (
+                          <div className="text-[11px] text-temple-stone-600 space-y-0.5 bg-temple-stone-50 p-2.5 rounded border border-temple-stone-150 font-sans">
+                            <p><span className="font-bold text-temple-stone-750">Donor:</span> {item.details.donorName}</p>
+                            {item.details.panNumber && <p><span className="font-bold text-temple-stone-750">PAN:</span> {item.details.panNumber}</p>}
+                            <p className="text-[10px] text-green-700 font-semibold mt-1">✓ Eligible for Sec 80G benefit</p>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Actions */}
+                      <div className="mt-3 pt-3 border-t border-temple-stone-100 flex justify-end gap-3 font-sans">
+                        <button 
+                          onClick={() => handleEditCartItem(item)}
+                          className="text-temple-stone-600 hover:text-temple-maroon-800 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                        >
+                          <Edit2 size={12} /> Edit Details
+                        </button>
+                        <button 
+                          onClick={() => setCart(cart.filter(c => c.id !== item.id))}
+                          className="text-red-600 hover:text-red-750 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                        >
+                          <Trash2 size={12} /> Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            {cart.length > 0 && (
+              <div className="bg-white border-t border-temple-stone-200 p-6 space-y-4 shadow-inner">
+                <div className="flex justify-between items-center font-sans">
+                  <span className="font-semibold text-temple-stone-600 text-sm">Total offerings:</span>
+                  <span className="text-2xl font-bold font-serif text-temple-maroon-800">
+                    ₹{cart.reduce((sum, item) => sum + item.price, 0).toLocaleString('en-IN')}
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 font-sans">
+                  <button 
+                    onClick={() => setIsCartOpen(false)}
+                    className="py-3 border border-temple-stone-300 rounded-lg text-temple-stone-850 font-bold hover:bg-temple-stone-50 transition-colors text-sm cursor-pointer"
+                  >
+                    Add More
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setIsCartOpen(false);
+                      setPaymentStep(1);
+                      setSelectedPooja(null);
+                    }}
+                    className="py-3 bg-temple-saffron-600 hover:bg-temple-saffron-700 text-white rounded-lg font-bold shadow-md transition-colors text-sm text-center cursor-pointer"
+                  >
+                    Proceed to Pay
+                  </button>
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+      )}
+
+      {/* DONATION EDIT FORM MODAL */}
+      {editingCartItem && editingCartItem.type === 'donation' && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden my-8 max-h-[90vh] flex flex-col font-sans">
+            
+            {/* Header */}
+            <div className="bg-temple-maroon-800 text-white p-6 flex justify-between items-center">
+              <div>
+                <span className="text-xs uppercase text-temple-saffron-300 font-bold tracking-wider">Charitable Seva</span>
+                <h3 className="font-serif font-bold text-xl">Edit Donation Details</h3>
+              </div>
+              <button onClick={closeDonationEditModal} className="text-white/80 hover:text-white cursor-pointer"><X size={24} /></button>
+            </div>
+
+            {/* Body Form */}
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                const finalAmt = donationForm.amount === 'custom' ? donationForm.customAmount : donationForm.amount;
+                setCart(cart.map(item => item.id === editingCartItem.id ? {
+                  ...item,
+                  cause: donationForm.cause,
+                  price: parseInt(finalAmt, 10),
+                  details: { ...donationForm }
+                } : item));
+                setEditingCartItem(null);
+                setIsCartOpen(true);
+              }}
+              className="p-6 space-y-4 overflow-y-auto flex-grow text-temple-stone-900"
+            >
+              
+              {/* Cause selection */}
+              <div className="space-y-1">
+                <label className="block text-xs font-bold uppercase text-temple-stone-700">Select Cause / Initiative *</label>
+                <select 
+                  value={donationForm.cause}
+                  onChange={(e) => setDonationForm({...donationForm, cause: e.target.value})}
+                  className="w-full p-2.5 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 bg-white focus:outline-none"
+                >
+                  <option value="Annadanam">Annadanam (Feeding Seva)</option>
+                  <option value="Goshala Seva">Goshala Seva (Cow Care)</option>
+                  <option value="Guruji Medical Centre">Guruji Medical Centre (Healthcare)</option>
+                  <option value="Senior Citizens Home">Senior Citizens Home (Elder Care)</option>
+                  <option value="Temple Maintenance & General Fund">Temple Maintenance & General Fund</option>
+                </select>
+              </div>
+
+              {/* Amount Selection */}
+              <div className="space-y-1">
+                <label className="block text-xs font-bold uppercase text-temple-stone-700">Select Amount (INR) *</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {['500', '1000', '2500', '5000', '10000'].map(amt => (
+                    <button
+                      key={amt}
+                      type="button"
+                      onClick={() => setDonationForm({...donationForm, amount: amt})}
+                      className={`py-2 rounded-lg font-serif font-bold transition-all border ${
+                        donationForm.amount === amt 
+                          ? 'bg-temple-maroon-850 text-white border-temple-maroon-850 shadow' 
+                          : 'bg-white text-temple-stone-800 border-temple-stone-300 hover:bg-temple-stone-50 cursor-pointer'
+                      }`}
+                    >
+                      ₹{parseInt(amt, 10).toLocaleString('en-IN')}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setDonationForm({...donationForm, amount: 'custom'})}
+                    className={`py-2 rounded-lg font-semibold transition-all border ${
+                      donationForm.amount === 'custom' 
+                        ? 'bg-temple-maroon-850 text-white border-temple-maroon-850 shadow' 
+                        : 'bg-white text-temple-stone-800 border-temple-stone-300 hover:bg-temple-stone-50 cursor-pointer'
+                    }`}
+                  >
+                    Custom
+                  </button>
+                </div>
+
+                {donationForm.amount === 'custom' && (
+                  <div className="pt-2 relative">
+                    <span className="absolute left-3 top-5 text-sm text-temple-stone-655 font-bold">₹</span>
+                    <input 
+                      type="number" 
+                      required
+                      min="100"
+                      placeholder="Enter custom amount (Min. ₹100)"
+                      value={donationForm.customAmount}
+                      onChange={(e) => setDonationForm({...donationForm, customAmount: e.target.value})}
+                      className="w-full pl-7 pr-3 py-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Donor Details */}
+              <div className="space-y-3 pt-2">
+                <span className="block text-xs font-bold text-temple-stone-700 uppercase tracking-wider border-b border-temple-stone-150 pb-1">Donor Details</span>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-temple-stone-650 mb-1">Donor Full Name *</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={donationForm.donorName}
+                      onChange={(e) => setDonationForm({...donationForm, donorName: e.target.value})}
+                      placeholder="Full name"
+                      className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-temple-stone-650 mb-1">PAN Card Number (for 80G tax benefit)</label>
+                    <input 
+                      type="text" 
+                      value={donationForm.panNumber}
+                      onChange={(e) => setDonationForm({...donationForm, panNumber: e.target.value.toUpperCase()})}
+                      placeholder="e.g. ABCDE1234F"
+                      className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none text-sm uppercase"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-temple-stone-650 mb-1">Email Address *</label>
+                    <input 
+                      type="email" 
+                      required
+                      value={donationForm.email}
+                      onChange={(e) => setDonationForm({...donationForm, email: e.target.value})}
+                      placeholder="For digital 80G receipt"
+                      className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-temple-stone-650 mb-1">Phone Number *</label>
+                    <input 
+                      type="tel" 
+                      required
+                      value={donationForm.phone}
+                      onChange={(e) => setDonationForm({...donationForm, phone: e.target.value})}
+                      placeholder="WhatsApp number"
+                      className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-temple-stone-655 mb-1">Donor Address</label>
+                  <textarea 
+                    rows={2}
+                    value={donationForm.address}
+                    onChange={(e) => setDonationForm({...donationForm, address: e.target.value})}
+                    placeholder="Residential Address"
+                    className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none text-sm"
+                  />
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-4 pt-4 border-t border-temple-stone-200">
+                <button 
+                  type="button" 
+                  onClick={closeDonationEditModal}
+                  className="flex-1 py-3 border border-temple-stone-300 rounded-lg text-temple-stone-850 font-bold hover:bg-temple-stone-50 transition-colors cursor-pointer text-sm"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="flex-1 py-3 bg-temple-saffron-600 hover:bg-temple-saffron-700 text-white rounded-lg font-bold shadow-md transition-colors cursor-pointer text-sm"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* 4. FOOTER SECTION */}
       <footer className="bg-temple-stone-900 text-temple-stone-100 border-t-2 border-temple-saffron-500 pt-16 pb-8 px-4 sm:px-6 lg:px-8">
