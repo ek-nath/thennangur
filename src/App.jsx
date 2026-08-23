@@ -220,13 +220,17 @@ const getEventDatesForSchedule = (schedule) => {
   } else if (s.includes('narasimha jayanthi') || s.includes('nrusimha jayanthi')) {
     searchTitle = 'Nrusimha Jayanthi';
   } else if (s.includes('tamil new year')) {
-    searchTitle = 'New Year';
+    searchTitle = 'Tamil New Year';
   }
 
   if (searchTitle) {
-    const matchingEvents = contentDb.events.filter(e => 
-      e.title.toLowerCase().includes(searchTitle.toLowerCase())
-    );
+    const matchingEvents = contentDb.events.filter(e => {
+      const t = e.title.toLowerCase();
+      if (searchTitle === 'Tamil New Year') {
+        return t.includes('new year') && !t.includes('telugu') && !t.includes('ugadi');
+      }
+      return t.includes(searchTitle.toLowerCase());
+    });
     if (matchingEvents.length > 0) {
       let dates = [];
       matchingEvents.forEach(event => {
