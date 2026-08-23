@@ -242,6 +242,8 @@ Pradosha or Pradosham is a bimonthly occasion on the thirteenth day of every for
 
 ### Sankatahara Chaturti
 
+Sankatahara Chaturthi
+
 Devotees perform pooja or worship Lord Vinayaka for the prosperity, peace, and happiness. Adulation takes place in the e…
 
 ₹1,000
@@ -321,6 +323,8 @@ Guru in Sanskrit means teacher and Vandana means salutations. Guru Vandana means
 
 ### Samasthi Pada Pooja – Guruji Maha Pooja
 
+Guruji Mahapooja day
+
 Special Samasthi Pada Pooja performed on Guruji Maha Pooja day at Thennangur Ashram.
 
 ₹500
@@ -335,6 +339,8 @@ Special Swarna Pushpa (golden flower) Paada Pooja at Thennangur Ashram.
 
 ### Samasthi Pada Pooja — Swami Aradhana
 
+Swami Gnanananda Aaradhana Day
+
 Samasthi Pada Pooja performed on Swami Aradhana Day at Thennangur Ashram.
 
 ₹500
@@ -342,12 +348,25 @@ Samasthi Pada Pooja performed on Swami Aradhana Day at Thennangur Ashram.
 
 ### Samasthi Pada Pooja — Guruji's Monthly Birth Star Uttarathathi Day
 
+Uttarathathi Day
+
 Samasthi Pada Pooja performed on Guruji's monthly birth star Uttarathathi day.
 
 ₹500
 [Book Now](/product/gurujis-monthly-birth-star-uttarathathi-day)  [View Details](/product/gurujis-monthly-birth-star-uttarathathi-day)
 
+### Samasthi Pada Pooja — Guruji's Monthly Birth Star Mrigashirsha Day
+
+Mrigashirsha Day
+
+Samasthi Pada Pooja performed on Namaji's monthly birth star Mrigashirsha day.
+
+₹500
+[Book Now](/product/gurujis-monthly-birth-star-mrigashirsha-day)  [View Details](/product/gurujis-monthly-birth-star-mrigashirsha-day)
+
 ### Samasthi Pada Pooja — Namaji Aradhana
+
+Namaji Aradhana Day
 
 Samasthi Pada Pooja performed on Namaji Aradhana Day at Thennangur Ashram.
 
@@ -355,6 +374,8 @@ Samasthi Pada Pooja performed on Namaji Aradhana Day at Thennangur Ashram.
 [Book Now](/product/namaji-aradhana)  [View Details](/product/namaji-aradhana)
 
 ### Samasthi Pada Pooja — On Tamil New Year Day
+
+Tamil New Year Day
 
 Samasthi Pada Pooja performed on Tamil New Year Day at Thennangur Ashram.
 

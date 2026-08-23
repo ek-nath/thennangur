@@ -66,7 +66,15 @@ function parsePoojas(markdown) {
          firstLine.toLowerCase().includes('friday') ||
          firstLine.toLowerCase().includes('thursday') ||
          firstLine.toLowerCase().includes('month') ||
-         firstLine.toLowerCase().includes('daily'))
+         firstLine.toLowerCase().includes('daily') ||
+         firstLine.toLowerCase().includes('poornima') ||
+         firstLine.toLowerCase().includes('pournami') ||
+         firstLine.toLowerCase().includes('pradosh') ||
+         firstLine.toLowerCase().includes('chaturthi') ||
+         firstLine.toLowerCase().includes('chaturti') ||
+         firstLine.toLowerCase().includes('star') ||
+         firstLine.toLowerCase().includes('new year') ||
+         firstLine.toLowerCase().includes('uttarathathi'))
       ) {
         schedule = firstLine;
         startIndex = 2;

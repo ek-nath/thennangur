@@ -333,6 +333,10 @@ const getValidDatesForPooja = (pooja) => {
     uttarathathi: [
       "2026-08-30", "2026-09-26", "2026-10-23", "2026-11-20", "2026-12-17", 
       "2027-01-13", "2027-02-09", "2027-03-09", "2027-04-05"
+    ],
+    mrigashirsha: [
+      "2026-08-09", "2026-09-05", "2026-10-02", "2026-10-29", "2026-11-25", 
+      "2026-12-23", "2027-01-20", "2027-02-16", "2027-03-15", "2027-04-12"
     ]
   };
   
@@ -347,6 +351,9 @@ const getValidDatesForPooja = (pooja) => {
   }
   if (s.includes('uttarathathi')) {
     return STATIC_LUNAR_DATES.uttarathathi.filter(d => d >= tomorrowStr);
+  }
+  if (s.includes('mrigashirsha')) {
+    return STATIC_LUNAR_DATES.mrigashirsha.filter(d => d >= tomorrowStr);
   }
   
   return null;
