@@ -401,9 +401,9 @@ const getValidDatesForPooja = (pooja) => {
       } else if (isChaturthi) {
         matches = (panchangNoon.tithi === 19 || panchangSunset.tithi === 19);
       } else if (isUttarathathi) {
-        matches = (panchangSunrise.nakshatra === 26 || panchangNoon.nakshatra === 26 || panchangSunset.nakshatra === 26);
+        matches = (panchangSunrise.nakshatra === 26 || panchangNoon.nakshatra === 26);
       } else if (isMrigashirsha) {
-        matches = (panchangSunrise.nakshatra === 5 || panchangNoon.nakshatra === 5 || panchangSunset.nakshatra === 5);
+        matches = (panchangSunrise.nakshatra === 5 || panchangNoon.nakshatra === 5);
       }
       
       if (matches) {
