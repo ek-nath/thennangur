@@ -380,12 +380,12 @@ const getValidDatesForPooja = (pooja) => {
       const month = current.getMonth();
       const dateVal = current.getDate();
       
-      // Calculate sunrise (6:00 AM) for morning transitions
-      const sunriseTime = new Date(year, month, dateVal, 6, 0, 0);
+      // Calculate morning observation time (7:00 AM) to match Paambu (Vakya) Panchangam boundaries
+      const sunriseTime = new Date(year, month, dateVal, 7, 0, 0);
       const panchangSunrise = getPanchangForDate(sunriseTime);
       
-      // Calculate tomorrow's sunrise (6:00 AM) for skipped Nakshatra checks
-      const tomorrowSunriseTime = new Date(year, month, dateVal + 1, 6, 0, 0);
+      // Calculate tomorrow's morning observation time (7:00 AM) for skipped Nakshatra checks
+      const tomorrowSunriseTime = new Date(year, month, dateVal + 1, 7, 0, 0);
       const panchangTomorrowSunrise = getPanchangForDate(tomorrowSunriseTime);
       
       // Calculate noon (12:00 PM) for midday positions
