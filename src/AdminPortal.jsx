@@ -514,15 +514,29 @@ Radhe Krishna.`;
 Total Offerings: ${list.length}
 ---------------------------------------------`;
 
-    list.forEach((b, idx) => {
+    // Group bookings by poojaName
+    const grouped = {};
+    list.forEach(b => {
+      if (!grouped[b.poojaName]) {
+        grouped[b.poojaName] = [];
+      }
+      grouped[b.poojaName].push(b);
+    });
+
+    Object.keys(grouped).forEach(poojaName => {
+      const bookingsForPooja = grouped[poojaName];
       message += `
 
-${idx + 1}. *${b.poojaName}*
-   - *Devotee:* ${b.devoteeName || 'N/A'}
+*${poojaName} (${bookingsForPooja.length} ${bookingsForPooja.length === 1 ? 'offering' : 'offerings'})*`;
+      
+      bookingsForPooja.forEach((b, idx) => {
+        message += `
+${idx + 1}. *Devotee:* ${b.devoteeName || 'N/A'}
    - *Gotram:* ${b.gotram || 'N/A'}
    - *Nakshatram:* ${b.nakshatram || 'N/A'} ${b.rasi ? `(${b.rasi})` : ''}
    - *Family Members:* ${b.familyMembers || 'N/A'}
    - *Sankalpam:* ${b.sankalpam || 'N/A'}`;
+      });
     });
 
     message += `
