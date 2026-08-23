@@ -355,14 +355,14 @@ Samasthi Pada Pooja performed on Guruji's monthly birth star Uttarathathi day.
 ₹500
 [Book Now](/product/gurujis-monthly-birth-star-uttarathathi-day)  [View Details](/product/gurujis-monthly-birth-star-uttarathathi-day)
 
-### Samasthi Pada Pooja — Guruji's Monthly Birth Star Mrigashirsha Day
+### Samasthi Pada Pooja — Namaji's Monthly Birth Star Mrigashirsha Day
 
 Mrigashirsha Day
 
 Samasthi Pada Pooja performed on Namaji's monthly birth star Mrigashirsha day.
 
 ₹500
-[Book Now](/product/gurujis-monthly-birth-star-mrigashirsha-day)  [View Details](/product/gurujis-monthly-birth-star-mrigashirsha-day)
+[Book Now](/product/namajis-monthly-birth-star-mrigashirsha-day)  [View Details](/product/namajis-monthly-birth-star-mrigashirsha-day)
 
 ### Samasthi Pada Pooja — Namaji Aradhana
 
