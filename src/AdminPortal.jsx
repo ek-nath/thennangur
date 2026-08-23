@@ -1,5 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Trash2, Search, RefreshCw, Lock, User, LogOut } from 'lucide-react';
+import { Shield, Trash2, Search, RefreshCw, Lock, User, LogOut, MessageSquare } from 'lucide-react';
+import contentDb from './data/content.json';
+
+const getPriestInfo = (category) => {
+  switch (category) {
+    case 'Sree Matam Poojas':
+      return { name: 'Sri Venkatesh Bhattar (Shree Matham)', phone: '+919876543210' };
+    case 'Meenakshi Sundareshwar Temple Poojas':
+      return { name: 'Sri Sundaramurthy Bhattar (Meenakshi Sundareshwar)', phone: '+919876543211' };
+    case 'Panduranga Rakhumayi Temple Poojas':
+      return { name: 'Sri Vitthal Das (Panduranga Temple)', phone: '+919876543212' };
+    case 'Lakshmi Narayan Temple Poojas':
+      return { name: 'Sri Narayana Bhattar (Lakshmi Narayan Temple)', phone: '+919876543213' };
+    default:
+      return { name: 'Ashram Office / General Priest', phone: '+919176967153' };
+  }
+};
 
 export default function AdminPortal() {
   const [dbData, setDbData] = useState({ transactions: [], bookings: [], donations: [] });
@@ -101,6 +117,31 @@ export default function AdminPortal() {
     fetchRecords();
     setIsClearing(false);
     alert('Ledger cleared successfully!');
+  };
+
+  const handleSendWhatsApp = (booking) => {
+    const pooja = contentDb.poojas.find(p => p.name === booking.poojaName);
+    const category = pooja ? pooja.category : '';
+    const priest = getPriestInfo(category);
+
+    const message = `*Thennangur Ashram Pooja Offering*
+
+*Pooja:* ${booking.poojaName}
+*Pooja Date:* ${booking.poojaDate || 'N/A'}
+
+*Devotee Details:*
+- *Name:* ${booking.devoteeName || 'N/A'}
+- *Gotram:* ${booking.gotram || 'N/A'}
+- *Nakshatram:* ${booking.nakshatram || 'N/A'} ${booking.rasi ? `(${booking.rasi})` : ''}
+- *Family Members:* ${booking.familyMembers || 'N/A'}
+- *Sankalpam:* ${booking.sankalpam || 'N/A'}
+- *Contact Phone:* ${booking.phone || 'N/A'}
+
+Radhe Krishna.`;
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${priest.phone.replace(/[^0-9+]/g, '')}?text=${encodedMessage}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   // Stats calculation
@@ -336,12 +377,13 @@ export default function AdminPortal() {
                       <th className="p-4">Contact Info</th>
                       <th className="p-4">Sankalpam</th>
                       <th className="p-4">Txn ID</th>
+                      <th className="p-4">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-temple-stone-200">
                     {filteredBookings.length === 0 ? (
                       <tr>
-                        <td colSpan="8" className="p-8 text-center text-temple-stone-500">
+                        <td colSpan="9" className="p-8 text-center text-temple-stone-500">
                           No pooja bookings found.
                         </td>
                       </tr>
@@ -362,6 +404,22 @@ export default function AdminPortal() {
                           </td>
                           <td className="p-4 max-w-xs truncate text-wrap" title={b.sankalpam}>{b.sankalpam || '-'}</td>
                           <td className="p-4 font-mono font-bold text-temple-maroon-800 whitespace-nowrap">{b.txnId}</td>
+                          <td className="p-4 whitespace-nowrap">
+                            {(() => {
+                              const pooja = contentDb.poojas.find(p => p.name === b.poojaName);
+                              const category = pooja ? pooja.category : '';
+                              const priest = getPriestInfo(category);
+                              return (
+                                <button
+                                  onClick={() => handleSendWhatsApp(b)}
+                                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1 px-2.5 rounded text-[10px] flex items-center gap-1 cursor-pointer transition-colors"
+                                  title={`Send to: ${priest.name} (${priest.phone})`}
+                                >
+                                  <MessageSquare size={10} /> WhatsApp Priest
+                                </button>
+                              );
+                            })()}
+                          </td>
                         </tr>
                       ))
                     )}
