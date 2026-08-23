@@ -428,10 +428,10 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-temple-stone-50 text-temple-stone-900 selection:bg-temple-saffron-500 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-temple-stone-50 text-temple-stone-900 selection:bg-temple-saffron-500 selection:text-white print:bg-white">
       
       {/* 1. TOP INFORMATION BANNER */}
-      <div className="bg-temple-maroon-900 text-temple-stone-100 text-xs py-2 px-4 border-b border-temple-saffron-600/30 font-sans">
+      <div className="bg-temple-maroon-900 text-temple-stone-100 text-xs py-2 px-4 border-b border-temple-saffron-600/30 font-sans print:hidden">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
           <div className="flex flex-wrap items-center justify-center gap-4">
             <a href="tel:+919176967153" className="flex items-center gap-1 hover:text-temple-saffron-400 transition-colors">
@@ -468,7 +468,7 @@ export default function App() {
       </div>
 
       {/* 2. HEADER AND STICKY NAVIGATION */}
-      <header className="bg-white border-b border-temple-stone-200 sticky top-0 z-40 shadow-sm">
+      <header className="bg-white border-b border-temple-stone-200 sticky top-0 z-40 shadow-sm print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20">
             
@@ -712,10 +712,10 @@ export default function App() {
             </div>
           </div>
         ) : paymentStep === 2 && receiptData ? (
-          <div className="max-w-2xl mx-auto my-12 space-y-6 w-full px-4 sm:px-0">
+          <div className="max-w-2xl mx-auto my-12 space-y-6 w-full px-4 sm:px-0 print:my-0 print:max-w-none print:px-0">
             
             {/* Visual success notice */}
-            <div className="text-center space-y-3">
+            <div className="text-center space-y-3 print:hidden">
               <div className="inline-flex items-center justify-center p-3 bg-green-50 text-green-600 rounded-full border border-green-200 shadow-md">
                 <CheckCircle size={40} />
               </div>
@@ -2997,7 +2997,7 @@ export default function App() {
       {cart.length > 0 && !isCartOpen && (
         <button 
           onClick={() => setIsCartOpen(true)}
-          className="fixed bottom-6 right-6 bg-temple-saffron-600 hover:bg-temple-saffron-700 text-white p-4 rounded-full shadow-2xl z-40 transition-all hover:scale-105 duration-200 border border-temple-saffron-500 flex items-center gap-2 group cursor-pointer"
+          className="fixed bottom-6 right-6 bg-temple-saffron-600 hover:bg-temple-saffron-700 text-white p-4 rounded-full shadow-2xl z-40 transition-all hover:scale-105 duration-200 border border-temple-saffron-500 flex items-center gap-2 group cursor-pointer print:hidden"
         >
           <ShoppingCart size={24} />
           <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 ease-in-out font-bold text-sm whitespace-nowrap">
@@ -3337,7 +3337,7 @@ export default function App() {
       )}
 
       {/* 4. FOOTER SECTION */}
-      <footer className="bg-temple-stone-900 text-temple-stone-100 border-t-2 border-temple-saffron-500 pt-16 pb-8 px-4 sm:px-6 lg:px-8">
+      <footer className="bg-temple-stone-900 text-temple-stone-100 border-t-2 border-temple-saffron-500 pt-16 pb-8 px-4 sm:px-6 lg:px-8 print:hidden">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           
           <div className="space-y-4">
