@@ -6,6 +6,7 @@ import {
   ShoppingCart, Trash2, Edit2, Plus, Gift, Info
 } from 'lucide-react';
 import contentDb from './data/content.json';
+import AdminPortal from './AdminPortal';
 
 // Gallery images array
 const GALLERY_IMAGES = Array.from({ length: 35 }, (_, i) => ({
@@ -379,24 +380,60 @@ export default function App() {
     setIsCartOpen(true);
   };
 
-  const completePayment = () => {
-    const randNum = Math.floor(10000 + Math.random() * 90000);
-    const txnId = 'TXN-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-    
-    setReceiptData({
-      receiptNo: `GA-TXN-2026-${randNum}`,
-      txnId,
-      date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }),
-      items: cart.map(item => ({
-        id: item.id,
-        type: item.type,
-        name: item.type === 'pooja' ? item.pooja.name : item.cause,
-        price: item.price,
-        details: { ...item.details }
-      })),
-      totalPrice: cart.reduce((sum, item) => sum + item.price, 0)
-    });
-    setPaymentStep(2); // Go to receipt screen
+  const completePayment = async () => {
+    const cartItems = cart.map(item => ({
+      id: item.id,
+      type: item.type,
+      name: item.type === 'pooja' ? item.pooja.name : item.cause,
+      price: item.price,
+      details: { ...item.details }
+    }));
+    const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
+
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ items: cartItems, totalPrice })
+      });
+
+      if (!response.ok) {
+        throw new Error('Checkout API request failed');
+      }
+
+      const result = await response.json();
+      setReceiptData(result.receipt);
+      setPaymentStep(2);
+    } catch (err) {
+      console.warn('Backend server is offline or unreachable. Saving transaction to local storage.', err);
+      
+      const randNum = Math.floor(10000 + Math.random() * 90000);
+      const txnId = 'TXN-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+      const receiptNo = `GA-TXN-2026-${randNum}`;
+      const date = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+
+      const localReceipt = {
+        receiptNo: `${receiptNo} (Local)`,
+        txnId,
+        date,
+        items: cartItems,
+        totalPrice,
+        isLocal: true
+      };
+
+      try {
+        const localTxns = JSON.parse(localStorage.getItem('thennangur_local_txns') || '[]');
+        localTxns.push(localReceipt);
+        localStorage.setItem('thennangur_local_txns', JSON.stringify(localTxns));
+      } catch (e) {
+        console.error('Failed to save to localStorage:', e);
+      }
+
+      setReceiptData(localReceipt);
+      setPaymentStep(2);
+    }
   };
 
   const resetPortals = () => {
@@ -553,6 +590,7 @@ export default function App() {
               <a href="#/gallery" className={`px-2 xl:px-3 py-2 text-sm font-medium tracking-wide border-b-2 transition-colors duration-200 ${isRoute('#/gallery') ? 'border-temple-saffron-500 text-temple-maroon-800' : 'border-transparent text-temple-stone-800 hover:text-temple-maroon-800 hover:border-temple-stone-200'}`}>Gallery</a>
               <a href="#/facilities" className={`px-2 xl:px-3 py-2 text-sm font-medium tracking-wide border-b-2 transition-colors duration-200 ${isRoute('#/facilities') ? 'border-temple-saffron-500 text-temple-maroon-800' : 'border-transparent text-temple-stone-800 hover:text-temple-maroon-800 hover:border-temple-stone-200'}`}>Facilities</a>
               <a href="#/contact" className={`px-2 xl:px-3 py-2 text-sm font-medium tracking-wide border-b-2 transition-colors duration-200 ${isRoute('#/contact') ? 'border-temple-saffron-500 text-temple-maroon-800' : 'border-transparent text-temple-stone-800 hover:text-temple-maroon-800 hover:border-temple-stone-200'}`}>Contact</a>
+              <a href="#/admin" className={`px-2 xl:px-3 py-2 text-sm font-medium tracking-wide border-b-2 transition-colors duration-200 ${isRoute('#/admin') ? 'border-temple-saffron-500 text-temple-maroon-800' : 'border-transparent text-temple-stone-800 hover:text-temple-maroon-800 hover:border-temple-stone-200'}`}>Admin Register</a>
               <button 
                 onClick={() => setIsCartOpen(true)}
                 className="relative px-2 xl:px-3 py-2 text-sm font-medium tracking-wide text-temple-stone-800 hover:text-temple-maroon-800 flex items-center gap-1 cursor-pointer transition-colors duration-200"
@@ -620,6 +658,7 @@ export default function App() {
               <a href="#/gallery" className="block px-3 py-2 rounded-md text-base font-medium text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Gallery</a>
               <a href="#/facilities" className="block px-3 py-2 rounded-md text-base font-medium text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Facilities</a>
               <a href="#/contact" className="block px-3 py-2 rounded-md text-base font-medium text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Contact Us</a>
+              <a href="#/admin" className="block px-3 py-2 rounded-md text-base font-medium text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800">Admin Register</a>
               <button 
                 onClick={() => {
                   setMobileMenuOpen(false);
@@ -2950,6 +2989,13 @@ export default function App() {
           </div>
         )}
 
+        {/* ========================================================
+            ADMIN REGISTER PORTAL ROUTE (#/admin) 
+            ======================================================== */}
+        {isRoute('#/admin') && (
+          <AdminPortal />
+        )}
+
         {/* DYNAMIC FALLBACK ROUTE FOR POLICY PAGES & OTHER MARKDOWN FILES */}
         {!isRoute('#/') && 
          !isRoute('#/history') && 
@@ -2961,7 +3007,8 @@ export default function App() {
          !isRoute('#/events') && 
          !isRoute('#/gallery') && 
          !isRoute('#/facilities') && 
-         !isRoute('#/contact') && (
+         !isRoute('#/contact') && 
+         !isRoute('#/admin') && (
           (() => {
             const cleanRoute = route.replace('#/', '').replace('#', '');
             const parts = cleanRoute.split('/');
