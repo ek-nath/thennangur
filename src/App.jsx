@@ -117,6 +117,159 @@ function FilterableSelect({ label, value, onChange, options, placeholder, requir
   );
 }
 
+// Helper to parse dates from contentDb.events (e.g. "01 Apr 2026 · Wednesday" or range "30 Mar – 07 Apr 2026 · Mon–Tue")
+const parseEventDateString = (dateStr) => {
+  if (!dateStr) return [];
+  const cleanStr = dateStr.split('·')[0].trim();
+  
+  const parseSingleDate = (singleStr) => {
+    const months = {
+      jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06',
+      jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12'
+    };
+    const parts = singleStr.trim().split(/\s+/);
+    if (parts.length < 3) return null;
+    const day = parts[0].padStart(2, '0');
+    const monthName = parts[1].toLowerCase().slice(0, 3);
+    const month = months[monthName] || '01';
+    const year = parts[2];
+    return `${year}-${month}-${day}`;
+  };
+
+  if (cleanStr.includes('–') || cleanStr.includes('-')) {
+    const sep = cleanStr.includes('–') ? '–' : '-';
+    const rangeParts = cleanStr.split(sep);
+    const endStr = rangeParts[1].trim();
+    const endParsed = parseSingleDate(endStr);
+    if (!endParsed) return [];
+    
+    const [endYear, endMonth, endDay] = endParsed.split('-');
+    
+    const startStr = rangeParts[0].trim();
+    const startParts = startStr.split(/\s+/);
+    
+    let startParsed = '';
+    if (startParts.length === 1) {
+      const day = startParts[0].padStart(2, '0');
+      startParsed = `${endYear}-${endMonth}-${day}`;
+    } else if (startParts.length === 2) {
+      const day = startParts[0].padStart(2, '0');
+      const months = {
+        jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06',
+        jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12'
+      };
+      const monthName = startParts[1].toLowerCase().slice(0, 3);
+      const month = months[monthName] || '01';
+      startParsed = `${endYear}-${month}-${day}`;
+    }
+    
+    if (!startParsed) return [];
+    
+    const dates = [];
+    let current = new Date(startParsed);
+    const end = new Date(endParsed);
+    while (current <= end) {
+      const y = current.getFullYear();
+      const m = String(current.getMonth() + 1).padStart(2, '0');
+      const d = String(current.getDate()).padStart(2, '0');
+      dates.push(`${y}-${m}-${d}`);
+      current.setDate(current.getDate() + 1);
+    }
+    return dates;
+  } else {
+    const parsed = parseSingleDate(cleanStr);
+    return parsed ? [parsed] : [];
+  }
+};
+
+// Map a schedule string to allowed days of the week or specific annual event dates
+const getEventDatesForSchedule = (schedule) => {
+  if (!schedule) return null;
+  const s = schedule.toLowerCase();
+  
+  const weekdays = {
+    sunday: [0],
+    monday: [1],
+    tuesday: [2],
+    wednesday: [3],
+    thursday: [4],
+    friday: [5],
+    saturday: [6],
+    "tuesday/friday": [2, 5]
+  };
+  
+  if (weekdays[s]) {
+    return { type: 'weekday', days: weekdays[s] };
+  }
+  
+  let searchTitle = '';
+  if (s.includes('guruji mahapooja') || s.includes('guruji maha pooja')) {
+    searchTitle = 'Guruji Maha Pooja';
+  } else if (s.includes('gnanananda aaradhana') || s.includes('gnanananda aradhana') || s.includes('sathgurunathar aradhana') || s.includes('aaradhana day')) {
+    searchTitle = 'Sathgurunathar Aradhana';
+  } else if (s.includes('namaji aradhana')) {
+    searchTitle = 'Namaji Aradhana';
+  } else if (s.includes('rama navami') || s.includes('sita kalyanam')) {
+    searchTitle = 'Rama Navami';
+  } else if (s.includes('meenakshi kalyanam')) {
+    searchTitle = 'Meenakshi Kalyanam';
+  } else if (s.includes('gokulashtami')) {
+    searchTitle = 'Gokulashtami';
+  } else if (s.includes('hanumath jayanthi')) {
+    searchTitle = 'Hanumath Jayanthi';
+  } else if (s.includes('narasimha jayanthi') || s.includes('nrusimha jayanthi')) {
+    searchTitle = 'Nrusimha Jayanthi';
+  }
+
+  if (searchTitle) {
+    const event = contentDb.events.find(e => 
+      e.title.toLowerCase().includes(searchTitle.toLowerCase())
+    );
+    if (event) {
+      const dates = parseEventDateString(event.date);
+      return { type: 'event', dates, eventTitle: event.title };
+    }
+  }
+
+  return null;
+};
+
+// Check if a selected poojaDate matches the pooja's schedule rules
+const checkDateValidityForPooja = (dateString, pooja) => {
+  const scheduleInfo = getEventDatesForSchedule(pooja.schedule);
+  if (!scheduleInfo) return { isValid: true };
+  
+  if (scheduleInfo.type === 'weekday') {
+    const dateObj = new Date(dateString);
+    const dayOfWeek = dateObj.getDay();
+    if (!scheduleInfo.days.includes(dayOfWeek)) {
+      const dayNames = {
+        0: 'Sunday', 1: 'Monday', 2: 'Tuesday', 3: 'Wednesday', 4: 'Thursday', 5: 'Friday', 6: 'Saturday'
+      };
+      const allowedDaysStr = scheduleInfo.days.map(d => dayNames[d]).join(' or ');
+      return {
+        isValid: false,
+        message: `This pooja is only performed on ${allowedDaysStr}. Please select a date falling on a ${allowedDaysStr}.`
+      };
+    }
+  }
+  
+  if (scheduleInfo.type === 'event') {
+    if (!scheduleInfo.dates.includes(dateString)) {
+      const formattedDates = scheduleInfo.dates.map(ds => {
+        const d = new Date(ds);
+        return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      }).join(', ');
+      return {
+        isValid: false,
+        message: `This pooja is only performed on ${scheduleInfo.eventTitle} (${formattedDates || 'no valid dates configured'}). Please select the correct event date.`
+      };
+    }
+  }
+  
+  return { isValid: true };
+};
+
 // Helper to format date strings for Google Calendar
 // Format: 30 Mar 2026 or 01 Apr 2026 or 01–03 May 2026
 function getGoogleCalendarUrl(event) {
@@ -420,6 +573,14 @@ export default function App() {
   // Handle Pooja booking submit (Add to Cart / Save Changes)
   const handlePoojaSubmit = (e) => {
     e.preventDefault();
+    
+    // Validate Pooja booking date matches the pooja's schedule rules
+    const validation = checkDateValidityForPooja(bookingForm.poojaDate, selectedPooja);
+    if (!validation.isValid) {
+      alert(validation.message);
+      return;
+    }
+
     if (editingCartItem) {
       setCart(cart.map(item => item.id === editingCartItem.id ? {
         ...item,
@@ -2200,7 +2361,14 @@ export default function App() {
                       </div>
  
                       <div>
-                        <label className="block text-xs font-bold uppercase text-temple-stone-700 mb-1">Pooja Date *</label>
+                        <label className="block text-xs font-bold uppercase text-temple-stone-700 mb-1 flex justify-between items-center">
+                          <span>Pooja Date *</span>
+                          {selectedPooja.schedule && (
+                            <span className="text-[10px] text-temple-saffron-600 font-semibold normal-case">
+                              Rule: {selectedPooja.schedule}
+                            </span>
+                          )}
+                        </label>
                         <input 
                           type="date" 
                           required
@@ -2209,6 +2377,17 @@ export default function App() {
                           onChange={(e) => setBookingForm({...bookingForm, poojaDate: e.target.value})}
                           className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none"
                         />
+                        {bookingForm.poojaDate && (() => {
+                          const validation = checkDateValidityForPooja(bookingForm.poojaDate, selectedPooja);
+                          if (!validation.isValid) {
+                            return (
+                              <div className="mt-1.5 text-red-600 text-[10px] font-bold bg-red-50 border border-red-200 rounded p-2 leading-tight">
+                                ⚠️ {validation.message}
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
                       </div>
  
                       <FilterableSelect
