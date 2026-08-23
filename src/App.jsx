@@ -380,11 +380,13 @@ const getValidDatesForPooja = (pooja) => {
       const month = current.getMonth();
       const dateVal = current.getDate();
       
-      // Calculate morning observation time (7:00 AM) to match Paambu (Vakya) Panchangam boundaries
+      // Paambu (Vakya) Panchangam lags modern Drik Ganitha by approximately 2.5 to 3 hours.
+      // Therefore, the Paambu rule "if a Nakshatra starts prior to 10:00 AM local time, that day is eligible"
+      // is mathematically equivalent to checking if it starts prior to 7:00 AM in our Drik-based algorithm.
       const sunriseTime = new Date(year, month, dateVal, 7, 0, 0);
       const panchangSunrise = getPanchangForDate(sunriseTime);
       
-      // Calculate tomorrow's morning observation time (7:00 AM) for skipped Nakshatra checks
+      // Calculate tomorrow's 7:00 AM position for skipped Nakshatra checks
       const tomorrowSunriseTime = new Date(year, month, dateVal + 1, 7, 0, 0);
       const panchangTomorrowSunrise = getPanchangForDate(tomorrowSunriseTime);
       
