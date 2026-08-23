@@ -1038,39 +1038,39 @@ export default function App() {
                     </div>
 
                     {/* Tab Navigation */}
-                    <div className="flex border-b border-temple-stone-200 bg-white p-2 rounded-xl shadow-sm gap-2">
+                    <div className="grid grid-cols-3 sm:flex border-b border-temple-stone-200 bg-white p-1.5 sm:p-2 rounded-xl shadow-sm gap-1 sm:gap-2">
                       <button
                         onClick={() => setActiveTempleTab('overview')}
-                        className={`flex items-center gap-2 px-5 py-3 rounded-lg text-sm font-bold tracking-wide transition-all ${
+                        className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2 py-2 sm:px-5 sm:py-3 rounded-lg text-xs sm:text-sm font-bold tracking-wide transition-all ${
                           activeTempleTab === 'overview'
                             ? 'bg-temple-maroon-800 text-white shadow'
                             : 'text-temple-stone-600 hover:bg-temple-stone-100 hover:text-temple-maroon-850'
                         }`}
                       >
                         <Compass size={18} />
-                        Sthala Puranam
+                        <span className="text-center">Sthala Puranam</span>
                       </button>
                       <button
                         onClick={() => setActiveTempleTab('gallery')}
-                        className={`flex items-center gap-2 px-5 py-3 rounded-lg text-sm font-bold tracking-wide transition-all ${
+                        className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2 py-2 sm:px-5 sm:py-3 rounded-lg text-xs sm:text-sm font-bold tracking-wide transition-all ${
                           activeTempleTab === 'gallery'
                             ? 'bg-temple-maroon-800 text-white shadow'
                             : 'text-temple-stone-600 hover:bg-temple-stone-100 hover:text-temple-maroon-850'
                         }`}
                       >
                         <ImageIcon size={18} />
-                        Sacred Gallery
+                        <span className="text-center">Sacred Gallery</span>
                       </button>
                       <button
                         onClick={() => setActiveTempleTab('poojas')}
-                        className={`flex items-center gap-2 px-5 py-3 rounded-lg text-sm font-bold tracking-wide transition-all ${
+                        className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2 py-2 sm:px-5 sm:py-3 rounded-lg text-xs sm:text-sm font-bold tracking-wide transition-all ${
                           activeTempleTab === 'poojas'
                             ? 'bg-temple-maroon-800 text-white shadow'
                             : 'text-temple-stone-600 hover:bg-temple-stone-100 hover:text-temple-maroon-850'
                         }`}
                       >
                         <Clock size={18} />
-                        Darshan & Poojas
+                        <span className="text-center">Darshan & Poojas</span>
                       </button>
                     </div>
 

@@ -71,6 +71,14 @@
 .prose {
   @apply text-temple-stone-800 leading-relaxed space-y-4;
 }
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  text-align: left;
+}
 .prose h2 {
   @apply text-2xl font-semibold text-temple-maroon-800 mt-8 mb-4 border-b border-temple-stone-200 pb-2;
 }
