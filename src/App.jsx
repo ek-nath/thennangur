@@ -235,34 +235,99 @@ const getEventDatesForSchedule = (schedule) => {
 };
 
 // Check if a selected poojaDate matches the pooja's schedule rules
-const checkDateValidityForPooja = (dateString, pooja) => {
-  const scheduleInfo = getEventDatesForSchedule(pooja.schedule);
-  if (!scheduleInfo) return { isValid: true };
+const checkDateValidityForPooja = (dateString, pooja, loadedTithiNum) => {
+  if (!pooja || !dateString) return { isValid: true };
+  const schedule = pooja.schedule || '';
+  const s = schedule.toLowerCase();
   
-  if (scheduleInfo.type === 'weekday') {
+  // 1. Offline Weekday check
+  const weekdays = {
+    sunday: [0],
+    monday: [1],
+    tuesday: [2],
+    wednesday: [3],
+    thursday: [4],
+    friday: [5],
+    saturday: [6],
+    "tuesday/friday": [2, 5]
+  };
+  
+  if (weekdays[s]) {
     const dateObj = new Date(dateString);
     const dayOfWeek = dateObj.getDay();
-    if (!scheduleInfo.days.includes(dayOfWeek)) {
+    if (!weekdays[s].includes(dayOfWeek)) {
       const dayNames = {
         0: 'Sunday', 1: 'Monday', 2: 'Tuesday', 3: 'Wednesday', 4: 'Thursday', 5: 'Friday', 6: 'Saturday'
       };
-      const allowedDaysStr = scheduleInfo.days.map(d => dayNames[d]).join(' or ');
+      const allowedDaysStr = weekdays[s].map(d => dayNames[d]).join(' or ');
       return {
         isValid: false,
         message: `This pooja is only performed on ${allowedDaysStr}. Please select a date falling on a ${allowedDaysStr}.`
       };
     }
+    return { isValid: true };
   }
   
-  if (scheduleInfo.type === 'event') {
-    if (!scheduleInfo.dates.includes(dateString)) {
-      const formattedDates = scheduleInfo.dates.map(ds => {
-        const d = new Date(ds);
-        return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-      }).join(', ');
+  // 2. Offline Annual event check (from verified local events db)
+  let searchTitle = '';
+  if (s.includes('guruji mahapooja') || s.includes('guruji maha pooja')) {
+    searchTitle = 'Guruji Maha Pooja';
+  } else if (s.includes('gnanananda aaradhana') || s.includes('gnanananda aradhana') || s.includes('sathgurunathar aradhana') || s.includes('aaradhana day')) {
+    searchTitle = 'Sathgurunathar Aradhana';
+  } else if (s.includes('namaji aradhana')) {
+    searchTitle = 'Namaji Aradhana';
+  } else if (s.includes('rama navami') || s.includes('sita kalyanam')) {
+    searchTitle = 'Rama Navami';
+  } else if (s.includes('meenakshi kalyanam')) {
+    searchTitle = 'Meenakshi Kalyanam';
+  } else if (s.includes('gokulashtami')) {
+    searchTitle = 'Gokulashtami';
+  } else if (s.includes('hanumath jayanthi')) {
+    searchTitle = 'Hanumath Jayanthi';
+  } else if (s.includes('narasimha jayanthi') || s.includes('nrusimha jayanthi')) {
+    searchTitle = 'Nrusimha Jayanthi';
+  }
+
+  if (searchTitle) {
+    const event = contentDb.events.find(e => 
+      e.title.toLowerCase().includes(searchTitle.toLowerCase())
+    );
+    if (event) {
+      const dates = parseEventDateString(event.date);
+      if (!dates.includes(dateString)) {
+        const formattedDates = dates.map(ds => {
+          const d = new Date(ds);
+          return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        }).join(', ');
+        return {
+          isValid: false,
+          message: `This pooja is only performed on ${event.title} (${formattedDates || 'no valid dates configured'}). Please select the correct event date.`
+        };
+      }
+    }
+    return { isValid: true };
+  }
+  
+  // 3. Dynamic Lunar / Panchangam Check (Pradosham, Pournami, Sankatahara Chaturthi, Amavasya)
+  const LUNAR_EVENTS = {
+    'pradosham day': { numbers: [13, 28], name: 'Pradosham' },
+    'pradosham': { numbers: [13, 28], name: 'Pradosham' },
+    'sankatahara chaturti': { numbers: [19], name: 'Sankatahara Chaturthi' },
+    'sankatahara chaturthi': { numbers: [19], name: 'Sankatahara Chaturthi' },
+    'poornima': { numbers: [15], name: 'Pournami / Poornima' },
+    'pournami': { numbers: [15], name: 'Pournami / Poornima' },
+    'amavasya': { numbers: [30], name: 'Amavasya' }
+  };
+  
+  const rule = LUNAR_EVENTS[s];
+  if (rule) {
+    if (loadedTithiNum === null || loadedTithiNum === undefined) {
+      return { isValid: true, isPending: true };
+    }
+    if (!rule.numbers.includes(loadedTithiNum)) {
       return {
         isValid: false,
-        message: `This pooja is only performed on ${scheduleInfo.eventTitle} (${formattedDates || 'no valid dates configured'}). Please select the correct event date.`
+        message: `This pooja is only performed on ${rule.name} (Trayodashi/Chaturthi/Pournami depending on rule). The selected date is not a ${rule.name} day. Please select a valid ${rule.name} date.`
       };
     }
   }
@@ -449,6 +514,15 @@ export default function App() {
     devoteeName: '', gotram: '', nakshatram: '', rasi: '',
     poojaDate: '', familyMembers: '', email: '', phone: '', sankalpam: ''
   });
+
+  const [panchangCache, setPanchangCache] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('thennangur_panchang_cache') || '{}');
+    } catch (e) {
+      return {};
+    }
+  });
+  const [isValidatingDate, setIsValidatingDate] = useState(false);
   
   // Donation states
   const [donationForm, setDonationForm] = useState({
@@ -544,6 +618,53 @@ export default function App() {
     }
   }, [cart, route]);
 
+  const fetchPanchangForDate = async (dateString) => {
+    const cacheKey = 'thennangur_panchang_cache';
+    let cache = {};
+    try {
+      cache = JSON.parse(localStorage.getItem(cacheKey) || '{}');
+    } catch (e) {}
+
+    if (cache[dateString] !== undefined) {
+      return cache[dateString];
+    }
+
+    try {
+      const res = await fetch(`https://nityapanchangam.com/api/panchangam.php?date=${dateString}`);
+      if (!res.ok) throw new Error('API error');
+      const data = await res.json();
+      if (data && data.tithi) {
+        const tithiNum = data.tithi.number;
+        cache[dateString] = tithiNum;
+        localStorage.setItem(cacheKey, JSON.stringify(cache));
+        return tithiNum;
+      }
+    } catch (err) {
+      console.error('Failed to fetch Panchangam:', err);
+    }
+    return null;
+  };
+
+  const handleDateChange = async (dateVal, currentPooja = selectedPooja) => {
+    setBookingForm(prev => ({ ...prev, poojaDate: dateVal }));
+    if (!dateVal || !currentPooja) return;
+    
+    const schedule = currentPooja.schedule?.toLowerCase() || '';
+    const needsLunarCheck = schedule.includes('pradosham') || 
+                            schedule.includes('chaturti') || 
+                            schedule.includes('chaturthi') || 
+                            schedule.includes('poornima') || 
+                            schedule.includes('pournami') || 
+                            schedule.includes('amavasya');
+                            
+    if (needsLunarCheck && panchangCache[dateVal] === undefined) {
+      setIsValidatingDate(true);
+      const tithiNum = await fetchPanchangForDate(dateVal);
+      setPanchangCache(prev => ({ ...prev, [dateVal]: tithiNum }));
+      setIsValidatingDate(false);
+    }
+  };
+
   // Click handler to book a pooja and pre-fill details from cart
   const handleBookPoojaClick = (pooja) => {
     setSelectedPooja(pooja);
@@ -575,7 +696,7 @@ export default function App() {
     e.preventDefault();
     
     // Validate Pooja booking date matches the pooja's schedule rules
-    const validation = checkDateValidityForPooja(bookingForm.poojaDate, selectedPooja);
+    const validation = checkDateValidityForPooja(bookingForm.poojaDate, selectedPooja, panchangCache[bookingForm.poojaDate]);
     if (!validation.isValid) {
       alert(validation.message);
       return;
@@ -625,6 +746,7 @@ export default function App() {
     if (item.type === 'pooja') {
       setSelectedPooja(item.pooja);
       setBookingForm({ ...item.details });
+      handleDateChange(item.details.poojaDate, item.pooja);
     } else {
       setDonationForm({ ...item.details });
     }
@@ -2369,16 +2491,29 @@ export default function App() {
                             </span>
                           )}
                         </label>
-                        <input 
-                          type="date" 
-                          required
-                          min={getTomorrowString()}
-                          value={bookingForm.poojaDate}
-                          onChange={(e) => setBookingForm({...bookingForm, poojaDate: e.target.value})}
-                          className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none"
-                        />
+                        <div className="relative">
+                          <input 
+                            type="date" 
+                            required
+                            min={getTomorrowString()}
+                            value={bookingForm.poojaDate}
+                            onChange={(e) => handleDateChange(e.target.value)}
+                            className="w-full p-2 pr-10 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none bg-white"
+                          />
+                          {isValidatingDate && (
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 flex h-4 w-4 border-2 border-temple-saffron-500 border-t-transparent rounded-full animate-spin"></span>
+                          )}
+                        </div>
                         {bookingForm.poojaDate && (() => {
-                          const validation = checkDateValidityForPooja(bookingForm.poojaDate, selectedPooja);
+                          const validation = checkDateValidityForPooja(bookingForm.poojaDate, selectedPooja, panchangCache[bookingForm.poojaDate]);
+                          if (validation.isPending) {
+                            return (
+                              <div className="mt-1.5 text-temple-stone-600 text-[10px] font-bold bg-temple-stone-50 border border-temple-stone-200 rounded p-2 leading-tight flex items-center gap-1.5">
+                                <span className="h-2 w-2 rounded-full bg-temple-stone-400 animate-pulse"></span>
+                                ⏳ Checking Hindu calendar (Panchangam)...
+                              </div>
+                            );
+                          }
                           if (!validation.isValid) {
                             return (
                               <div className="mt-1.5 text-red-600 text-[10px] font-bold bg-red-50 border border-red-200 rounded p-2 leading-tight">
