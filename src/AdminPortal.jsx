@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Trash2, Search, RefreshCw, Lock, User, LogOut, MessageSquare } from 'lucide-react';
+import { Shield, Trash2, Search, RefreshCw, Lock, User, LogOut, MessageSquare, Database } from 'lucide-react';
 import contentDb from './data/content.json';
 
 const getPriestInfo = (category) => {
@@ -127,6 +127,330 @@ export default function AdminPortal() {
     fetchRecords();
     setIsClearing(false);
     alert('Ledger cleared successfully!');
+  };
+
+  const handleSeedData = () => {
+    const seedTransactions = [
+      {
+        receiptNo: "GA-TXN-2026-88123",
+        txnId: "TXN-SD1A8F9K2",
+        date: "23 August 2026",
+        totalPrice: 450,
+        isLocal: false,
+        items: [
+          {
+            id: "seed-1",
+            type: "pooja",
+            name: "Gho Pooja",
+            price: 100,
+            details: {
+              devoteeName: "Ramanathan Iyer",
+              gotram: "Kashyapa",
+              nakshatram: "Rohini",
+              rasi: "Vrishabha",
+              poojaDate: "2026-08-24",
+              familyMembers: "Ramanathan, Priya, Karthik",
+              email: "ram@example.com",
+              phone: "+919444012345",
+              sankalpam: "Family welfare and good health"
+            }
+          },
+          {
+            id: "seed-2",
+            type: "pooja",
+            name: "Ganapathy Homam",
+            price: 250,
+            details: {
+              devoteeName: "Ganesh Subramanian",
+              gotram: "Bharadwaja",
+              nakshatram: "Hasta",
+              rasi: "Kanya",
+              poojaDate: "2026-08-24",
+              familyMembers: "Ganesh, Gayathri, Aditya",
+              email: "ganesh@example.com",
+              phone: "+919840123456",
+              sankalpam: "Removal of obstacles and success in new venture"
+            }
+          }
+        ]
+      },
+      {
+        receiptNo: "GA-TXN-2026-88124",
+        txnId: "TXN-SD2A9B8C7",
+        date: "23 August 2026",
+        totalPrice: 7000,
+        isLocal: false,
+        items: [
+          {
+            id: "seed-3",
+            type: "pooja",
+            name: "Abhishekam & Archana to all Deities",
+            price: 5000,
+            details: {
+              devoteeName: "Meenakshi Sundaram",
+              gotram: "Srivatsa",
+              nakshatram: "Swati",
+              rasi: "Tula",
+              poojaDate: "2026-08-24",
+              familyMembers: "Meenakshi, Sundar, Shivani",
+              email: "meena@example.com",
+              phone: "+918825700112",
+              sankalpam: "Marriage blessings and prosperity"
+            }
+          },
+          {
+            id: "seed-4",
+            type: "pooja",
+            name: "Abhishekam & Archana to a particular Deity",
+            price: 2000,
+            details: {
+              devoteeName: "Srinivasan Raju",
+              gotram: "Harita",
+              nakshatram: "Rohini",
+              rasi: "Vrishabha",
+              poojaDate: "2026-08-24",
+              familyMembers: "Srinivasan, Lakshmi, Varun",
+              email: "srini@example.com",
+              phone: "+918618199887",
+              sankalpam: "Good health and longevity for family members"
+            }
+          }
+        ]
+      },
+      {
+        receiptNo: "GA-TXN-2026-88125",
+        txnId: "TXN-SD3C4D5E6",
+        date: "23 August 2026",
+        totalPrice: 10400,
+        isLocal: false,
+        items: [
+          {
+            id: "seed-5",
+            type: "pooja",
+            name: "Panduranga Rakhumayi Archana",
+            price: 100,
+            details: {
+              devoteeName: "Vijayalakshmi Rao",
+              gotram: "Koundinya",
+              nakshatram: "Revati",
+              rasi: "Meena",
+              poojaDate: "2026-08-24",
+              familyMembers: "Vijayalakshmi, Mohan",
+              email: "viji@example.com",
+              phone: "+919876543210",
+              sankalpam: "Devotional growth and peace of mind"
+            }
+          },
+          {
+            id: "seed-6",
+            type: "pooja",
+            name: "Panduranga Rakhumayi Archana",
+            price: 100,
+            details: {
+              devoteeName: "Subramanian Swamy",
+              gotram: "Vadhula",
+              nakshatram: "Anuradha",
+              rasi: "Vrishchika",
+              poojaDate: "2026-08-24",
+              familyMembers: "Subramanian, Priya, Ananya",
+              email: "subbu@example.com",
+              phone: "+919444098765",
+              sankalpam: "Children's academic success"
+            }
+          },
+          {
+            id: "seed-7",
+            type: "pooja",
+            name: "Panduranga Rakhumayi Abhishekham",
+            price: 5000,
+            details: {
+              devoteeName: "Ananthakrishnan R",
+              gotram: "Gautama",
+              nakshatram: "Arudra",
+              rasi: "Mithuna",
+              poojaDate: "2026-08-24",
+              familyMembers: "Ananth, Radhika, Shweta",
+              email: "ananth@example.com",
+              phone: "+919840987654",
+              sankalpam: "Aaroghya Dridha Gathratha (Good Health)"
+            }
+          },
+          {
+            id: "seed-8",
+            type: "pooja",
+            name: "Panduranga Rakhumayi Abhishekham",
+            price: 5000,
+            details: {
+              devoteeName: "Radha Krishnan",
+              gotram: "Kashyapa",
+              nakshatram: "Uttara",
+              rasi: "Kanya",
+              poojaDate: "2026-08-24",
+              familyMembers: "Radha, Krishnan",
+              email: "radhakrish@example.com",
+              phone: "+918825799988",
+              sankalpam: "Maha Sakthi and spiritual wellness"
+            }
+          },
+          {
+            id: "seed-9",
+            type: "pooja",
+            name: "Panduranga Rakhumayi Archana",
+            price: 100,
+            details: {
+              devoteeName: "Balaji Parthasarathy",
+              gotram: "Srivatsa",
+              nakshatram: "Hasta",
+              rasi: "Kanya",
+              poojaDate: "2026-08-24",
+              familyMembers: "Balaji, Hema",
+              email: "balaji@example.com",
+              phone: "+918618100112",
+              sankalpam: "Job stability and general welfare"
+            }
+          },
+          {
+            id: "seed-10",
+            type: "pooja",
+            name: "Panduranga Rakhumayi Archana",
+            price: 100,
+            details: {
+              devoteeName: "Siddharth Venkat",
+              gotram: "Harita",
+              nakshatram: "Rohini",
+              rasi: "Vrishabha",
+              poojaDate: "2026-08-24",
+              familyMembers: "Siddharth",
+              email: "sid@example.com",
+              phone: "+919176967153",
+              sankalpam: "Clear thinking and success in exams"
+            }
+          }
+        ]
+      },
+      {
+        receiptNo: "GA-TXN-2026-88126",
+        txnId: "TXN-SD4F5G6H7",
+        date: "23 August 2026",
+        totalPrice: 2700,
+        isLocal: false,
+        items: [
+          {
+            id: "seed-11",
+            type: "pooja",
+            name: "Lakshmi Narayana Abhishekham",
+            price: 1000,
+            details: {
+              devoteeName: "Narayanaswamy K",
+              gotram: "Bharadwaja",
+              nakshatram: "Swati",
+              rasi: "Tula",
+              poojaDate: "2026-08-24",
+              familyMembers: "Narayana, Rukmani",
+              email: "ns@example.com",
+              phone: "+919444055443",
+              sankalpam: "Family prosperity and debt relief"
+            }
+          },
+          {
+            id: "seed-12",
+            type: "pooja",
+            name: "Anjaneyar Vada Malai",
+            price: 750,
+            details: {
+              devoteeName: "Hanuman Prasad",
+              gotram: "Kashyapa",
+              nakshatram: "Anuradha",
+              rasi: "Vrishchika",
+              poojaDate: "2026-08-24",
+              familyMembers: "Prasad, Anjana, Maruti",
+              email: "hanu@example.com",
+              phone: "+919840807718",
+              sankalpam: "Removal of fear and health issues"
+            }
+          },
+          {
+            id: "seed-13",
+            type: "pooja",
+            name: "Anjaneyar Vada Malai",
+            price: 750,
+            details: {
+              devoteeName: "Ramachandran Murthy",
+              gotram: "Srivatsa",
+              nakshatram: "Rohini",
+              rasi: "Vrishabha",
+              poojaDate: "2026-08-24",
+              familyMembers: "Ramachandran, Janaki",
+              email: "rc@example.com",
+              phone: "+918825766554",
+              sankalpam: "Overall family safety and peace"
+            }
+          },
+          {
+            id: "seed-14",
+            type: "pooja",
+            name: "Gho Pooja",
+            price: 100,
+            details: {
+              devoteeName: "Kalyanasundaram K",
+              gotram: "Koundinya",
+              nakshatram: "Swati",
+              rasi: "Tula",
+              poojaDate: "2026-08-24",
+              familyMembers: "Kalyanasundaram, Rajeshwari",
+              email: "kalyan@example.com",
+              phone: "+918618130675",
+              sankalpam: "Gho Samrakshanam blessing and peaceful home"
+            }
+          },
+          {
+            id: "seed-15",
+            type: "pooja",
+            name: "Gho Pooja",
+            price: 100,
+            details: {
+              devoteeName: "Senthil Kumar",
+              gotram: "Bharadwaja",
+              nakshatram: "Hasta",
+              rasi: "Kanya",
+              poojaDate: "2026-08-24",
+              familyMembers: "Senthil, Priya",
+              email: "senthil@example.com",
+              phone: "+919988776655",
+              sankalpam: "Wealth and prosperity"
+            }
+          },
+          {
+            id: "seed-16",
+            type: "pooja",
+            name: "Panduranga Rakhumayi Archana",
+            price: 100,
+            details: {
+              devoteeName: "Aditya Narain",
+              gotram: "Harita",
+              nakshatram: "Rohini",
+              rasi: "Vrishabha",
+              poojaDate: "2026-08-24",
+              familyMembers: "Aditya",
+              email: "aditya@example.com",
+              phone: "+917766554433",
+              sankalpam: "Career success and good intellect"
+            }
+          }
+        ]
+      }
+    ];
+
+    try {
+      const localTxns = JSON.parse(localStorage.getItem('thennangur_local_txns') || '[]');
+      const newTxns = [...localTxns, ...seedTransactions];
+      localStorage.setItem('thennangur_local_txns', JSON.stringify(newTxns));
+      fetchRecords();
+      alert("Successfully seeded pooja bookings for August 24, 2026! 16 bookings added.");
+    } catch (e) {
+      console.error(e);
+      alert("Failed to seed database.");
+    }
   };
 
   const handleSendWhatsApp = (booking) => {
@@ -340,6 +664,13 @@ Radhe Krishna.`;
             <RefreshCw size={12} className="animate-spin-hover" /> Refresh
           </button>
           
+          <button 
+            onClick={handleSeedData}
+            className="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 cursor-pointer transition-colors"
+          >
+            <Database size={12} /> Seed Test Data
+          </button>
+
           <button 
             disabled={isClearing || dbData.transactions.length === 0}
             onClick={handleClearRecords}
