@@ -24,6 +24,99 @@ function getTomorrowString() {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+const GOTRAM_OPTIONS = [
+  "Kashyapa", "Bharadwaja", "Harita", "Srivatsa", "Vadhula", 
+  "Koundinya", "Gautama", "Atri", "Vasishta", "Vishvamitra", 
+  "Angirasa", "Jamadagni", "Shandilya", "Naidhruva", "Sankrithi", "Shatamarshana"
+];
+
+const NAKSHATRAM_OPTIONS = [
+  "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashirsha", 
+  "Arudra", "Punarvasu", "Pushya", "Ashlesha", "Magha", 
+  "Poorva Phalguni", "Uttara Phalguni", "Hasta", "Chitra", 
+  "Swati", "Vishakha", "Anuradha", "Jyeshtha", "Moola", 
+  "Poorvashadha", "Uttarashadha", "Shravana", "Dhanishta", 
+  "Shatabhisha", "Poorvabhadrapada", "Uttarabhadrapada", "Revati"
+];
+
+const RASI_OPTIONS = [
+  "Mesha", "Vrishabha", "Mithuna", "Karka", 
+  "Simha", "Kanya", "Tula", "Vrishchika", 
+  "Dhanus", "Makara", "Kumbha", "Meena"
+];
+
+function FilterableSelect({ label, value, onChange, options, placeholder, required = false }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    setSearch(value || '');
+  }, [value]);
+
+  const filteredOptions = options.filter(opt =>
+    opt.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const handleSelect = (val) => {
+    onChange(val);
+    setSearch(val);
+    setIsOpen(false);
+  };
+
+  const handleInputChange = (e) => {
+    const val = e.target.value;
+    setSearch(val);
+    onChange(val);
+    setIsOpen(true);
+  };
+
+  return (
+    <div className="relative">
+      <label className="block text-xs font-bold uppercase text-temple-stone-700 mb-1">
+        {label} {required && '*'}
+      </label>
+      <div className="relative">
+        <input
+          type="text"
+          value={search}
+          onChange={handleInputChange}
+          onFocus={() => setIsOpen(true)}
+          onBlur={() => setTimeout(() => setIsOpen(false), 200)}
+          placeholder={placeholder}
+          required={required}
+          className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none bg-white text-xs"
+        />
+        <div className="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none text-temple-stone-400">
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </div>
+
+      {isOpen && (
+        <ul className="absolute z-50 w-full mt-1 bg-white border border-temple-stone-200 rounded shadow-lg max-h-48 overflow-y-auto text-xs divide-y divide-temple-stone-100">
+          {filteredOptions.length === 0 ? (
+            <li className="p-2 text-temple-stone-400 italic">No matches, typing custom...</li>
+          ) : (
+            filteredOptions.map((opt, idx) => (
+              <li
+                key={idx}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  handleSelect(opt);
+                }}
+                className="p-2 hover:bg-temple-saffron-50 hover:text-temple-maroon-900 cursor-pointer transition-colors text-temple-stone-800"
+              >
+                {opt}
+              </li>
+            ))
+          )}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 // Helper to format date strings for Google Calendar
 // Format: 30 Mar 2026 or 01 Apr 2026 or 01–03 May 2026
 function getGoogleCalendarUrl(event) {
@@ -2118,38 +2211,29 @@ export default function App() {
                         />
                       </div>
  
-                      <div>
-                        <label className="block text-xs font-bold uppercase text-temple-stone-700 mb-1">Gotram (Lineage)</label>
-                        <input 
-                          type="text" 
-                          value={bookingForm.gotram}
-                          onChange={(e) => setBookingForm({...bookingForm, gotram: e.target.value})}
-                          placeholder="e.g. Kashyapa, Bharadwaja"
-                          className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none"
-                        />
-                      </div>
- 
-                      <div>
-                        <label className="block text-xs font-bold uppercase text-temple-stone-700 mb-1">Nakshatram (Birth Star)</label>
-                        <input 
-                          type="text" 
-                          value={bookingForm.nakshatram}
-                          onChange={(e) => setBookingForm({...bookingForm, nakshatram: e.target.value})}
-                          placeholder="e.g. Rohini, Revathi"
-                          className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none"
-                        />
-                      </div>
- 
-                      <div>
-                        <label className="block text-xs font-bold uppercase text-temple-stone-700 mb-1">Rasi (Zodiac)</label>
-                        <input 
-                          type="text" 
-                          value={bookingForm.rasi}
-                          onChange={(e) => setBookingForm({...bookingForm, rasi: e.target.value})}
-                          placeholder="e.g. Mesha, Rishaba"
-                          className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none"
-                        />
-                      </div>
+                      <FilterableSelect
+                        label="Gotram (Lineage)"
+                        value={bookingForm.gotram}
+                        onChange={(val) => setBookingForm({...bookingForm, gotram: val})}
+                        options={GOTRAM_OPTIONS}
+                        placeholder="e.g. Kashyapa, Bharadwaja"
+                      />
+
+                      <FilterableSelect
+                        label="Nakshatram (Birth Star)"
+                        value={bookingForm.nakshatram}
+                        onChange={(val) => setBookingForm({...bookingForm, nakshatram: val})}
+                        options={NAKSHATRAM_OPTIONS}
+                        placeholder="e.g. Rohini, Revathi"
+                      />
+
+                      <FilterableSelect
+                        label="Rasi (Zodiac)"
+                        value={bookingForm.rasi}
+                        onChange={(val) => setBookingForm({...bookingForm, rasi: val})}
+                        options={RASI_OPTIONS}
+                        placeholder="e.g. Mesha, Vrishabha"
+                      />
  
                       <div>
                         <label className="block text-xs font-bold uppercase text-temple-stone-700 mb-1">WhatsApp / Phone *</label>
