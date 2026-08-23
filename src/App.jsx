@@ -236,6 +236,46 @@ const getEventDatesForSchedule = (schedule) => {
   return null;
 };
 
+// Calculate approximate Tithi and Nakshatra for a given Date object (local time)
+const getPanchangForDate = (date) => {
+  const ts = date.getTime() / 1000;
+  const d = (ts / 86400.0) - 10957.5; // Days since Jan 1, 2000 12:00 UTC
+  
+  // Sun mean longitude and anomaly (in radians)
+  const Ms = (357.5291 + 0.98560028 * d) * Math.PI / 180;
+  const Ls = (280.4665 + 0.98564736 * d) * Math.PI / 180;
+  
+  // Moon mean longitude and anomaly (in radians)
+  const Lm = (218.3165 + 13.17639648 * d) * Math.PI / 180;
+  const Mm = (134.9634 + 13.06499295 * d) * Math.PI / 180;
+  
+  // Sun true longitude
+  const SunLong = Ls + (1.915 * Math.sin(Ms)) * Math.PI / 180;
+  
+  // Moon true longitude (truncated terms)
+  const MoonLong = Lm + (
+    6.289 * Math.sin(Mm) + 
+    1.274 * Math.sin(2 * Lm - 2 * Ls - Mm) + 
+    0.658 * Math.sin(2 * Lm - 2 * Ls) + 
+    0.214 * Math.sin(2 * Mm) - 
+    0.186 * Math.sin(Ms)
+  ) * Math.PI / 180;
+  
+  // Sidereal correction (Lahiri Ayanamsa is approximately 23.85 + 0.00014 * d)
+  const ayanamsa = 23.85 + 0.00014 * d;
+  
+  const degLsun = (SunLong * 180 / Math.PI) % 360;
+  const degLmoon = (MoonLong * 180 / Math.PI) % 360;
+  
+  const degLmoonSidereal = (degLmoon - ayanamsa + 360) % 360;
+  const diff = (degLmoon - degLsun + 360) % 360;
+  
+  const tithiNum = Math.floor(diff / 12) + 1;
+  const nakshatraNum = Math.floor(degLmoonSidereal / 13.333333) + 1;
+  
+  return { tithi: tithiNum, nakshatra: nakshatraNum };
+};
+
 // Generate list of allowed dates for a pooja based on its schedule
 const getValidDatesForPooja = (pooja) => {
   if (!pooja || !pooja.schedule) return null;
@@ -314,46 +354,59 @@ const getValidDatesForPooja = (pooja) => {
     return eventInfo.dates.filter(d => d >= tomorrowStr);
   }
   
-  // 3. Verified shifting lunar occasions (fortnightly/monthly)
-  const STATIC_LUNAR_DATES = {
-    pradosham: [
-      "2026-08-25", "2026-09-08", "2026-09-24", "2026-10-08", "2026-10-23", 
-      "2026-11-06", "2026-11-21", "2026-12-06", "2026-12-22", "2027-01-05", 
-      "2027-01-20", "2027-02-03", "2027-02-19", "2027-03-05", "2027-03-20", 
-      "2027-04-04"
-    ],
-    pournami: [
-      "2026-08-27", "2026-09-26", "2026-10-25", "2026-11-24", "2026-12-23", 
-      "2027-01-22", "2027-02-20", "2027-03-22"
-    ],
-    chaturthi: [
-      "2026-08-31", "2026-09-29", "2026-10-29", "2026-11-27", "2026-12-26", 
-      "2027-01-25", "2027-02-24", "2027-03-25", "2027-04-24"
-    ],
-    uttarathathi: [
-      "2026-08-30", "2026-09-26", "2026-10-23", "2026-11-20", "2026-12-17", 
-      "2027-01-13", "2027-02-09", "2027-03-09", "2027-04-05"
-    ],
-    mrigashirsha: [
-      "2026-08-09", "2026-09-05", "2026-10-02", "2026-10-29", "2026-11-25", 
-      "2026-12-23", "2027-01-20", "2027-02-16", "2027-03-15", "2027-04-12"
-    ]
-  };
+  // 3. Dynamic Lunar / Astronomical Calculation (Pradosham, Pournami, Ganesha Chaturthi, Mrigashirsha, Uttarathathi)
+  const isPradosham = s.includes('pradosham');
+  const isPournami = s.includes('poornima') || s.includes('pournami');
+  const isChaturthi = s.includes('chaturti') || s.includes('chaturthi');
+  const isUttarathathi = s.includes('uttarathathi');
+  const isMrigashirsha = s.includes('mrigashirsha');
   
-  if (s.includes('pradosham')) {
-    return STATIC_LUNAR_DATES.pradosham.filter(d => d >= tomorrowStr);
-  }
-  if (s.includes('poornima') || s.includes('pournami')) {
-    return STATIC_LUNAR_DATES.pournami.filter(d => d >= tomorrowStr);
-  }
-  if (s.includes('chaturti') || s.includes('chaturthi')) {
-    return STATIC_LUNAR_DATES.chaturthi.filter(d => d >= tomorrowStr);
-  }
-  if (s.includes('uttarathathi')) {
-    return STATIC_LUNAR_DATES.uttarathathi.filter(d => d >= tomorrowStr);
-  }
-  if (s.includes('mrigashirsha')) {
-    return STATIC_LUNAR_DATES.mrigashirsha.filter(d => d >= tomorrowStr);
+  if (isPradosham || isPournami || isChaturthi || isUttarathathi || isMrigashirsha) {
+    const dates = [];
+    let current = new Date();
+    current.setDate(current.getDate() + 1);
+    
+    // Scan next 180 days (approx. 6 months) to find matching dates
+    for (let i = 0; i < 180; i++) {
+      const year = current.getFullYear();
+      const month = current.getMonth();
+      const dateVal = current.getDate();
+      
+      // Calculate noon (12:00 PM) for Nakshatras and daytime Tithis
+      const noonTime = new Date(year, month, dateVal, 12, 0, 0);
+      const panchangNoon = getPanchangForDate(noonTime);
+      
+      // Calculate evening (6:00 PM) for evening Tithis (Pradosham, Chaturthi, Pournami)
+      const sunsetTime = new Date(year, month, dateVal, 18, 0, 0);
+      const panchangSunset = getPanchangForDate(sunsetTime);
+      
+      let matches = false;
+      if (isPradosham) {
+        matches = (panchangNoon.tithi === 13 || panchangNoon.tithi === 28 || 
+                   panchangSunset.tithi === 13 || panchangSunset.tithi === 28);
+      } else if (isPournami) {
+        matches = (panchangNoon.tithi === 15 || panchangSunset.tithi === 15);
+      } else if (isChaturthi) {
+        matches = (panchangNoon.tithi === 19 || panchangSunset.tithi === 19);
+      } else if (isUttarathathi) {
+        matches = (panchangNoon.nakshatra === 26);
+      } else if (isMrigashirsha) {
+        matches = (panchangNoon.nakshatra === 5);
+      }
+      
+      if (matches) {
+        const yStr = String(year);
+        const mStr = String(month + 1).padStart(2, '0');
+        const dStr = String(dateVal).padStart(2, '0');
+        const dateString = `${yStr}-${mStr}-${dStr}`;
+        if (!dates.includes(dateString)) {
+          dates.push(dateString);
+        }
+      }
+      
+      current.setDate(current.getDate() + 1);
+    }
+    return dates.sort();
   }
   
   return null;
