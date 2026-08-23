@@ -380,13 +380,13 @@ const getValidDatesForPooja = (pooja) => {
       const month = current.getMonth();
       const dateVal = current.getDate();
       
-      // Calculate sunrise (6:00 AM) for morning transitions
-      const sunriseTime = new Date(year, month, dateVal, 6, 0, 0);
-      const panchangSunrise = getPanchangForDate(sunriseTime);
+      // Calculate 10:00 AM today (cutoff limit for morning pooja)
+      const tenAmTime = new Date(year, month, dateVal, 10, 0, 0);
+      const panchang10am = getPanchangForDate(tenAmTime);
       
-      // Calculate tomorrow's sunrise (6:00 AM) for skipped Nakshatra checks
-      const tomorrowSunriseTime = new Date(year, month, dateVal + 1, 6, 0, 0);
-      const panchangTomorrowSunrise = getPanchangForDate(tomorrowSunriseTime);
+      // Calculate 10:00 AM tomorrow (for skipped/transition checks)
+      const tomorrow10amTime = new Date(year, month, dateVal + 1, 10, 0, 0);
+      const panchangTomorrow10am = getPanchangForDate(tomorrow10amTime);
       
       // Calculate noon (12:00 PM) for midday positions
       const noonTime = new Date(year, month, dateVal, 12, 0, 0);
@@ -405,13 +405,13 @@ const getValidDatesForPooja = (pooja) => {
       } else if (isChaturthi) {
         matches = (panchangNoon.tithi === 19 || panchangSunset.tithi === 19);
       } else if (isUttarathathi) {
-        const nakToday = panchangSunrise.nakshatra;
-        const nakTomorrow = panchangTomorrowSunrise.nakshatra;
-        matches = (nakToday === 26 || (nakToday === 25 && nakTomorrow === 27));
+        const nakToday = panchang10am.nakshatra;
+        const nakTomorrow = panchangTomorrow10am.nakshatra;
+        matches = (nakToday === 26 && nakTomorrow !== 26) || (nakToday === 25 && nakTomorrow === 27);
       } else if (isMrigashirsha) {
-        const nakToday = panchangSunrise.nakshatra;
-        const nakTomorrow = panchangTomorrowSunrise.nakshatra;
-        matches = (nakToday === 5 || (nakToday === 4 && nakTomorrow === 6));
+        const nakToday = panchang10am.nakshatra;
+        const nakTomorrow = panchangTomorrow10am.nakshatra;
+        matches = (nakToday === 5 && nakTomorrow !== 5) || (nakToday === 4 && nakTomorrow === 6);
       }
       
       if (matches) {
