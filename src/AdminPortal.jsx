@@ -17,12 +17,21 @@ const getPriestInfo = (category) => {
   }
 };
 
+const getTodayString = () => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export default function AdminPortal() {
   const [dbData, setDbData] = useState({ transactions: [], bookings: [], donations: [] });
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('bookings'); // bookings, donations, transactions
   const [searchQuery, setSearchQuery] = useState('');
   const [isClearing, setIsClearing] = useState(false);
+  const [selectedSheetDate, setSelectedSheetDate] = useState(getTodayString());
 
   // Authentication states
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -136,6 +145,58 @@ export default function AdminPortal() {
 - *Family Members:* ${booking.familyMembers || 'N/A'}
 - *Sankalpam:* ${booking.sankalpam || 'N/A'}
 - *Contact Phone:* ${booking.phone || 'N/A'}
+
+Radhe Krishna.`;
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${priest.phone.replace(/[^0-9+]/g, '')}?text=${encodedMessage}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const getPoojaListForCategory = (category, date) => {
+    return dbData.bookings.filter(b => {
+      const pooja = contentDb.poojas.find(p => p.name === b.poojaName);
+      const bCategory = pooja ? pooja.category : '';
+      return bCategory === category && b.poojaDate === date;
+    });
+  };
+
+  const handleSendConsolidatedWhatsApp = (category, templeName) => {
+    const list = getPoojaListForCategory(category, selectedSheetDate);
+    if (list.length === 0) {
+      alert(`No pooja bookings scheduled for ${templeName} on ${selectedSheetDate}.`);
+      return;
+    }
+
+    const priest = getPriestInfo(category);
+    
+    const formattedDate = new Date(selectedSheetDate).toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+
+    let message = `*Thennangur Ashram Pooja Offerings*
+*Date:* ${formattedDate}
+*Temple:* ${templeName}
+*Priest:* ${priest.name}
+
+Total Offerings: ${list.length}
+---------------------------------------------`;
+
+    list.forEach((b, idx) => {
+      message += `
+
+${idx + 1}. *${b.poojaName}*
+   - *Devotee:* ${b.devoteeName || 'N/A'}
+   - *Gotram:* ${b.gotram || 'N/A'}
+   - *Nakshatram:* ${b.nakshatram || 'N/A'} ${b.rasi ? `(${b.rasi})` : ''}
+   - *Family Members:* ${b.familyMembers || 'N/A'}
+   - *Sankalpam:* ${b.sankalpam || 'N/A'}
+   - *Contact Phone:* ${b.phone || 'N/A'}`;
+    });
+
+    message += `
 
 Radhe Krishna.`;
 
@@ -314,6 +375,128 @@ Radhe Krishna.`;
           <div className="text-xs font-bold text-temple-stone-500 uppercase tracking-wider">Charity Donations</div>
           <div className="text-3xl font-bold text-temple-maroon-800">{totalDonations}</div>
           <div className="text-xs text-temple-stone-600">Causes supported (Annadanam, etc.)</div>
+        </div>
+      </div>
+
+      {/* Consolidated Daily Dispatch Section */}
+      <div className="bg-white border border-temple-stone-200 rounded-xl p-6 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-temple-stone-100 pb-4">
+          <div>
+            <h3 className="text-lg font-serif font-bold text-temple-maroon-800 flex items-center gap-2">
+              <MessageSquare size={20} className="text-emerald-600" /> Consolidated Priest Dispatch
+            </h3>
+            <p className="text-xs text-temple-stone-600 mt-0.5">
+              Select a date to view poojas scheduled and send a consolidated WhatsApp list to the respective temple priest.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-bold text-temple-stone-700 whitespace-nowrap">Perform Date:</label>
+            <input
+              type="date"
+              value={selectedSheetDate}
+              onChange={(e) => setSelectedSheetDate(e.target.value)}
+              className="border border-temple-stone-300 rounded px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-temple-saffron-500 bg-white"
+            />
+          </div>
+        </div>
+
+        {/* Buttons Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Shree Matham */}
+          {(() => {
+            const category = 'Sree Matam Poojas';
+            const templeName = 'Shree Matham';
+            const priest = getPriestInfo(category);
+            const count = getPoojaListForCategory(category, selectedSheetDate).length;
+            return (
+              <button
+                onClick={() => handleSendConsolidatedWhatsApp(category, templeName)}
+                disabled={count === 0}
+                className={`w-full flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
+                  count > 0 
+                    ? 'bg-emerald-50 border-emerald-300 hover:bg-emerald-100 hover:border-emerald-400 text-emerald-800 shadow-sm' 
+                    : 'bg-temple-stone-50 border-temple-stone-200 text-temple-stone-400 cursor-not-allowed opacity-60'
+                }`}
+                title={count > 0 ? `Send consolidated sheet to: ${priest.name}` : `No bookings for this date`}
+              >
+                <span className="font-bold text-[10px] uppercase tracking-wider text-center">{templeName}</span>
+                <span className="font-serif font-extrabold text-2xl mt-1">{count} {count === 1 ? 'Pooja' : 'Poojas'}</span>
+                <span className="text-[10px] opacity-75 mt-1 truncate max-w-full">{priest.name.split(' (')[0]}</span>
+              </button>
+            );
+          })()}
+
+          {/* Meenakshi Sundareshwar */}
+          {(() => {
+            const category = 'Meenakshi Sundareshwar Temple Poojas';
+            const templeName = 'Meenakshi Sundareshwar';
+            const priest = getPriestInfo(category);
+            const count = getPoojaListForCategory(category, selectedSheetDate).length;
+            return (
+              <button
+                onClick={() => handleSendConsolidatedWhatsApp(category, templeName)}
+                disabled={count === 0}
+                className={`w-full flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
+                  count > 0 
+                    ? 'bg-emerald-50 border-emerald-300 hover:bg-emerald-100 hover:border-emerald-400 text-emerald-800 shadow-sm' 
+                    : 'bg-temple-stone-50 border-temple-stone-200 text-temple-stone-400 cursor-not-allowed opacity-60'
+                }`}
+                title={count > 0 ? `Send consolidated sheet to: ${priest.name}` : `No bookings for this date`}
+              >
+                <span className="font-bold text-[10px] uppercase tracking-wider text-center">{templeName}</span>
+                <span className="font-serif font-extrabold text-2xl mt-1">{count} {count === 1 ? 'Pooja' : 'Poojas'}</span>
+                <span className="text-[10px] opacity-75 mt-1 truncate max-w-full">{priest.name.split(' (')[0]}</span>
+              </button>
+            );
+          })()}
+
+          {/* Panduranga */}
+          {(() => {
+            const category = 'Panduranga Rakhumayi Temple Poojas';
+            const templeName = 'Panduranga Temple';
+            const priest = getPriestInfo(category);
+            const count = getPoojaListForCategory(category, selectedSheetDate).length;
+            return (
+              <button
+                onClick={() => handleSendConsolidatedWhatsApp(category, templeName)}
+                disabled={count === 0}
+                className={`w-full flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
+                  count > 0 
+                    ? 'bg-emerald-50 border-emerald-300 hover:bg-emerald-100 hover:border-emerald-400 text-emerald-800 shadow-sm' 
+                    : 'bg-temple-stone-50 border-temple-stone-200 text-temple-stone-400 cursor-not-allowed opacity-60'
+                }`}
+                title={count > 0 ? `Send consolidated sheet to: ${priest.name}` : `No bookings for this date`}
+              >
+                <span className="font-bold text-[10px] uppercase tracking-wider text-center">{templeName}</span>
+                <span className="font-serif font-extrabold text-2xl mt-1">{count} {count === 1 ? 'Pooja' : 'Poojas'}</span>
+                <span className="text-[10px] opacity-75 mt-1 truncate max-w-full">{priest.name.split(' (')[0]}</span>
+              </button>
+            );
+          })()}
+
+          {/* Lakshmi Narayan */}
+          {(() => {
+            const category = 'Lakshmi Narayan Temple Poojas';
+            const templeName = 'Lakshmi Narayan Temple';
+            const priest = getPriestInfo(category);
+            const count = getPoojaListForCategory(category, selectedSheetDate).length;
+            return (
+              <button
+                onClick={() => handleSendConsolidatedWhatsApp(category, templeName)}
+                disabled={count === 0}
+                className={`w-full flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
+                  count > 0 
+                    ? 'bg-emerald-50 border-emerald-300 hover:bg-emerald-100 hover:border-emerald-400 text-emerald-800 shadow-sm' 
+                    : 'bg-temple-stone-50 border-temple-stone-200 text-temple-stone-400 cursor-not-allowed opacity-60'
+                }`}
+                title={count > 0 ? `Send consolidated sheet to: ${priest.name}` : `No bookings for this date`}
+              >
+                <span className="font-bold text-[10px] uppercase tracking-wider text-center">{templeName}</span>
+                <span className="font-serif font-extrabold text-2xl mt-1">{count} {count === 1 ? 'Pooja' : 'Poojas'}</span>
+                <span className="text-[10px] opacity-75 mt-1 truncate max-w-full">{priest.name.split(' (')[0]}</span>
+              </button>
+            );
+          })()}
         </div>
       </div>
 
