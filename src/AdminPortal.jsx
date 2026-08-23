@@ -5,13 +5,13 @@ import contentDb from './data/content.json';
 const getPriestInfo = (category) => {
   switch (category) {
     case 'Sree Matam Poojas':
-      return { name: 'Sri Venkatesh Bhattar (Shree Matham)', phone: '+919876543210' };
+      return { name: 'Sri Venkatesh Bhattar (Shree Matham)', phone: '+919840807718' };
     case 'Meenakshi Sundareshwar Temple Poojas':
-      return { name: 'Sri Sundaramurthy Bhattar (Meenakshi Sundareshwar)', phone: '+919876543211' };
+      return { name: 'Sri Sundaramurthy Bhattar (Meenakshi Sundareshwar)', phone: '+14803993440' };
     case 'Panduranga Rakhumayi Temple Poojas':
-      return { name: 'Sri Vitthal Das (Panduranga Temple)', phone: '+919876543212' };
+      return { name: 'Sri Vitthal Das (Panduranga Temple)', phone: '+918825789523' };
     case 'Lakshmi Narayan Temple Poojas':
-      return { name: 'Sri Narayana Bhattar (Lakshmi Narayan Temple)', phone: '+919876543213' };
+      return { name: 'Sri Narayana Bhattar (Lakshmi Narayan Temple)', phone: '+918618130675' };
     default:
       return { name: 'Ashram Office / General Priest', phone: '+919176967153' };
   }
