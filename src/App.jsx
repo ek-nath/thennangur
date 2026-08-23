@@ -3394,6 +3394,7 @@ export default function App() {
             </p>
             <div className="flex flex-wrap gap-2 pt-2">
               <a href="http://www.facebook.com/BhagavathaSammelanaSamajam/" target="_blank" rel="noopener noreferrer" className="border border-temple-stone-700 hover:border-temple-saffron-500 hover:bg-white/5 text-xs px-3 py-1.5 rounded transition-all duration-200">Facebook</a>
+              <a href="http://www.instagram.com/GnananandaMandaliChennai/" target="_blank" rel="noopener noreferrer" className="border border-temple-stone-700 hover:border-temple-saffron-500 hover:bg-white/5 text-xs px-3 py-1.5 rounded transition-all duration-200">Instagram</a>
               <a href="http://www.youtube.com/c/GnananandaMandaliChennai" target="_blank" rel="noopener noreferrer" className="border border-temple-stone-700 hover:border-temple-saffron-500 hover:bg-white/5 text-xs px-3 py-1.5 rounded transition-all duration-200">YouTube</a>
               <a href="http://www.twitter.com/GnananandaC/" target="_blank" rel="noopener noreferrer" className="border border-temple-stone-700 hover:border-temple-saffron-500 hover:bg-white/5 text-xs px-3 py-1.5 rounded transition-all duration-200">Twitter (X)</a>
             </div>
