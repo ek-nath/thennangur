@@ -811,7 +811,7 @@
       "id": "sankatahara-chaturti",
       "name": "Sankatahara Chaturti",
       "category": "Meenakshi Sundareshwar Temple — Weekly Poojas",
-      "schedule": "",
+      "schedule": "Sankatahara Chaturthi",
       "price": 1000,
       "description": "Devotees perform pooja or worship Lord Vinayaka for the prosperity, peace, and happiness. Adulation takes place in the e…"
     },
@@ -819,7 +819,7 @@
       "id": "shodasi-poornima-archana",
       "name": "Shodasi Poornima Archana",
       "category": "Meenakshi Sundareshwar Temple — Weekly Poojas",
-      "schedule": "",
+      "schedule": "Poornima",
       "price": 250,
       "description": "Poornima Special Archana to Sri Maha Shodasi on Poornima day at the Sree Matham, Thennangur."
     },
@@ -827,7 +827,7 @@
       "id": "shodasi-abhishekham",
       "name": "Sri Shodasi Amman Abhishekam on Pournima day",
       "category": "Meenakshi Sundareshwar Temple — Weekly Poojas",
-      "schedule": "",
+      "schedule": "Poornima",
       "price": 1000,
       "description": "Poornima Special Abhishekam of Sri Shodasi Amman performed on the auspicious Pournima (full moon) day at Sree Matham, Thennangur."
     },
@@ -883,7 +883,7 @@
       "id": "guruji-maha-pooja",
       "name": "Samasthi Pada Pooja – Guruji Maha Pooja",
       "category": "Paada Pooja & Special Poojas",
-      "schedule": "",
+      "schedule": "Guruji Mahapooja day",
       "price": 500,
       "description": "Special Samasthi Pada Pooja performed on Guruji Maha Pooja day at Thennangur Ashram."
     },
@@ -899,7 +899,7 @@
       "id": "swami-aradhana",
       "name": "Samasthi Pada Pooja — Swami Aradhana",
       "category": "Paada Pooja & Special Poojas",
-      "schedule": "",
+      "schedule": "Swami Gnanananda Aaradhana Day",
       "price": 500,
       "description": "Samasthi Pada Pooja performed on Swami Aradhana Day at Thennangur Ashram."
     },
@@ -907,7 +907,7 @@
       "id": "gurujis-monthly-birth-star-uttarathathi-day",
       "name": "Samasthi Pada Pooja — Guruji's Monthly Birth Star Uttarathathi Day",
       "category": "Paada Pooja & Special Poojas",
-      "schedule": "",
+      "schedule": "Uttarathathi Day",
       "price": 500,
       "description": "Samasthi Pada Pooja performed on Guruji's monthly birth star Uttarathathi day."
     },
@@ -915,7 +915,7 @@
       "id": "namaji-aradhana",
       "name": "Samasthi Pada Pooja — Namaji Aradhana",
       "category": "Paada Pooja & Special Poojas",
-      "schedule": "",
+      "schedule": "Namaji Aradhana Day",
       "price": 500,
       "description": "Samasthi Pada Pooja performed on Namaji Aradhana Day at Thennangur Ashram."
     },
@@ -923,7 +923,7 @@
       "id": "tamil-new-year-day",
       "name": "Samasthi Pada Pooja — On Tamil New Year Day",
       "category": "Paada Pooja & Special Poojas",
-      "schedule": "",
+      "schedule": "Tamil New Year Day",
       "price": 300,
       "description": "Samasthi Pada Pooja performed on Tamil New Year Day at Thennangur Ashram."
     },

@@ -219,6 +219,8 @@ const getEventDatesForSchedule = (schedule) => {
     searchTitle = 'Hanumath Jayanthi';
   } else if (s.includes('narasimha jayanthi') || s.includes('nrusimha jayanthi')) {
     searchTitle = 'Nrusimha Jayanthi';
+  } else if (s.includes('tamil new year')) {
+    searchTitle = 'New Year';
   }
 
   if (searchTitle) {
