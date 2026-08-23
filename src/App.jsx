@@ -607,6 +607,9 @@ export default function App() {
     poojaDate: '', familyMembers: '', email: '', phone: '', sankalpam: ''
   });
 
+  const [isValidatingDate, setIsValidatingDate] = useState(false);
+  const [apiValidationResult, setApiValidationResult] = useState(null);
+
   // Donation states
   const [donationForm, setDonationForm] = useState({
     cause: 'Annadanam',
@@ -701,6 +704,88 @@ export default function App() {
     }
   }, [cart, route]);
 
+  const verifyDateWithAPI = async (dateString, pooja) => {
+    if (!pooja || !dateString || !pooja.schedule) return { isValid: true };
+    const s = pooja.schedule.toLowerCase();
+    
+    const isPradosham = s.includes('pradosham');
+    const isPournami = s.includes('poornima') || s.includes('pournami');
+    const isChaturthi = s.includes('chaturti') || s.includes('chaturthi');
+    const isUttarathathi = s.includes('uttarathathi');
+    const isMrigashirsha = s.includes('mrigashirsha');
+    
+    if (!isPradosham && !isPournami && !isChaturthi && !isUttarathathi && !isMrigashirsha) {
+      return { isValid: true };
+    }
+
+    const cacheKey = 'thennangur_panchang_api_cache';
+    let cache = {};
+    try {
+      cache = JSON.parse(localStorage.getItem(cacheKey) || '{}');
+    } catch (e) {}
+
+    const cacheEntry = cache[`${dateString}-${pooja.id}`];
+    if (cacheEntry !== undefined) {
+      return cacheEntry;
+    }
+
+    try {
+      const res = await fetch(`https://nityapanchangam.com/api/panchangam.php?date=${dateString}&city=chennai`);
+      if (!res.ok) throw new Error('API error');
+      const data = await res.json();
+      if (data && data.tithi && data.nakshatra) {
+        const tNum = data.tithi.number;
+        const nName = (data.nakshatra.name || '').toLowerCase();
+        
+        let isValid = false;
+        let eventName = '';
+        
+        if (isPradosham) {
+          isValid = (tNum === 13 || tNum === 28);
+          eventName = 'Pradosham (Trayodashi)';
+        } else if (isPournami) {
+          isValid = (tNum === 15);
+          eventName = 'Pournami (Purnima)';
+        } else if (isChaturthi) {
+          isValid = (tNum === 19);
+          eventName = 'Sankatahara Chaturthi';
+        } else if (isUttarathathi) {
+          isValid = nName.includes('uttara bhadra') || nName.includes('uttarabhadra') || nName.includes('uttarathathi') || nName.includes('uttarabhadrapada');
+          eventName = 'Uttarathathi (Uttara Bhadrapada)';
+        } else if (isMrigashirsha) {
+          isValid = nName.includes('mrigashirsha') || nName.includes('mrigashira') || nName.includes('mrigasira');
+          eventName = 'Mrigashirsha';
+        }
+
+        const result = isValid 
+          ? { isValid: true } 
+          : { 
+              isValid: false, 
+              message: `API check: The selected date is not confirmed as a ${eventName} day in Chennai Panchangam (Tithi: ${data.tithi.name}, Nakshatra: ${data.nakshatra.name}). Please double-check or select another date.` 
+            };
+            
+        cache[`${dateString}-${pooja.id}`] = result;
+        localStorage.setItem(cacheKey, JSON.stringify(cache));
+        return result;
+      }
+    } catch (err) {
+      console.error('Failed to verify with API:', err);
+    }
+    
+    return { isValid: true };
+  };
+
+  const handleDropdownDateChange = async (dateVal, currentPooja = selectedPooja) => {
+    setBookingForm(prev => ({ ...prev, poojaDate: dateVal }));
+    setApiValidationResult(null);
+    if (!dateVal || !currentPooja) return;
+
+    setIsValidatingDate(true);
+    const validation = await verifyDateWithAPI(dateVal, currentPooja);
+    setApiValidationResult({ date: dateVal, result: validation });
+    setIsValidatingDate(false);
+  };
+
   // Click handler to book a pooja and pre-fill details from cart
   const handleBookPoojaClick = (pooja) => {
     setSelectedPooja(pooja);
@@ -735,6 +820,12 @@ export default function App() {
     const validation = checkDateValidityForPooja(bookingForm.poojaDate, selectedPooja);
     if (!validation.isValid) {
       alert(validation.message);
+      return;
+    }
+
+    // Validate using Chennai Panchangam API verification result
+    if (apiValidationResult && apiValidationResult.date === bookingForm.poojaDate && !apiValidationResult.result.isValid) {
+      alert(apiValidationResult.result.message);
       return;
     }
 
@@ -782,6 +873,7 @@ export default function App() {
     if (item.type === 'pooja') {
       setSelectedPooja(item.pooja);
       setBookingForm({ ...item.details });
+      handleDropdownDateChange(item.details.poojaDate, item.pooja);
     } else {
       setDonationForm({ ...item.details });
     }
@@ -2530,28 +2622,57 @@ export default function App() {
                           const validDates = getValidDatesForPooja(selectedPooja);
                           if (validDates) {
                             return (
-                              <select
-                                required
-                                value={bookingForm.poojaDate}
-                                onChange={(e) => setBookingForm({...bookingForm, poojaDate: e.target.value})}
-                                className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none bg-white cursor-pointer text-sm"
-                              >
-                                <option value="">Select a valid date...</option>
-                                {validDates.map(dateStr => {
-                                  const dateObj = new Date(dateStr);
-                                  const formatted = dateObj.toLocaleDateString('en-IN', {
-                                    day: 'numeric',
-                                    month: 'short',
-                                    year: 'numeric',
-                                    weekday: 'long'
-                                  });
+                              <div className="space-y-1.5">
+                                <div className="relative">
+                                  <select
+                                    required
+                                    value={bookingForm.poojaDate}
+                                    onChange={(e) => handleDropdownDateChange(e.target.value)}
+                                    className="w-full p-2 pr-10 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none bg-white cursor-pointer text-sm"
+                                  >
+                                    <option value="">Select a valid date...</option>
+                                    {validDates.map(dateStr => {
+                                      const dateObj = new Date(dateStr);
+                                      const formatted = dateObj.toLocaleDateString('en-IN', {
+                                        day: 'numeric',
+                                        month: 'short',
+                                        year: 'numeric',
+                                        weekday: 'long'
+                                      });
+                                      return (
+                                        <option key={dateStr} value={dateStr}>
+                                          {formatted}
+                                        </option>
+                                      );
+                                    })}
+                                  </select>
+                                  {isValidatingDate && (
+                                    <span className="absolute right-8 top-1/2 -translate-y-1/2 flex h-4 w-4 border-2 border-temple-saffron-500 border-t-transparent rounded-full animate-spin"></span>
+                                  )}
+                                </div>
+                                {bookingForm.poojaDate && (() => {
+                                  if (isValidatingDate) {
+                                    return (
+                                      <div className="text-temple-stone-600 text-[10px] font-bold bg-temple-stone-50 border border-temple-stone-200 rounded p-2 leading-tight flex items-center gap-1.5 animate-pulse">
+                                        <span className="h-2 w-2 rounded-full bg-temple-stone-400 animate-pulse"></span>
+                                        ⏳ Verifying date with Chennai Panchangam...
+                                      </div>
+                                    );
+                                  }
+                                  if (apiValidationResult && apiValidationResult.date === bookingForm.poojaDate && !apiValidationResult.result.isValid) {
+                                    return (
+                                      <div className="text-red-600 text-[10px] font-bold bg-red-50 border border-red-200 rounded p-2 leading-tight">
+                                        ⚠️ {apiValidationResult.result.message}
+                                      </div>
+                                    );
+                                  }
                                   return (
-                                    <option key={dateStr} value={dateStr}>
-                                      {formatted}
-                                    </option>
+                                    <div className="text-green-700 text-[10px] font-bold bg-green-50 border border-green-200 rounded p-2 leading-tight flex items-center gap-1">
+                                      ✓ Verified with Chennai Panchangam API
+                                    </div>
                                   );
-                                })}
-                              </select>
+                                })()}
+                              </div>
                             );
                           }
                           
