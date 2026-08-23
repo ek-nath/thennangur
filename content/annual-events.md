@@ -359,6 +359,3 @@ Vasantha Navarathri
 Tamil New Year Day — PILAVANGA
 
 14 Apr 2027 · Wednesday
-
-RADHE KRISHNA
-$/$

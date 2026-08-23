@@ -224,12 +224,16 @@ const getEventDatesForSchedule = (schedule) => {
   }
 
   if (searchTitle) {
-    const event = contentDb.events.find(e => 
+    const matchingEvents = contentDb.events.filter(e => 
       e.title.toLowerCase().includes(searchTitle.toLowerCase())
     );
-    if (event) {
-      const dates = parseEventDateString(event.date);
-      return { type: 'event', dates, eventTitle: event.title };
+    if (matchingEvents.length > 0) {
+      let dates = [];
+      matchingEvents.forEach(event => {
+        dates = dates.concat(parseEventDateString(event.date));
+      });
+      dates = [...new Set(dates)].sort();
+      return { type: 'event', dates, eventTitle: searchTitle };
     }
   }
 
