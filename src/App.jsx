@@ -117,6 +117,120 @@ function FilterableSelect({ label, value, onChange, options, placeholder, requir
   );
 }
 
+function InlineCalendar({ validDates, value, onChange }) {
+  // Find the initial month based on the first valid date or today
+  const getInitialMonth = () => {
+    if (value) return new Date(value);
+    if (validDates && validDates.length > 0) return new Date(validDates[0]);
+    return new Date();
+  };
+
+  const [currentMonth, setCurrentMonth] = useState(getInitialMonth);
+
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+
+  // Navigation handlers
+  const handlePrevMonth = () => {
+    setCurrentMonth(new Date(year, month - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentMonth(new Date(year, month + 1, 1));
+  };
+
+  // Get days in this month
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  // Get day of the week for the 1st of the month (0 = Sunday, 1 = Monday, etc.)
+  const firstDayIndex = new Date(year, month, 1).getDay();
+
+  // Create array of days to render in the grid
+  const days = [];
+  // Add empty slots for the offset
+  for (let i = 0; i < firstDayIndex; i++) {
+    days.push(null);
+  }
+  // Add actual days
+  for (let d = 1; d <= daysInMonth; d++) {
+    days.push(d);
+  }
+
+  // Format month name
+  const monthName = currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+  const weekdayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  return (
+    <div className="bg-temple-stone-50 border border-temple-stone-200 rounded-lg p-3 max-w-sm mx-auto shadow-sm">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-3">
+        <button
+          type="button"
+          onClick={handlePrevMonth}
+          className="p-1 rounded hover:bg-temple-stone-200 text-temple-stone-700 transition"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <span className="font-bold text-xs text-temple-stone-800 tracking-wide">{monthName}</span>
+        <button
+          type="button"
+          onClick={handleNextMonth}
+          className="p-1 rounded hover:bg-temple-stone-200 text-temple-stone-700 transition"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Weekday headers */}
+      <div className="grid grid-cols-7 gap-1 text-center text-[9px] font-bold uppercase text-temple-stone-500 mb-1">
+        {weekdayHeaders.map(day => (
+          <div key={day} className="py-0.5">{day}</div>
+        ))}
+      </div>
+
+      {/* Days grid */}
+      <div className="grid grid-cols-7 gap-1 text-center">
+        {days.map((day, idx) => {
+          if (day === null) {
+            return <div key={`empty-${idx}`} className="py-2" />;
+          }
+
+          const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          const isAllowed = validDates.includes(dateStr);
+          const isSelected = value === dateStr;
+
+          return (
+            <button
+              key={dateStr}
+              type="button"
+              disabled={!isAllowed}
+              onClick={() => onChange(dateStr)}
+              className={`
+                text-[10px] font-bold py-1 rounded transition-all duration-150 relative h-7 flex items-center justify-center
+                ${isSelected 
+                  ? 'bg-temple-saffron-600 text-white shadow-sm ring-1 ring-temple-saffron-300 scale-105' 
+                  : isAllowed 
+                    ? 'bg-white border border-temple-saffron-300 text-temple-saffron-800 hover:bg-temple-saffron-50 cursor-pointer hover:scale-105 shadow-sm' 
+                    : 'text-temple-stone-400 bg-temple-stone-100/50 cursor-not-allowed opacity-35'
+                }
+              `}
+            >
+              {day}
+              {isAllowed && !isSelected && (
+                <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-0.5 h-0.5 bg-temple-saffron-500 rounded-full"></span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // Helper to parse dates from contentDb.events (e.g. "01 Apr 2026 · Wednesday" or range "30 Mar – 07 Apr 2026 · Mon–Tue")
 const parseEventDateString = (dateStr) => {
   if (!dateStr) return [];
@@ -2554,28 +2668,27 @@ export default function App() {
                           const validDates = getValidDatesForPooja(selectedPooja);
                           if (validDates) {
                             return (
-                              <select
-                                required
-                                value={bookingForm.poojaDate}
-                                onChange={(e) => setBookingForm({...bookingForm, poojaDate: e.target.value})}
-                                className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none bg-white cursor-pointer text-sm"
-                              >
-                                <option value="">Select a valid date...</option>
-                                {validDates.map(dateStr => {
-                                  const dateObj = new Date(dateStr);
+                              <div className="space-y-2">
+                                <InlineCalendar
+                                  validDates={validDates}
+                                  value={bookingForm.poojaDate}
+                                  onChange={(date) => setBookingForm({...bookingForm, poojaDate: date})}
+                                />
+                                {bookingForm.poojaDate && (() => {
+                                  const dateObj = new Date(bookingForm.poojaDate);
                                   const formatted = dateObj.toLocaleDateString('en-IN', {
                                     day: 'numeric',
-                                    month: 'short',
+                                    month: 'long',
                                     year: 'numeric',
                                     weekday: 'long'
                                   });
                                   return (
-                                    <option key={dateStr} value={dateStr}>
-                                      {formatted}
-                                    </option>
+                                    <div className="text-[11px] font-bold text-temple-saffron-800 bg-temple-saffron-50 border border-temple-saffron-200 rounded p-2 text-center">
+                                      Selected Date: {formatted}
+                                    </div>
                                   );
-                                })}
-                              </select>
+                                })()}
+                              </div>
                             );
                           }
                           
