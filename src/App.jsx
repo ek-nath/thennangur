@@ -269,8 +269,8 @@ const getPanchangForDate = (date) => {
     0.186 * Math.sin(Ms)
   ) * Math.PI / 180;
   
-  // Sidereal correction (Lahiri Ayanamsa is approximately 23.85 + 0.00014 * d)
-  const ayanamsa = 23.85 + 0.00014 * d;
+  // Sidereal correction (Lahiri Ayanamsa is approximately 23.857 + 0.00003825 * d)
+  const ayanamsa = 23.857 + 0.00003825 * d;
   
   const degLsun = (SunLong * 180 / Math.PI) % 360;
   const degLmoon = (MoonLong * 180 / Math.PI) % 360;
@@ -384,6 +384,10 @@ const getValidDatesForPooja = (pooja) => {
       const sunriseTime = new Date(year, month, dateVal, 6, 0, 0);
       const panchangSunrise = getPanchangForDate(sunriseTime);
       
+      // Calculate tomorrow's sunrise (6:00 AM) for skipped Nakshatra checks
+      const tomorrowSunriseTime = new Date(year, month, dateVal + 1, 6, 0, 0);
+      const panchangTomorrowSunrise = getPanchangForDate(tomorrowSunriseTime);
+      
       // Calculate noon (12:00 PM) for midday positions
       const noonTime = new Date(year, month, dateVal, 12, 0, 0);
       const panchangNoon = getPanchangForDate(noonTime);
@@ -401,9 +405,13 @@ const getValidDatesForPooja = (pooja) => {
       } else if (isChaturthi) {
         matches = (panchangNoon.tithi === 19 || panchangSunset.tithi === 19);
       } else if (isUttarathathi) {
-        matches = (panchangSunrise.nakshatra === 26 || panchangNoon.nakshatra === 26);
+        const nakToday = panchangSunrise.nakshatra;
+        const nakTomorrow = panchangTomorrowSunrise.nakshatra;
+        matches = (nakToday === 26 || (nakToday === 25 && nakTomorrow === 27));
       } else if (isMrigashirsha) {
-        matches = (panchangSunrise.nakshatra === 5 || panchangNoon.nakshatra === 5);
+        const nakToday = panchangSunrise.nakshatra;
+        const nakTomorrow = panchangTomorrowSunrise.nakshatra;
+        matches = (nakToday === 5 || (nakToday === 4 && nakTomorrow === 6));
       }
       
       if (matches) {
@@ -753,19 +761,26 @@ export default function App() {
         let eventName = '';
         
         if (isPradosham) {
-          isValid = (tNum === 13 || tNum === 28);
+          // Allow Trayodashi (13 or 28) or Dvadashi (12 or 27) for transition days
+          isValid = (tNum === 13 || tNum === 28 || tNum === 12 || tNum === 27);
           eventName = 'Pradosham (Trayodashi)';
         } else if (isPournami) {
-          isValid = (tNum === 15);
+          // Allow Purnima (15) or Chaturdashi (14) for transition days
+          isValid = (tNum === 15 || tNum === 14);
           eventName = 'Pournami (Purnima)';
         } else if (isChaturthi) {
-          isValid = (tNum === 19);
+          // Allow Chaturthi (19) or Tritiya (18) for transition days
+          isValid = (tNum === 19 || tNum === 18);
           eventName = 'Sankatahara Chaturthi';
         } else if (isUttarathathi) {
-          isValid = nName.includes('uttara bhadra') || nName.includes('uttarabhadra') || nName.includes('uttarathathi') || nName.includes('uttarabhadrapada');
+          // Allow Uttara Bhadra (26) or Purva Bhadra (25) for transition days
+          isValid = nName.includes('uttara bhadra') || nName.includes('uttarabhadra') || nName.includes('uttarathathi') || nName.includes('uttarabhadrapada') ||
+                    nName.includes('purva bhadra') || nName.includes('purvabhadra') || nName.includes('poorvathathi') || nName.includes('purvabhadrapada');
           eventName = 'Uttarathathi (Uttara Bhadrapada)';
         } else if (isMrigashirsha) {
-          isValid = nName.includes('mrigashirsha') || nName.includes('mrigashira') || nName.includes('mrigasira');
+          // Allow Mrigashirsha (5) or Rohini (4) for transition days
+          isValid = nName.includes('mrigashirsha') || nName.includes('mrigashira') || nName.includes('mrigasira') ||
+                    nName.includes('rohini');
           eventName = 'Mrigashirsha';
         }
 
