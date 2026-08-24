@@ -85,6 +85,8 @@ export default function AdminPortal() {
   const [paymentMethod, setPaymentMethod] = useState('Cash'); // 'Cash' or 'Check'
   const [checkNo, setCheckNo] = useState('');
   const [bankName, setBankName] = useState('');
+  const [upiTxnId, setUpiTxnId] = useState('');
+  const [organization, setOrganization] = useState('GA Trust');
   
   // Devotee fields (Pooja)
   const [devoteeName, setDevoteeName] = useState('');
@@ -146,6 +148,8 @@ export default function AdminPortal() {
     setPaymentMethod('Cash');
     setCheckNo('');
     setBankName('');
+    setUpiTxnId('');
+    setOrganization('GA Trust');
     setDevoteeName('');
     setGotram('');
     setNakshatram('');
@@ -180,7 +184,7 @@ export default function AdminPortal() {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(20);
     doc.setTextColor(128, 0, 0); // Temple maroon
-    doc.text("GA Trust", 105, 20, { align: "center" });
+    doc.text(data.organization || "GA Trust", 105, 20, { align: "center" });
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
@@ -210,6 +214,9 @@ export default function AdminPortal() {
     let nextY = 69;
     if (data.paymentMethod === 'Check') {
       doc.text(`Bank: ${data.bankName || 'N/A'} | Check No: ${data.checkNo || 'N/A'}`, 15, nextY);
+      nextY += 7;
+    } else if (data.paymentMethod === 'UPI') {
+      doc.text(`UPI Ref ID: ${data.upiTxnId || 'N/A'}`, 15, nextY);
       nextY += 7;
     }
 
@@ -304,6 +311,7 @@ export default function AdminPortal() {
       bankName: txn.bankName,
       totalPrice: txn.totalPrice,
       recordType: item.type,
+      organization: txn.organization || 'GA Trust',
       
       devoteeName: item.details?.devoteeName || item.details?.donorName || 'N/A',
       gotram: item.details?.gotram,
@@ -348,6 +356,7 @@ export default function AdminPortal() {
           bankName: txn.bankName,
           totalPrice: txn.totalPrice,
           recordType: item.type,
+          organization: txn.organization || 'GA Trust',
           
           devoteeName: item.details?.devoteeName || item.details?.donorName || 'N/A',
           gotram: item.details?.gotram,
@@ -382,7 +391,7 @@ export default function AdminPortal() {
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; color: #333;">
         <div style="background-color: #800000; color: white; padding: 20px; text-align: center;">
-          <h2 style="margin: 0; font-family: Georgia, serif;">GA Trust</h2>
+          <h2 style="margin: 0; font-family: Georgia, serif;">${data.organization || 'GA Trust'}</h2>
           <p style="margin: 5px 0 0 0; font-size: 11px; color: #ffd700;">31, Sadayappan St, Jeth Nagar, Mandaveli, Chennai, Greater Chennai, Tamil Nadu 600028</p>
         </div>
         <div style="padding: 24px; line-height: 1.6;">
@@ -405,7 +414,11 @@ export default function AdminPortal() {
             </tr>
             <tr>
               <td style="padding: 10px; border: 1px solid #eee; font-weight: bold;">Payment Method:</td>
-              <td style="padding: 10px; border: 1px solid #eee;">${data.paymentMethod} ${data.paymentMethod === 'Check' ? `(Bank: ${data.bankName}, Check No: ${data.checkNo})` : ''}</td>
+              <td style="padding: 10px; border: 1px solid #eee;">
+                ${data.paymentMethod} 
+                ${data.paymentMethod === 'Check' ? `(Bank: ${data.bankName}, Check No: ${data.checkNo})` : ''}
+                ${data.paymentMethod === 'UPI' ? `(UPI Ref ID: ${data.upiTxnId})` : ''}
+              </td>
             </tr>
             <tr style="background-color: #f9f9f9;">
               <td style="padding: 10px; border: 1px solid #eee; font-weight: bold;">Offering Details:</td>
@@ -460,9 +473,31 @@ export default function AdminPortal() {
   const handleRecordSubmit = (e) => {
     e.preventDefault();
     
-    const randNum = Math.floor(10000 + Math.random() * 90000);
+    const year = new Date().getFullYear();
+    const localTxns = (() => {
+      try {
+        return JSON.parse(localStorage.getItem('thennangur_local_txns') || '[]');
+      } catch (err) {
+        return [];
+      }
+    })();
+    const prefix = organization === 'Gnanananda Seva Samajam' ? 'GSS' : 'GAT';
+    const matchingTxns = localTxns.filter(txn => {
+      const txnPrefix = (txn.organization === 'Gnanananda Seva Samajam') ? 'GSS' : 'GAT';
+      return txnPrefix === prefix && txn.receiptNo && txn.receiptNo.startsWith(`${prefix}-${year}-`);
+    });
+    let maxNum = 0;
+    matchingTxns.forEach(txn => {
+      const parts = txn.receiptNo.split('-');
+      if (parts.length >= 3) {
+        const num = parseInt(parts[2], 10);
+        if (!isNaN(num) && num > maxNum) {
+          maxNum = num;
+        }
+      }
+    });
+    const receiptNo = `${prefix}-${year}-${maxNum + 1}`;
     const dateStr = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
-    const receiptNo = `GA-TXN-2026-${randNum}`;
     
     let txnId = '';
     let items = [];
@@ -471,7 +506,7 @@ export default function AdminPortal() {
     if (recordType === 'pooja') {
       const parsedPrice = parseFloat(price) || 0;
       totalPrice = parsedPrice;
-      txnId = `TXN-${paymentMethod === 'Cash' ? 'CSH' : 'CHK'}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+      txnId = `TXN-${paymentMethod === 'Cash' ? 'CSH' : (paymentMethod === 'UPI' ? 'UPI' : 'CHK')}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
       
       const itemDetails = {
         devoteeName,
@@ -496,7 +531,7 @@ export default function AdminPortal() {
     } else {
       const parsedAmount = parseFloat(amount) || 0;
       totalPrice = parsedAmount;
-      txnId = `TXN-${paymentMethod === 'Cash' ? 'CSH' : 'CHK'}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+      txnId = `TXN-${paymentMethod === 'Cash' ? 'CSH' : (paymentMethod === 'UPI' ? 'UPI' : 'CHK')}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
       
       const itemDetails = {
         donorName,
@@ -525,7 +560,9 @@ export default function AdminPortal() {
       isLocal: true,
       paymentMethod,
       checkNo: paymentMethod === 'Check' ? checkNo : undefined,
-      bankName: paymentMethod === 'Check' ? bankName : undefined
+      bankName: paymentMethod === 'Check' ? bankName : undefined,
+      upiTxnId: paymentMethod === 'UPI' ? upiTxnId : undefined,
+      organization
     };
     
     try {
@@ -541,6 +578,7 @@ export default function AdminPortal() {
         paymentMethod,
         checkNo,
         bankName,
+        upiTxnId,
         totalPrice,
         recordType,
         devoteeName,
@@ -557,7 +595,8 @@ export default function AdminPortal() {
         donorName,
         cause,
         panCard,
-        address
+        address,
+        organization
       });
 
       // 2. Send Simulated Email Receipt (if email is provided)
@@ -569,6 +608,7 @@ export default function AdminPortal() {
           paymentMethod,
           checkNo,
           bankName,
+          upiTxnId,
           totalPrice,
           recordType,
           devoteeName,
@@ -585,7 +625,8 @@ export default function AdminPortal() {
           donorName,
           cause,
           panCard,
-          address
+          address,
+          organization
         });
       }
 
@@ -632,6 +673,7 @@ export default function AdminPortal() {
               paymentMethod: txn.paymentMethod || 'Online',
               checkNo: txn.checkNo,
               bankName: txn.bankName,
+              upiTxnId: txn.upiTxnId,
               category: item.details.category || (pooja ? pooja.category : 'Sree Matam Poojas'),
               ...item.details
             });
@@ -645,6 +687,7 @@ export default function AdminPortal() {
               paymentMethod: txn.paymentMethod || 'Online',
               checkNo: txn.checkNo,
               bankName: txn.bankName,
+              upiTxnId: txn.upiTxnId,
               ...item.details
             });
           }
@@ -1822,6 +1865,11 @@ Radhe Krishna.`;
                                   Check ({b.checkNo || 'N/A'})
                                 </span>
                               )}
+                              {b.paymentMethod === 'UPI' && (
+                                <span className="w-fit bg-purple-50 border border-purple-200 text-purple-700 text-[9px] font-bold px-1 py-0.5 rounded" title={`UPI Ref: ${b.upiTxnId || 'N/A'}`}>
+                                  UPI ({b.upiTxnId || 'N/A'})
+                                </span>
+                              )}
                               {(b.paymentMethod === 'Online' || !b.paymentMethod) && (
                                 <span className="w-fit bg-temple-stone-100 border border-temple-stone-200 text-temple-stone-700 text-[9px] font-bold px-1 py-0.5 rounded">Online</span>
                               )}
@@ -1957,6 +2005,11 @@ Radhe Krishna.`;
                                   Check ({d.checkNo || 'N/A'})
                                 </span>
                               )}
+                              {d.paymentMethod === 'UPI' && (
+                                <span className="w-fit bg-purple-50 border border-purple-200 text-purple-700 text-[9px] font-bold px-1 py-0.5 rounded" title={`UPI Ref: ${d.upiTxnId || 'N/A'}`}>
+                                  UPI ({d.upiTxnId || 'N/A'})
+                                </span>
+                              )}
                               {(d.paymentMethod === 'Online' || !d.paymentMethod) && (
                                 <span className="w-fit bg-temple-stone-100 border border-temple-stone-200 text-temple-stone-700 text-[9px] font-bold px-1 py-0.5 rounded">Online</span>
                               )}
@@ -2016,6 +2069,11 @@ Radhe Krishna.`;
                               {t.paymentMethod === 'Check' && (
                                 <span className="text-[10px] bg-blue-50 text-blue-700 border border-blue-200 px-1.5 py-0.5 rounded font-semibold" title={`${t.bankName || 'N/A'} - Chk# ${t.checkNo || 'N/A'}`}>
                                   Check Payment ({t.checkNo || 'N/A'})
+                                </span>
+                              )}
+                              {t.paymentMethod === 'UPI' && (
+                                <span className="text-[10px] bg-purple-50 text-purple-700 border border-purple-200 px-1.5 py-0.5 rounded font-semibold" title={`UPI Ref: ${t.upiTxnId || 'N/A'}`}>
+                                  UPI Payment ({t.upiTxnId || 'N/A'})
                                 </span>
                               )}
                               {(t.paymentMethod === 'Online' || !t.paymentMethod) && (
@@ -2137,6 +2195,45 @@ Radhe Krishna.`;
                     >
                       Deposited Check
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('UPI')}
+                      className={`flex-1 py-2 px-3 rounded-lg border font-bold text-center transition-all ${
+                        paymentMethod === 'UPI'
+                          ? 'bg-purple-700 text-white border-purple-800 shadow-sm'
+                          : 'bg-white text-temple-stone-700 border-temple-stone-300 hover:bg-temple-stone-50 cursor-pointer'
+                      }`}
+                    >
+                      UPI
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-1 col-span-1 sm:col-span-2">
+                  <label className="block font-bold uppercase text-temple-stone-700">Receipt Organization *</label>
+                  <div className="flex gap-2 mt-1">
+                    <button
+                      type="button"
+                      onClick={() => setOrganization('GA Trust')}
+                      className={`flex-1 py-2 px-3 rounded-lg border font-bold text-center transition-all ${
+                        organization === 'GA Trust'
+                          ? 'bg-temple-maroon-800 text-white border-temple-maroon-900 shadow-sm'
+                          : 'bg-white text-temple-stone-700 border-temple-stone-300 hover:bg-temple-stone-50 cursor-pointer'
+                      }`}
+                    >
+                      GA Trust
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setOrganization('Gnanananda Seva Samajam')}
+                      className={`flex-1 py-2 px-3 rounded-lg border font-bold text-center transition-all ${
+                        organization === 'Gnanananda Seva Samajam'
+                          ? 'bg-temple-maroon-800 text-white border-temple-maroon-900 shadow-sm'
+                          : 'bg-white text-temple-stone-700 border-temple-stone-300 hover:bg-temple-stone-50 cursor-pointer'
+                      }`}
+                    >
+                      Gnanananda Seva Samajam
+                    </button>
                   </div>
                 </div>
               </div>
@@ -2164,6 +2261,23 @@ Radhe Krishna.`;
                       onChange={(e) => setBankName(e.target.value)}
                       placeholder="e.g. SBI, HDFC, ICICI"
                       className="w-full p-2 border border-blue-300 rounded focus:ring-2 focus:ring-blue-500 bg-white focus:outline-none"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* UPI details if UPI Payment */}
+              {paymentMethod === 'UPI' && (
+                <div className="grid grid-cols-1 gap-4 bg-purple-50/50 p-4 rounded-xl border border-purple-200">
+                  <div className="col-span-1">
+                    <label className="block font-bold uppercase text-purple-900 mb-1">UPI Reference / Transaction ID *</label>
+                    <input
+                      type="text"
+                      required
+                      value={upiTxnId}
+                      onChange={(e) => setUpiTxnId(e.target.value)}
+                      placeholder="e.g. 12-digit UPI UTR number or transaction reference ID"
+                      className="w-full p-2 border border-purple-300 rounded focus:ring-2 focus:ring-purple-500 bg-white focus:outline-none"
                     />
                   </div>
                 </div>
