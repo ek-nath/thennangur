@@ -2558,7 +2558,7 @@ export default function App() {
                       />
                     </div>
                     <div className="md:col-span-7 flex flex-wrap gap-2 justify-end">
-                      {['All', 'Sree Matam', 'Panduranga', 'Meenakshi', 'Lakshmi'].map(cat => (
+                      {['All', 'Shree Matam', 'Panduranga', 'Meenakshi', 'Lakshmi'].map(cat => (
                         <button
                           key={cat}
                           onClick={() => setPoojaCategory(cat)}
@@ -2579,7 +2579,7 @@ export default function App() {
                 {(() => {
                   const filtered = contentDb.poojas.filter(p => {
                     const matchSearch = p.name.toLowerCase().includes(poojaSearch.toLowerCase()) || p.description.toLowerCase().includes(poojaSearch.toLowerCase());
-                    const matchCat = poojaCategory === 'All' || p.category.toLowerCase().includes(poojaCategory.toLowerCase()) || (poojaCategory === 'Sree Matam' && p.category.toLowerCase().includes('matam'));
+                    const matchCat = poojaCategory === 'All' || p.category.toLowerCase().includes(poojaCategory.toLowerCase()) || ((poojaCategory === 'Sree Matam' || poojaCategory === 'Shree Matam') && (p.category.toLowerCase().includes('matam') || p.category.toLowerCase().includes('paada pooja')));
                     return matchSearch && matchCat;
                   });
 
