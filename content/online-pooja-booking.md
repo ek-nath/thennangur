@@ -409,24 +409,6 @@ Samasthi Pada Pooja performed on Tamil New Year Day at Thennangur Ashram.
 ₹300
 [Book Now](/product/tamil-new-year-day)  [View Details](/product/tamil-new-year-day)
 
-## Special Donations
-
-### One Day Annadhanam
-
-Sponsor the Annadhanam (free food distribution) for one day at the Thennangur Ashram. Annadhanam is considered one of th…
-
-₹5,000
-[Book Now](/product/one-day-annadhanam)  [View Details](/product/one-day-annadhanam)
-
-### Life Time Annadhanam
-
-On any mentioned Date
-
-Sponsor the Life Time Annadhanam at the Thennangur Ashram. An act of perpetual charity in the name of your family.
-
-₹50,000
-[Book Now](/product/life-time-annadhanam)  [View Details](/product/life-time-annadhanam)
-
 ### Poojas to all Deities
 
 Gurunathar Sannidhi, Pandurangan Temple, Sivan Temple, Lakshmi Narayan Temple
@@ -434,13 +416,4 @@ Gurunathar Sannidhi, Pandurangan Temple, Sivan Temple, Lakshmi Narayan Temple
 Comprehensive poojas performed to all deities at all the sannidhis — Gurunathar Sannidhi, Pandurangan Temple, Sivan Temp…
 
 ₹2,500
-[Book Now](/product/poojas-to-all-deities)  [View Details](/product/poojas-to-all-deities)
-
-### Go Samrakshanam
-
-On Particular Date
-
-Go Samrakshanam — sponsoring the care and protection of the sacred cows (Goshala) at the Thennangur Ashram.
-
-₹2,000
-[Book Now](/product/go-samrakshanam)  [View Details](/product/go-samrakshanam) $/$
+[Book Now](/product/poojas-to-all-deities)  [View Details](/product/poojas-to-all-deities) $/$

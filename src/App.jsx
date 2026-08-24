@@ -2842,11 +2842,27 @@ export default function App() {
                       <div className="bg-temple-saffron-50 p-2 rounded-lg text-temple-saffron-600 h-10 w-10 flex items-center justify-center flex-shrink-0">
                         <Coffee size={24} />
                       </div>
-                      <div className="space-y-1">
+                      <div className="space-y-1 flex-grow">
                         <h4 className="font-serif font-bold text-temple-maroon-800">Annadanam (Food Drive)</h4>
                         <p className="text-xs text-temple-stone-700">
                           "Serve food for all." Daily free feeding of hundreds of pilgrims, local villagers, and ashram visitors in the Annadhana Hall.
                         </p>
+                        <div className="mt-2.5 flex flex-wrap gap-2">
+                          <button 
+                            type="button"
+                            onClick={() => setDonationForm({ ...donationForm, cause: 'One Day Annadhanam', amount: '5000' })}
+                            className="text-[10px] bg-temple-saffron-55/75 hover:bg-temple-saffron-100 text-temple-saffron-800 px-2 py-1 rounded font-bold border border-temple-saffron-200 transition-colors cursor-pointer"
+                          >
+                            Sponsor 1 Day (₹5,000)
+                          </button>
+                          <button 
+                            type="button"
+                            onClick={() => setDonationForm({ ...donationForm, cause: 'Life Time Annadhanam', amount: '50000' })}
+                            className="text-[10px] bg-temple-saffron-55/75 hover:bg-temple-saffron-100 text-temple-saffron-800 px-2 py-1 rounded font-bold border border-temple-saffron-200 transition-colors cursor-pointer"
+                          >
+                            Sponsor Lifetime (₹50,000)
+                          </button>
+                        </div>
                       </div>
                     </div>
 
@@ -2855,11 +2871,20 @@ export default function App() {
                       <div className="bg-temple-saffron-50 p-2 rounded-lg text-temple-saffron-600 h-10 w-10 flex items-center justify-center flex-shrink-0">
                         <Compass size={24} />
                       </div>
-                      <div className="space-y-1">
+                      <div className="space-y-1 flex-grow">
                         <h4 className="font-serif font-bold text-temple-maroon-800">Goshala Seva (Cow Care)</h4>
                         <p className="text-xs text-temple-stone-700">
                           Protective shelter for over 50 cows. Your donation helps feed, maintain, and provide veterinary care for the sacred cows.
                         </p>
+                        <div className="mt-2.5">
+                          <button 
+                            type="button"
+                            onClick={() => setDonationForm({ ...donationForm, cause: 'Go Samrakshanam', amount: '2000' })}
+                            className="text-[10px] bg-temple-saffron-55/75 hover:bg-temple-saffron-100 text-temple-saffron-800 px-2 py-1 rounded font-bold border border-temple-saffron-200 transition-colors cursor-pointer"
+                          >
+                            Sponsor Cow Care (₹2,000)
+                          </button>
+                        </div>
                       </div>
                     </div>
 
@@ -2904,11 +2929,29 @@ export default function App() {
                         <span className="block text-xs font-bold text-temple-stone-700 uppercase tracking-wider">Select Cause / Initiative *</span>
                         <select 
                           value={donationForm.cause}
-                          onChange={(e) => setDonationForm({...donationForm, cause: e.target.value})}
+                          onChange={(e) => {
+                            const newCause = e.target.value;
+                            let newAmount = donationForm.amount;
+                            if (newCause === 'One Day Annadhanam') {
+                              newAmount = '5000';
+                            } else if (newCause === 'Life Time Annadhanam') {
+                              newAmount = '50000';
+                            } else if (newCause === 'Go Samrakshanam') {
+                              newAmount = '2000';
+                            }
+                            setDonationForm({
+                              ...donationForm,
+                              cause: newCause,
+                              amount: newAmount
+                            });
+                          }}
                           className="w-full p-2.5 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 bg-white focus:outline-none"
                         >
                           <option value="Annadanam">Annadanam (Feeding Seva)</option>
+                          <option value="One Day Annadhanam">One Day Annadhanam (₹5,000)</option>
+                          <option value="Life Time Annadhanam">Life Time Annadhanam (₹50,000)</option>
                           <option value="Goshala Seva">Goshala Seva (Cow Care)</option>
+                          <option value="Go Samrakshanam">Go Samrakshanam (₹2,000)</option>
                           <option value="Guruji Medical Centre">Guruji Medical Centre (Healthcare)</option>
                           <option value="Senior Citizens Home">Senior Citizens Home (Elder Care)</option>
                           <option value="Temple Maintenance & General Fund">Temple Maintenance & General Fund</option>
@@ -2918,47 +2961,55 @@ export default function App() {
                       {/* Amount Selection */}
                       <div className="space-y-2">
                         <span className="block text-xs font-bold text-temple-stone-700 uppercase tracking-wider">Select Amount (INR) *</span>
-                        <div className="grid grid-cols-3 gap-2">
-                          {['500', '1000', '2500', '5000', '10000'].map(amt => (
-                            <button
-                              key={amt}
-                              type="button"
-                              onClick={() => setDonationForm({...donationForm, amount: amt})}
-                              className={`py-2 rounded-lg font-serif font-bold transition-all border ${
-                                donationForm.amount === amt 
-                                  ? 'bg-temple-maroon-850 text-white border-temple-maroon-850 shadow' 
-                                  : 'bg-white text-temple-stone-800 border-temple-stone-300 hover:bg-temple-stone-50'
-                              }`}
-                            >
-                              ₹{parseInt(amt, 10).toLocaleString('en-IN')}
-                            </button>
-                          ))}
-                          <button
-                            type="button"
-                            onClick={() => setDonationForm({...donationForm, amount: 'custom'})}
-                            className={`py-2 rounded-lg font-semibold transition-all border ${
-                              donationForm.amount === 'custom' 
-                                ? 'bg-temple-maroon-850 text-white border-temple-maroon-850 shadow' 
-                                : 'bg-white text-temple-stone-800 border-temple-stone-300 hover:bg-temple-stone-50'
-                            }`}
-                          >
-                            Custom
-                          </button>
-                        </div>
-
-                        {donationForm.amount === 'custom' && (
-                          <div className="pt-2 relative">
-                            <span className="absolute left-3 top-5 text-sm text-temple-stone-600 font-bold">₹</span>
-                            <input 
-                              type="number" 
-                              required
-                              min="100"
-                              placeholder="Enter custom amount (Min. ₹100)"
-                              value={donationForm.customAmount}
-                              onChange={(e) => setDonationForm({...donationForm, customAmount: e.target.value})}
-                              className="w-full pl-7 pr-3 py-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none"
-                            />
+                        {['One Day Annadhanam', 'Life Time Annadhanam', 'Go Samrakshanam'].includes(donationForm.cause) ? (
+                          <div className="p-3 bg-temple-stone-50 border border-temple-stone-200 rounded-lg text-temple-stone-800 font-serif font-bold text-lg">
+                            ₹{parseInt(donationForm.amount, 10).toLocaleString('en-IN')} <span className="text-xs text-temple-stone-500 font-sans font-normal ml-1">(Fixed Sponsorship Amount)</span>
                           </div>
+                        ) : (
+                          <>
+                            <div className="grid grid-cols-3 gap-2">
+                              {['500', '1000', '2500', '5000', '10000'].map(amt => (
+                                <button
+                                  key={amt}
+                                  type="button"
+                                  onClick={() => setDonationForm({...donationForm, amount: amt})}
+                                  className={`py-2 rounded-lg font-serif font-bold transition-all border ${
+                                    donationForm.amount === amt 
+                                      ? 'bg-temple-maroon-850 text-white border-temple-maroon-850 shadow' 
+                                      : 'bg-white text-temple-stone-800 border-temple-stone-300 hover:bg-temple-stone-50'
+                                  }`}
+                                >
+                                  ₹{parseInt(amt, 10).toLocaleString('en-IN')}
+                                </button>
+                              ))}
+                              <button
+                                type="button"
+                                onClick={() => setDonationForm({...donationForm, amount: 'custom'})}
+                                className={`py-2 rounded-lg font-semibold transition-all border ${
+                                  donationForm.amount === 'custom' 
+                                    ? 'bg-temple-maroon-850 text-white border-temple-maroon-850 shadow' 
+                                    : 'bg-white text-temple-stone-800 border-temple-stone-300 hover:bg-temple-stone-50'
+                                }`}
+                              >
+                                Custom
+                              </button>
+                            </div>
+
+                            {donationForm.amount === 'custom' && (
+                              <div className="pt-2 relative">
+                                <span className="absolute left-3 top-5 text-sm text-temple-stone-600 font-bold">₹</span>
+                                <input 
+                                  type="number" 
+                                  required
+                                  min="100"
+                                  placeholder="Enter custom amount (Min. ₹100)"
+                                  value={donationForm.customAmount}
+                                  onChange={(e) => setDonationForm({...donationForm, customAmount: e.target.value})}
+                                  className="w-full pl-7 pr-3 py-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none"
+                                />
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
 
@@ -3813,11 +3864,29 @@ export default function App() {
                 <label className="block text-xs font-bold uppercase text-temple-stone-700">Select Cause / Initiative *</label>
                 <select 
                   value={donationForm.cause}
-                  onChange={(e) => setDonationForm({...donationForm, cause: e.target.value})}
+                  onChange={(e) => {
+                    const newCause = e.target.value;
+                    let newAmount = donationForm.amount;
+                    if (newCause === 'One Day Annadhanam') {
+                      newAmount = '5000';
+                    } else if (newCause === 'Life Time Annadhanam') {
+                      newAmount = '50000';
+                    } else if (newCause === 'Go Samrakshanam') {
+                      newAmount = '2000';
+                    }
+                    setDonationForm({
+                      ...donationForm,
+                      cause: newCause,
+                      amount: newAmount
+                    });
+                  }}
                   className="w-full p-2.5 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 bg-white focus:outline-none"
                 >
                   <option value="Annadanam">Annadanam (Feeding Seva)</option>
+                  <option value="One Day Annadhanam">One Day Annadhanam (₹5,000)</option>
+                  <option value="Life Time Annadhanam">Life Time Annadhanam (₹50,000)</option>
                   <option value="Goshala Seva">Goshala Seva (Cow Care)</option>
+                  <option value="Go Samrakshanam">Go Samrakshanam (₹2,000)</option>
                   <option value="Guruji Medical Centre">Guruji Medical Centre (Healthcare)</option>
                   <option value="Senior Citizens Home">Senior Citizens Home (Elder Care)</option>
                   <option value="Temple Maintenance & General Fund">Temple Maintenance & General Fund</option>
@@ -3827,47 +3896,55 @@ export default function App() {
               {/* Amount Selection */}
               <div className="space-y-1">
                 <label className="block text-xs font-bold uppercase text-temple-stone-700">Select Amount (INR) *</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {['500', '1000', '2500', '5000', '10000'].map(amt => (
-                    <button
-                      key={amt}
-                      type="button"
-                      onClick={() => setDonationForm({...donationForm, amount: amt})}
-                      className={`py-2 rounded-lg font-serif font-bold transition-all border ${
-                        donationForm.amount === amt 
-                          ? 'bg-temple-maroon-850 text-white border-temple-maroon-850 shadow' 
-                          : 'bg-white text-temple-stone-800 border-temple-stone-300 hover:bg-temple-stone-50 cursor-pointer'
-                      }`}
-                    >
-                      ₹{parseInt(amt, 10).toLocaleString('en-IN')}
-                    </button>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => setDonationForm({...donationForm, amount: 'custom'})}
-                    className={`py-2 rounded-lg font-semibold transition-all border ${
-                      donationForm.amount === 'custom' 
-                        ? 'bg-temple-maroon-850 text-white border-temple-maroon-850 shadow' 
-                        : 'bg-white text-temple-stone-800 border-temple-stone-300 hover:bg-temple-stone-50 cursor-pointer'
-                    }`}
-                  >
-                    Custom
-                  </button>
-                </div>
-
-                {donationForm.amount === 'custom' && (
-                  <div className="pt-2 relative">
-                    <span className="absolute left-3 top-5 text-sm text-temple-stone-655 font-bold">₹</span>
-                    <input 
-                      type="number" 
-                      required
-                      min="100"
-                      placeholder="Enter custom amount (Min. ₹100)"
-                      value={donationForm.customAmount}
-                      onChange={(e) => setDonationForm({...donationForm, customAmount: e.target.value})}
-                      className="w-full pl-7 pr-3 py-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none"
-                    />
+                {['One Day Annadhanam', 'Life Time Annadhanam', 'Go Samrakshanam'].includes(donationForm.cause) ? (
+                  <div className="p-3 bg-temple-stone-50 border border-temple-stone-200 rounded-lg text-temple-stone-800 font-serif font-bold text-lg">
+                    ₹{parseInt(donationForm.amount, 10).toLocaleString('en-IN')} <span className="text-xs text-temple-stone-500 font-sans font-normal ml-1">(Fixed Sponsorship Amount)</span>
                   </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-3 gap-2">
+                      {['500', '1000', '2500', '5000', '10000'].map(amt => (
+                        <button
+                          key={amt}
+                          type="button"
+                          onClick={() => setDonationForm({...donationForm, amount: amt})}
+                          className={`py-2 rounded-lg font-serif font-bold transition-all border ${
+                            donationForm.amount === amt 
+                              ? 'bg-temple-maroon-850 text-white border-temple-maroon-850 shadow' 
+                              : 'bg-white text-temple-stone-800 border-temple-stone-300 hover:bg-temple-stone-50 cursor-pointer'
+                          }`}
+                        >
+                          ₹{parseInt(amt, 10).toLocaleString('en-IN')}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setDonationForm({...donationForm, amount: 'custom'})}
+                        className={`py-2 rounded-lg font-semibold transition-all border ${
+                          donationForm.amount === 'custom' 
+                            ? 'bg-temple-maroon-850 text-white border-temple-maroon-850 shadow' 
+                            : 'bg-white text-temple-stone-800 border-temple-stone-300 hover:bg-temple-stone-50 cursor-pointer'
+                        }`}
+                      >
+                        Custom
+                      </button>
+                    </div>
+
+                    {donationForm.amount === 'custom' && (
+                      <div className="pt-2 relative">
+                        <span className="absolute left-3 top-5 text-sm text-temple-stone-655 font-bold">₹</span>
+                        <input 
+                          type="number" 
+                          required
+                          min="100"
+                          placeholder="Enter custom amount (Min. ₹100)"
+                          value={donationForm.customAmount}
+                          onChange={(e) => setDonationForm({...donationForm, customAmount: e.target.value})}
+                          className="w-full pl-7 pr-3 py-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 focus:outline-none"
+                        />
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 
