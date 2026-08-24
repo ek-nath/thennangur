@@ -2,12 +2,13 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import cors from 'cors';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5055;
 
 // Middleware
 app.use(cors());
@@ -113,6 +114,38 @@ app.post('/api/checkout', (req, res) => {
     message: 'Payment simulated successfully. Record saved to in-memory database.',
     receipt
   });
+});
+
+// Add route for simulated email sending
+app.post('/api/send-receipt-email', (req, res) => {
+  const { recipientEmail, subject, htmlContent, txnId } = req.body;
+
+  try {
+    // Create sent_emails directory if it doesn't exist
+    const emailsDir = path.join(__dirname, 'sent_emails');
+    if (!fs.existsSync(emailsDir)) {
+      fs.mkdirSync(emailsDir, { recursive: true });
+    }
+
+    const fileName = `receipt_${txnId}.html`;
+    const filePath = path.join(emailsDir, fileName);
+
+    // Save mock email to file
+    fs.writeFileSync(filePath, htmlContent, 'utf-8');
+
+    console.log(`[Email Simulator] Email sent to: ${recipientEmail || 'N/A'}`);
+    console.log(`[Email Simulator] Subject: ${subject}`);
+    console.log(`[Email Simulator] Receipt saved to: ${filePath}`);
+
+    res.json({
+      success: true,
+      message: `Email receipt simulated successfully. Saved to ${fileName}`,
+      filePath: `/sent_emails/${fileName}`
+    });
+  } catch (err) {
+    console.error('Failed to simulate sending email:', err);
+    res.status(500).json({ error: 'Failed to simulate sending email' });
+  }
 });
 
 // Serve frontend in production (Vite builds into /dist)
