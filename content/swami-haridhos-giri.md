@@ -63,7 +63,7 @@ Today, Namasankirtan has spread far and wide in the world due to the seeds sown 
 
 It was Guruji's vision to build an ashram dedicated to his Guru. He built an ashram at his birthplace in Thennangur. The aim of the Ashram is to uphold the tenets of Sanatana Dharma through the path of Namasankirtan.
 
-There are 4 temples in the ashram complex. In the Panduranga Rakhumayi temple, the magnificent idols of Panduranga and Rakhumayi stand tall at 12 ft. and 10ft. respectively. The Maha Shodasi Temple is one of its kind with the sixteen-handed goddess Maha Shodasi and her army of protective deities. The unique Meenakshi Sundareshwar temple was built here since Thennagur( also known as Dakshina Halasyam)was the birth place of Goddess Meenakshi and the ancient Lakshmi Narayan temple adorn the ashram.
+There are 4 temples in the ashram complex. In the Panduranga Rakhumayi temple, the magnificent idols of Panduranga and Rakhumayi stand tall at 12 ft. and 10ft. respectively. The Maha Shodasi Temple is one of its kind with the sixteen-handed goddess Maha Shodasi and her army of protective deities. The unique Meenakshi Sundareswarar temple was built here since Thennagur( also known as Dakshina Halasyam)was the birth place of Goddess Meenakshi and the ancient Lakshmi Narayan temple adorn the ashram.
 
 The ashram runs a hospital that provides subsidised medical treatment and is a lifeline for the surrounding villages. It also has a Vedic School, a Senior Citizens home, a Ghoshala (Habitat for cows), an Annadhana Hall and a Namasankirtan Hall.
 

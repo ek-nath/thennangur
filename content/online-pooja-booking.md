@@ -7,7 +7,7 @@ Receive the blessings of the divine through our sacred pooja services
 
 How to book: Select your pooja below, provide devotee details, and complete payment via our secure payment gateway. You will receive a confirmation email after payment.
 
-## Sree Matam Poojas
+## Shree Matham Poojas
 
 ### Gho Pooja
 
@@ -76,23 +76,23 @@ Tulsi Puja brings prosperity and happiness to the family. It helps to attain sal
 ₹250
 [Book Now](/product/tulasi-pooja)  [View Details](/product/tulasi-pooja)
 
-## Meenakshi Sundareshwar Temple Poojas
+## Meenakshi Sundareswarar Temple Poojas
 
 ### Abhishekam & Archana to all Deities
 
-Complete Abhishekam and Archana performed to all deities at the Meenakshi Sundareshwarar Sannidhi.
+Complete Abhishekam and Archana performed to all deities at the Meenakshi Sundareswarar Sannidhi.
 
 ₹5,000
 [Book Now](/product/abhishekam-archana-to-all-deities)  [View Details](/product/abhishekam-archana-to-all-deities)
 
 ### Abhishekam & Archana to a particular Deity
 
-Abhishekam and Archana performed to a particular deity of your choice at the Meenakshi Sundareshwarar Sannidhi.
+Abhishekam and Archana performed to a particular deity of your choice at the Meenakshi Sundareswarar Sannidhi.
 
 ₹2,000
 [Book Now](/product/abhishekam-archana-to-a-particular-deity)  [View Details](/product/abhishekam-archana-to-a-particular-deity)
 
-## Panduranga Rakhumayi Temple Poojas
+## Pandurangan Rakhumayi Temple Poojas
 
 ### Panduranga Rakhumayi Archana
 
@@ -183,25 +183,25 @@ Offering of Vastram (divine clothing) to the deities at the temple on Guruji Mah
 ₹10,000
 [Book Now](/product/vastram-to-deities)  [View Details](/product/vastram-to-deities)
 
-## Meenakshi Sundareshwar Temple — Weekly Poojas
+## Meenakshi Sundareswarar Temple — Weekly Poojas
 
-### Sundareshwar Abhishekham
+### Sundareswarar Abhishekham
 
-Sacred Abhishekam of Lord Sundareshwar at the Meenakshi Sundareshwar Temple, Thennangur.
+Sacred Abhishekam of Lord Sundareswarar at the Meenakshi Sundareswarar Temple, Thennangur.
 
 ₹500
-[Book Now](/product/sundareshwar-abhishekham)  [View Details](/product/sundareshwar-abhishekham)
+[Book Now](/product/Sundareswarar-abhishekham)  [View Details](/product/Sundareswarar-abhishekham)
 
-### Archana to all Deities in the Meenakshi Sundareshwar Temple
+### Archana to all Deities in the Meenakshi Sundareswarar Temple
 
-Archana performed to all deities at the Meenakshi Sundareshwar Temple.
+Archana performed to all deities at the Meenakshi Sundareswarar Temple.
 
 ₹250
-[Book Now](/product/archana-to-all-deites-in-the-meenakshi-sundareshwar-temple)  [View Details](/product/archana-to-all-deites-in-the-meenakshi-sundareshwar-temple)
+[Book Now](/product/archana-to-all-deites-in-the-meenakshi-sundareswarar-temple)  [View Details](/product/archana-to-all-deites-in-the-meenakshi-sundareswarar-temple)
 
 ### Meenakshi Abhishekham
 
-Sacred Abhishekam of Goddess Meenakshi at the Meenakshi Sundareshwar Temple, Thennangur.
+Sacred Abhishekam of Goddess Meenakshi at the Meenakshi Sundareswarar Temple, Thennangur.
 
 ₹500
 [Book Now](/product/meenakshi-abhishekham)  [View Details](/product/meenakshi-abhishekham)

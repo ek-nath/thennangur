@@ -7,9 +7,9 @@ The Sri Lakshmi Narayana temple is the oldest temple in Thennangur.
 
 Until 1996, it was known as the Shiva Vishnu temple, since the idols of Shiva and Vishnu were inside the GarbaGriha (sanctum sanctorum). When Swami Haridhos Giri (Guruji) visited Thennangur in 1985, the temple was in a dilapidated state. He rebuilt the temple and performed the Kumbhabhishekam (consecration with holy water) in 1987. Both Lord Shiva and Lord Vishnu were worshipped here till 1996.
 
-Swami Haridhos Giri decided to build an Ashram in Thennangur. In 1987, the construction of the ashram including three new temples of Panduranga Rakhumayi, Meenakshi Sundareshwar and Shree Matham began in full swing. The Kumbhabhisekham of all four temples took place in 1996.
+Swami Haridhos Giri decided to build an Ashram in Thennangur. In 1987, the construction of the ashram including three new temples of Panduranga Rakhumayi, Meenakshi Sundareswarar and Shree Matham began in full swing. The Kumbhabhisekham of all four temples took place in 1996.
 
-The idol of Lord Shiva which was in the Shiva Vishnu temple was now placed in the Meenakshi Sundareshwar temple.
+The idol of Lord Shiva which was in the Shiva Vishnu temple was now placed in the Meenakshi Sundareswarar temple.
 
 Goddess Mahalakshmi was installed along with Lord Vishnu and the temple is now called the Lakshmi Narayana temple.
 

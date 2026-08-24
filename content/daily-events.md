@@ -15,9 +15,9 @@ Temple is open every day from 5.30 A.M. to 8.00 P.M.
 
 Temple is open every day from 6.00 A.M. to 8.00 P.M.
 
-![Daily Programmes in Meenakshi Sundareshwar Temple](/images/daily-events-meenakshi.jpg)
+![Daily Programmes in Meenakshi Sundareswarar Temple](/images/daily-events-meenakshi.jpg)
 
-## Daily Programmes in Meenakshi Sundareshwar Temple
+## Daily Programmes in Meenakshi Sundareswarar Temple
 
 Temple is open every day from 6.00 A.M. to 8.00 P.M.
 

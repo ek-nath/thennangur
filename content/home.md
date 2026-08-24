@@ -1,7 +1,7 @@
 
 ![Guruji Swami Haridhos Giri Ashram, Thennangur](/images/slider/slide1.jpg)
 
-![Meenakshi Sundareshwar Temple, Thennangur](/images/slider/slide2.jpg)
+![Meenakshi Sundareswarar Temple, Thennangur](/images/slider/slide2.jpg)
 
 ![Panduranga Rakhumayi Temple, Thennangur](/images/slider/slide3.jpg)
 
@@ -56,12 +56,12 @@ Swami Haridhos Giri propagated the holy name of Lord Panduranga throughout the w
 Maha Shodasi is worshipped either as Maha Meru or in the form of Sri Chakra. Swami Haridhos Giri consecrated a temple and gave an idol form to the Maha Shodasi mantra as he wanted everyone to receive the blessings of the Goddess. This Maha Shodasi temple is one of its kind and the first temple of Maha Shodasi in the world.
 [Read More](/maha-shodasi-temple)
 
-![Meenakshi Sundareshwar Temple](/images/temples/meenakshi-outside.jpg)
+![Meenakshi Sundareswarar Temple](/images/temples/meenakshi-outside.jpg)
 
-### Meenakshi Sundareshwar Temple
+### Meenakshi Sundareswarar Temple
 
-Thennangur is the birthplace of Goddess Meenakshi. Hence it is called Halasyam and since it is in the south it is called Dakshina Halasyam. Swami Haridhos Giri built a temple for Meenakshi Sundareshwar in the ashram.
-[Read More](/meenakshi-sundareshwar-temple)
+Thennangur is the birthplace of Goddess Meenakshi. Hence it is called Halasyam and since it is in the south it is called Dakshina Halasyam. Swami Haridhos Giri built a temple for Meenakshi Sundareswarar in the ashram.
+[Read More](/meenakshi-sundareswarar-temple)
 
 ![Lakshmi Narayan Temple](/images/temples/lakshmi-narayan.jpg)
 

@@ -7,8 +7,8 @@ const getPriestInfo = (category) => {
   switch (category) {
     case 'Sree Matam Poojas':
       return { name: 'Sri Venkatesh Bhattar (Shree Matham)', phone: '+919840807718' };
-    case 'Meenakshi Sundareshwar Temple Poojas':
-      return { name: 'Sri Sundaramurthy Bhattar (Meenakshi Sundareshwar)', phone: '+14803993440' };
+    case 'Meenakshi Sundareswarar Temple Poojas':
+      return { name: 'Sri Sundaramurthy Bhattar (Meenakshi Sundareswarar)', phone: '+14803993440' };
     case 'Panduranga Rakhumayi Temple Poojas':
       return { name: 'Sri Vitthal Das (Panduranga Temple)', phone: '+918825789523' };
     case 'Lakshmi Narayan Temple Poojas':
@@ -1575,10 +1575,10 @@ Radhe Krishna.`;
             );
           })()}
 
-          {/* Meenakshi Sundareshwar */}
+          {/* Meenakshi Sundareswarar */}
           {(() => {
-            const category = 'Meenakshi Sundareshwar Temple Poojas';
-            const templeName = 'Meenakshi Sundareshwar';
+            const category = 'Meenakshi Sundareswarar Temple Poojas';
+            const templeName = 'Meenakshi Sundareswarar';
             const priest = getPriestInfo(category);
             const count = getPoojaListForCategory(category, selectedSheetDate).length;
             return (
@@ -2435,7 +2435,7 @@ Radhe Krishna.`;
                         className="w-full p-2 border border-temple-stone-300 rounded focus:ring-2 focus:ring-temple-saffron-500 bg-white focus:outline-none cursor-pointer"
                       >
                         <option value="Sree Matam Poojas">Shree Matham</option>
-                        <option value="Meenakshi Sundareshwar Temple Poojas">Meenakshi Sundareshwar</option>
+                        <option value="Meenakshi Sundareswarar Temple Poojas">Meenakshi Sundareswarar</option>
                         <option value="Panduranga Rakhumayi Temple Poojas">Panduranga Temple</option>
                         <option value="Lakshmi Narayan Temple Poojas">Lakshmi Narayan Temple</option>
                       </select>

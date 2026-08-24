@@ -661,9 +661,9 @@ const TEMPLE_METADATA = {
     established: '1996 Consecration',
     subtitle: 'Supreme Mother Tripurasundari'
   },
-  'meenakshi-sundareshwar-temple': {
+  'meenakshi-sundareswarar-temple': {
     heroImage: '/images/temples/meenakshi-outside.jpg',
-    deity: 'Goddess Meenakshi & Sundareshwar',
+    deity: 'Goddess Meenakshi & Sundareswarar',
     style: 'Classical South-Indian Dravidian',
     highlight: 'Dakshina Halasyam Birthplace Site',
     established: '1996 Consecration',
@@ -711,13 +711,13 @@ const TEMPLE_TIMINGS = {
     { time: '7:30 PM', event: 'Deepa Aradhanai' },
     { time: '8:00 PM', event: 'Shree Matham closes' }
   ],
-  'meenakshi-sundareshwar-temple': [
+  'meenakshi-sundareswarar-temple': [
     { time: '6:00 AM', event: 'Suprabhatam' },
     { time: '6:30 AM', event: 'Abhishekham to all deities' },
     { time: '7:30 AM', event: 'Naivedyam and Deepa Aradhanai' },
     { time: '12:00 PM - 4:00 PM', event: 'Temple Closed for afternoon' },
     { time: '6:00 PM', event: 'Naivedyam and Deepa Aradhanai' },
-    { time: '8:00 PM', event: 'Meenakshi Sundareshwar Temple Closes' }
+    { time: '8:00 PM', event: 'Meenakshi Sundareswarar Temple Closes' }
   ],
   'lakshmi-narayan-temple': [
     { time: '6:00 AM', event: 'Suprabhatam Vishwa Roopam' },
@@ -736,7 +736,7 @@ export default function App() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const slides = [
     { src: '/images/slider/slide1.jpg', title: 'Guruji Swami Haridhos Giri Ashram', subtitle: 'Thennangur' },
-    { src: '/images/slider/slide2.jpg', title: 'Meenakshi Sundareshwar Temple', subtitle: 'Thennangur' },
+    { src: '/images/slider/slide2.jpg', title: 'Meenakshi Sundareswarar Temple', subtitle: 'Thennangur' },
     { src: '/images/slider/slide3.jpg', title: 'Panduranga Rakhumayi Temple', subtitle: 'Thennangur' },
     { src: '/images/slider/slide4.jpg', title: 'Guruji Brindavanam', subtitle: 'Thennangur' }
   ];
@@ -1092,7 +1092,7 @@ export default function App() {
                 <div className="absolute left-0 mt-2 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                   <div className="py-1">
                     <a href="#/temples/panduranga-rakhumayi-temple" className="block px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800 font-medium">Panduranga Rakhumayi</a>
-                    <a href="#/temples/meenakshi-sundareshwar-temple" className="block px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800 font-medium">Meenakshi Sundareshwar</a>
+                    <a href="#/temples/meenakshi-sundareswarar-temple" className="block px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800 font-medium">Meenakshi Sundareswarar</a>
                     <a href="#/temples/lakshmi-narayan-temple" className="block px-4 py-2 text-sm text-temple-stone-800 hover:bg-temple-stone-100 hover:text-temple-maroon-800 font-medium">Lakshmi Narayan Temple</a>
                     
                     {/* Shree Matham Sub-Dropdown */}
@@ -1173,7 +1173,7 @@ export default function App() {
               <div className="border-t border-temple-stone-100 my-1 pt-1">
                 <span className="block px-3 py-1 text-xs font-bold text-temple-saffron-600 uppercase tracking-wider">Temples</span>
                 <a href="#/temples/panduranga-rakhumayi-temple" className="block pl-6 pr-3 py-2 rounded-md text-base font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Panduranga Rakhumayi</a>
-                <a href="#/temples/meenakshi-sundareshwar-temple" className="block pl-6 pr-3 py-2 rounded-md text-base font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Meenakshi Sundareshwar</a>
+                <a href="#/temples/meenakshi-sundareswarar-temple" className="block pl-6 pr-3 py-2 rounded-md text-base font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Meenakshi Sundareswarar</a>
                 <a href="#/temples/lakshmi-narayan-temple" className="block pl-6 pr-3 py-2 rounded-md text-base font-medium text-temple-stone-700 hover:bg-temple-stone-50 hover:text-temple-maroon-800">Lakshmi Narayan Temple</a>
                 
                 {/* Shree Matham Mobile Section */}
@@ -1620,7 +1620,7 @@ export default function App() {
                     <div className="relative h-48 overflow-hidden">
                       <img 
                         src="/images/temples/meenakshi-outside.jpg" 
-                        alt="Meenakshi Sundareshwar Temple" 
+                        alt="Meenakshi Sundareswarar Temple" 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         loading="lazy"
                       />
@@ -1628,13 +1628,13 @@ export default function App() {
                     </div>
                     <div className="p-6 flex-grow flex flex-col justify-between">
                       <div className="space-y-3">
-                        <h3 className="font-serif text-lg font-bold text-temple-maroon-800">Meenakshi Sundareshwar</h3>
+                        <h3 className="font-serif text-lg font-bold text-temple-maroon-800">Meenakshi Sundareswarar</h3>
                         <p className="text-sm text-temple-stone-700 line-clamp-3">
                           Built in South-Indian style at the birth site of Goddess Meenakshi (Dakshina Halasyam). Adorned with beautiful carvings.
                         </p>
                       </div>
                       <div className="pt-6">
-                        <a href="#/temples/meenakshi-sundareshwar-temple" className="text-temple-saffron-600 hover:text-temple-maroon-800 font-bold text-sm flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                        <a href="#/temples/meenakshi-sundareswarar-temple" className="text-temple-saffron-600 hover:text-temple-maroon-800 font-bold text-sm flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                           Explore Temple &rarr;
                         </a>
                       </div>
@@ -1868,7 +1868,7 @@ export default function App() {
                   <div className="md:absolute md:-left-36 md:top-0 text-sm font-serif font-bold text-temple-saffron-600">1996</div>
                   <h4 className="font-serif font-semibold text-lg text-temple-maroon-800">Kumbhabhishekam (Consecration)</h4>
                   <p className="text-sm text-temple-stone-700 mt-1">
-                    The majestic Panduranga Rakhumayi Temple, Meenakshi Sundareshwar Temple, and Maha Shodasi Temple are completed. The grand Kumbhabhishekam consecration takes place, restoring prosperity and ending the curse.
+                    The majestic Panduranga Rakhumayi Temple, Meenakshi Sundareswarar Temple, and Maha Shodasi Temple are completed. The grand Kumbhabhishekam consecration takes place, restoring prosperity and ending the curse.
                   </p>
                 </div>
 
@@ -1900,10 +1900,17 @@ export default function App() {
                 if (!page) return <div className="text-center py-12 font-serif text-lg">Temple page not found.</div>;
                 
                 // Find matching poojas
-                const relatedPoojas = contentDb.poojas.filter(p => 
-                  p.category.toLowerCase().includes(templeId.split('-')[0]) || 
-                  (templeId.includes('lakshmi') && p.name.toLowerCase().includes('lakshmi'))
-                );
+                const relatedPoojas = contentDb.poojas.filter(p => {
+                  if (templeId.includes('lakshmi')) {
+                    return p.name.toLowerCase().includes('lakshmi') || p.name.toLowerCase().includes('anjaneyar');
+                  }
+                  if (templeId.includes('panduranga')) {
+                    return p.category.toLowerCase().includes('panduranga') && 
+                           !p.name.toLowerCase().includes('lakshmi') && 
+                           !p.name.toLowerCase().includes('anjaneyar');
+                  }
+                  return p.category.toLowerCase().includes(templeId.split('-')[0]);
+                });
 
                 const meta = TEMPLE_METADATA[templeId] || {
                   heroImage: page.images?.[0]?.src || '/images/temples/panduranga-outside.jpg',
@@ -2341,12 +2348,12 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Card 3: Meenakshi Sundareshwar */}
+                  {/* Card 3: Meenakshi Sundareswarar */}
                   <div className="bg-white rounded-2xl shadow-md border border-temple-stone-200 overflow-hidden flex flex-col group hover:shadow-xl hover:border-temple-saffron-300/30 transition-all duration-300">
                     <div className="relative h-72 overflow-hidden bg-temple-stone-100">
                       <img 
                         src="/images/temples/meenakshi-outside.jpg" 
-                        alt="Meenakshi Sundareshwar Temple" 
+                        alt="Meenakshi Sundareswarar Temple" 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>
@@ -2358,14 +2365,14 @@ export default function App() {
                       <div className="space-y-2">
                         <span className="text-xs text-temple-saffron-600 font-bold uppercase tracking-wider">Dakshina Halasyam</span>
                         <h3 className="font-serif text-2xl font-bold text-temple-maroon-800 group-hover:text-temple-maroon-900">
-                          Meenakshi Sundareshwar Temple
+                          Meenakshi Sundareswarar Temple
                         </h3>
                         <p className="text-sm text-temple-stone-700 leading-relaxed line-clamp-3">
                           Built at the historic birthplace of Goddess Meenakshi, this South-Indian style temple depicts the divine wedding of Shiva and Parvathy. It features unique Bana Lingam and rare shrines of Navagrahas with their consorts.
                         </p>
                       </div>
                       <a 
-                        href="#/temples/meenakshi-sundareshwar-temple" 
+                        href="#/temples/meenakshi-sundareswarar-temple" 
                         className="group flex items-center justify-between w-full bg-temple-stone-100 group-hover:bg-temple-maroon-800 group-hover:text-white px-5 py-3.5 rounded-xl font-bold text-sm text-temple-maroon-800 transition-all duration-300 border border-temple-stone-200 group-hover:border-transparent"
                       >
                         <span>Explore Sthala Puranam & Darshan</span>
@@ -2558,7 +2565,7 @@ export default function App() {
                       />
                     </div>
                     <div className="md:col-span-7 flex flex-wrap gap-2 justify-end">
-                      {['All', 'Shree Matam', 'Panduranga', 'Meenakshi', 'Lakshmi'].map(cat => (
+                      {['All', 'Shree Matham', 'Pandurangan Rakhumayi', 'Meenakshi Sundareswarar', 'Lakshmi Narayanar'].map(cat => (
                         <button
                           key={cat}
                           onClick={() => setPoojaCategory(cat)}
@@ -2579,7 +2586,11 @@ export default function App() {
                 {(() => {
                   const filtered = contentDb.poojas.filter(p => {
                     const matchSearch = p.name.toLowerCase().includes(poojaSearch.toLowerCase()) || p.description.toLowerCase().includes(poojaSearch.toLowerCase());
-                    const matchCat = poojaCategory === 'All' || p.category.toLowerCase().includes(poojaCategory.toLowerCase()) || ((poojaCategory === 'Sree Matam' || poojaCategory === 'Shree Matam') && (p.category.toLowerCase().includes('matam') || p.category.toLowerCase().includes('paada pooja')));
+                    const matchCat = poojaCategory === 'All' || 
+                      (poojaCategory === 'Shree Matham' && (p.category.toLowerCase().includes('matam') || p.category.toLowerCase().includes('matham') || p.category.toLowerCase().includes('paada pooja'))) ||
+                      (poojaCategory === 'Pandurangan Rakhumayi' && p.category.toLowerCase().includes('panduranga') && !p.name.toLowerCase().includes('lakshmi') && !p.name.toLowerCase().includes('anjaneyar')) ||
+                      (poojaCategory === 'Meenakshi Sundareswarar' && p.category.toLowerCase().includes('meenakshi')) ||
+                      (poojaCategory === 'Lakshmi Narayanar' && (p.name.toLowerCase().includes('lakshmi') || p.name.toLowerCase().includes('anjaneyar')));
                     return matchSearch && matchCat;
                   });
 
@@ -2594,7 +2605,9 @@ export default function App() {
                           <div className="space-y-4">
                             <div className="flex justify-between items-start gap-2">
                               <span className="text-[10px] font-bold text-temple-saffron-600 tracking-wider bg-temple-saffron-50 px-2 py-0.5 rounded uppercase">
-                                {pooja.category.split(' Poojas')[0]}
+                                {(pooja.name.toLowerCase().includes('lakshmi') || pooja.name.toLowerCase().includes('anjaneyar')) 
+                                  ? 'Lakshmi Narayanar Temple' 
+                                  : pooja.category.split(' Poojas')[0].replace('Sree Matam', 'Shree Matham').replace('Panduranga Rakhumayi', 'Pandurangan Rakhumayi')}
                               </span>
                               {pooja.schedule && (
                                 <span className="text-[10px] font-semibold text-temple-stone-500 flex items-center gap-0.5">
@@ -4068,7 +4081,7 @@ export default function App() {
             <ul className="space-y-2">
               <li><a href="#/temples/panduranga-rakhumayi-temple" className="hover:text-temple-saffron-300 transition-colors">Panduranga Rakhumayi</a></li>
               <li><a href="#/temples/shree-matham" className="hover:text-temple-saffron-300 transition-colors">Shree Matham</a></li>
-              <li><a href="#/temples/meenakshi-sundareshwar-temple" className="hover:text-temple-saffron-300 transition-colors">Meenakshi Sundareshwar</a></li>
+              <li><a href="#/temples/meenakshi-sundareswarar-temple" className="hover:text-temple-saffron-300 transition-colors">Meenakshi Sundareswarar</a></li>
               <li><a href="#/temples/lakshmi-narayan-temple" className="hover:text-temple-saffron-300 transition-colors">Lakshmi Narayan Sannidhi</a></li>
             </ul>
           </div>

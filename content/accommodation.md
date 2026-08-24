@@ -19,7 +19,7 @@ Adjacent to Lakshmi Bhavan there is the Saraswati Bhavan Complex. The complex ha
 
 ## Sant Nagar
 
-A big gate and a large, beautiful statue of Lord Shiva welcomes you into Sant Nagar. Sant Nagar has a dozen well-furnished individual cottages where a whole family could be accommodated. It is for the benefit of the devotees who come from far. Apart from these places of accommodation there are also a few rooms for VIP guests in a building opp Saraswati Bhavan and a dozen deluxe cottages known as “L cottages” adjacent to the Meenakshi Sundareshwar Temple.
+A big gate and a large, beautiful statue of Lord Shiva welcomes you into Sant Nagar. Sant Nagar has a dozen well-furnished individual cottages where a whole family could be accommodated. It is for the benefit of the devotees who come from far. Apart from these places of accommodation there are also a few rooms for VIP guests in a building opp Saraswati Bhavan and a dozen deluxe cottages known as “L cottages” adjacent to the Meenakshi Sundareswarar Temple.
 
 ![Sant Nagar cottages](/images/ashram/Cottages3.jpg)
 
