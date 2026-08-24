@@ -14,13 +14,82 @@ const GALLERY_IMAGES = Array.from({ length: 35 }, (_, i) => ({
   alt: `Sacred Moment ${i + 1}`
 }));
 
-// Helper to get tomorrow's date string in YYYY-MM-DD format
+function formatToISTDate(dateVal) {
+  if (!dateVal) return '';
+  
+  if (typeof dateVal === 'string') {
+    const trimmed = dateVal.trim();
+    
+    // yyyy-mm-dd
+    const ymdMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (ymdMatch) {
+      return `${ymdMatch[3]}-${ymdMatch[2]}-${ymdMatch[1]}`;
+    }
+    
+    // dd-mm-yyyy or mm-dd-yyyy
+    const dmyMatch = trimmed.match(/^(\d{2})[-/.](\d{2})[-/.](\d{4})$/);
+    if (dmyMatch) {
+      const p1 = parseInt(dmyMatch[1], 10);
+      const p2 = parseInt(dmyMatch[2], 10);
+      const year = dmyMatch[3];
+      
+      if (p1 > 12) {
+        return `${String(p1).padStart(2, '0')}-${String(p2).padStart(2, '0')}-${year}`;
+      }
+      if (p2 > 12) {
+        return `${String(p2).padStart(2, '0')}-${String(p1).padStart(2, '0')}-${year}`;
+      }
+    }
+  }
+
+  try {
+    let parsedDate = dateVal;
+    if (typeof dateVal === 'string') {
+      const trimmed = dateVal.trim();
+      const dmyMatch = trimmed.match(/^(\d{2})[-/.](\d{2})[-/.](\d{4})$/);
+      if (dmyMatch) {
+        parsedDate = `${dmyMatch[2]}/${dmyMatch[1]}/${dmyMatch[3]}`;
+      }
+    }
+    
+    const d = new Date(parsedDate);
+    if (isNaN(d.getTime())) {
+      return dateVal;
+    }
+    
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Kolkata',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+    
+    const parts = formatter.formatToParts(d);
+    const yyyy = parts.find(p => p.type === 'year').value;
+    const mm = parts.find(p => p.type === 'month').value;
+    const dd = parts.find(p => p.type === 'day').value;
+    return `${dd}-${mm}-${yyyy}`;
+  } catch (err) {
+    return dateVal;
+  }
+}
+
 function getTomorrowString() {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const yyyy = tomorrow.getFullYear();
-  const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
-  const dd = String(tomorrow.getDate()).padStart(2, '0');
+  const d = new Date();
+  const tomorrowInMs = d.getTime() + (24 * 60 * 60 * 1000);
+  const tomorrowDate = new Date(tomorrowInMs);
+  
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+  
+  const parts = formatter.formatToParts(tomorrowDate);
+  const yyyy = parts.find(p => p.type === 'year').value;
+  const mm = parts.find(p => p.type === 'month').value;
+  const dd = parts.find(p => p.type === 'day').value;
   return `${yyyy}-${mm}-${dd}`;
 }
 
@@ -959,7 +1028,7 @@ export default function App() {
     const randNum = Math.floor(10000 + Math.random() * 90000);
     const txnId = 'TXN-' + Math.random().toString(36).substr(2, 9).toUpperCase();
     const receiptNo = `GA-TXN-2026-${randNum}`;
-    const date = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+    const date = formatToISTDate(new Date());
 
     const localReceipt = {
       receiptNo,
@@ -1374,7 +1443,7 @@ export default function App() {
                             {item.type === 'pooja' ? (
                               <div className="space-y-0.5">
                                 <p><span className="font-semibold text-temple-stone-600">Devotee:</span> {item.details.devoteeName}</p>
-                                <p><span className="font-semibold text-temple-stone-600">Date:</span> {new Date(item.details.poojaDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                                <p><span className="font-semibold text-temple-stone-600">Date:</span> {formatToISTDate(item.details.poojaDate)}</p>
                                 {(item.details.gotram || item.details.nakshatram || item.details.rasi) && (
                                   <p>
                                     {item.details.gotram && <span>Gotram: {item.details.gotram} </span>}
@@ -1442,7 +1511,7 @@ export default function App() {
               <div>
                 <span className="font-bold block text-green-900">WhatsApp Notification Sent:</span>
                 <p className="mt-0.5 italic text-green-700">
-                  "Radhe Krishna {receiptData.items[0]?.details.devoteeName || receiptData.items[0]?.details.donorName || 'Devotee'}! Your transaction for {receiptData.items.map(item => item.type === 'pooja' ? `${item.name} (${new Date(item.details.poojaDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })})` : item.name).join(', ')} is successfully confirmed. Receipt: {receiptData.receiptNo}. May the grace of Lord Panduranga and Guruji Swami Haridhos Giri be with you."
+                  "Radhe Krishna {receiptData.items[0]?.details.devoteeName || receiptData.items[0]?.details.donorName || 'Devotee'}! Your transaction for {receiptData.items.map(item => item.type === 'pooja' ? `${item.name} (${formatToISTDate(item.details.poojaDate)})` : item.name).join(', ')} is successfully confirmed. Receipt: {receiptData.receiptNo}. May the grace of Lord Panduranga and Guruji Swami Haridhos Giri be with you."
                 </p>
               </div>
             </div>
@@ -2696,12 +2765,11 @@ export default function App() {
                                 />
                                 {bookingForm.poojaDate && (() => {
                                   const dateObj = new Date(bookingForm.poojaDate);
-                                  const formatted = dateObj.toLocaleDateString('en-IN', {
-                                    day: 'numeric',
-                                    month: 'long',
-                                    year: 'numeric',
+                                  const weekday = new Intl.DateTimeFormat('en-IN', {
+                                    timeZone: 'Asia/Kolkata',
                                     weekday: 'long'
-                                  });
+                                  }).format(dateObj);
+                                  const formatted = `${weekday}, ${formatToISTDate(bookingForm.poojaDate)}`;
                                   return (
                                     <div className="text-[11px] font-bold text-temple-saffron-800 bg-temple-saffron-50 border border-temple-saffron-200 rounded p-2 text-center">
                                       Selected Date: {formatted}
@@ -3767,7 +3835,7 @@ export default function App() {
                         {item.type === 'pooja' ? (
                           <div className="text-[11px] text-temple-stone-600 space-y-0.5 bg-temple-stone-50 p-2.5 rounded border border-temple-stone-150 font-sans">
                             <p><span className="font-bold text-temple-stone-750">Devotee:</span> {item.details.devoteeName}</p>
-                            <p><span className="font-bold text-temple-stone-750">Date:</span> {new Date(item.details.poojaDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                            <p><span className="font-bold text-temple-stone-750">Date:</span> {formatToISTDate(item.details.poojaDate)}</p>
                             {(item.details.gotram || item.details.nakshatram || item.details.rasi) && (
                               <p>
                                 {item.details.gotram && <span><span className="font-bold text-temple-stone-750">Gotram:</span> {item.details.gotram} </span>}

@@ -18,12 +18,82 @@ const getPriestInfo = (category) => {
   }
 };
 
+const formatToISTDate = (dateVal) => {
+  if (!dateVal) return '';
+  
+  if (typeof dateVal === 'string') {
+    const trimmed = dateVal.trim();
+    
+    // yyyy-mm-dd
+    const ymdMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (ymdMatch) {
+      return `${ymdMatch[3]}-${ymdMatch[2]}-${ymdMatch[1]}`;
+    }
+    
+    // dd-mm-yyyy or mm-dd-yyyy
+    const dmyMatch = trimmed.match(/^(\d{2})[-/.](\d{2})[-/.](\d{4})$/);
+    if (dmyMatch) {
+      const p1 = parseInt(dmyMatch[1], 10);
+      const p2 = parseInt(dmyMatch[2], 10);
+      const year = dmyMatch[3];
+      
+      if (p1 > 12) {
+        return `${String(p1).padStart(2, '0')}-${String(p2).padStart(2, '0')}-${year}`;
+      }
+      if (p2 > 12) {
+        return `${String(p2).padStart(2, '0')}-${String(p1).padStart(2, '0')}-${year}`;
+      }
+    }
+  }
+
+  try {
+    let parsedDate = dateVal;
+    if (typeof dateVal === 'string') {
+      const trimmed = dateVal.trim();
+      const dmyMatch = trimmed.match(/^(\d{2})[-/.](\d{2})[-/.](\d{4})$/);
+      if (dmyMatch) {
+        parsedDate = `${dmyMatch[2]}/${dmyMatch[1]}/${dmyMatch[3]}`;
+      }
+    }
+    
+    const d = new Date(parsedDate);
+    if (isNaN(d.getTime())) {
+      return dateVal;
+    }
+    
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Kolkata',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+    
+    const parts = formatter.formatToParts(d);
+    const yyyy = parts.find(p => p.type === 'year').value;
+    const mm = parts.find(p => p.type === 'month').value;
+    const dd = parts.find(p => p.type === 'day').value;
+    return `${dd}-${mm}-${yyyy}`;
+  } catch (err) {
+    return dateVal;
+  }
+};
+
 const getTomorrowString = () => {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const yyyy = tomorrow.getFullYear();
-  const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
-  const dd = String(tomorrow.getDate()).padStart(2, '0');
+  const d = new Date();
+  const tomorrowInMs = d.getTime() + (24 * 60 * 60 * 1000);
+  const tomorrowDate = new Date(tomorrowInMs);
+  
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+  
+  const parts = formatter.formatToParts(tomorrowDate);
+  const yyyy = parts.find(p => p.type === 'year').value;
+  const mm = parts.find(p => p.type === 'month').value;
+  const dd = parts.find(p => p.type === 'day').value;
   return `${yyyy}-${mm}-${dd}`;
 };
 
@@ -114,7 +184,8 @@ export default function AdminPortal() {
     if (contentDb.poojas && contentDb.poojas.length > 0) {
       setPoojaName(contentDb.poojas[0].name);
       setPrice(String(contentDb.poojas[0].price));
-      setPoojaLocation(contentDb.poojas[0].category || 'Sree Matam Poojas');
+      const cat = contentDb.poojas[0].category || 'Sree Matam Poojas';
+      setPoojaLocation(cat === 'Paada Pooja & Special Poojas' ? 'Sree Matam Poojas' : cat);
     }
     setPoojaDate(getTomorrowString());
   }, []);
@@ -125,7 +196,8 @@ export default function AdminPortal() {
     if (foundPooja) {
       setPrice(String(foundPooja.price));
       if (foundPooja.category) {
-        setPoojaLocation(foundPooja.category);
+        const cat = foundPooja.category;
+        setPoojaLocation(cat === 'Paada Pooja & Special Poojas' ? 'Sree Matam Poojas' : cat);
       }
     }
   };
@@ -265,12 +337,31 @@ export default function AdminPortal() {
     doc.line(15, nextY, 195, nextY);
     nextY += 8;
 
-    // Table Row
+    // Table Rows for all items in the transaction
     doc.setFont("helvetica", "normal");
-    const desc = data.recordType === 'pooja' ? `${data.poojaName} (${data.poojaLocation || 'Shree Matham'})` : `Donation for ${data.cause}`;
-    doc.text(desc, 15, nextY);
-    doc.text(`INR ${data.totalPrice.toLocaleString('en-IN')}.00`, 170, nextY);
-    nextY += 2;
+    const itemsList = data.items || [{
+      name: data.poojaName || data.cause,
+      type: data.recordType,
+      price: data.totalPrice,
+      cause: data.cause,
+      details: {
+        category: data.poojaLocation,
+        poojaDate: data.poojaDate
+      }
+    }];
+    
+    itemsList.forEach((item) => {
+      const categoryLabel = item.details?.category || 'Sree Matam Poojas';
+      const cleanCategory = categoryLabel === 'Paada Pooja & Special Poojas' ? 'Sree Matam Poojas' : categoryLabel;
+      const desc = item.type === 'pooja' 
+        ? `${item.name} (${cleanCategory})` 
+        : `Donation for ${item.cause || item.name}`;
+      
+      doc.text(desc, 15, nextY);
+      doc.text(`INR ${item.price.toLocaleString('en-IN')}.00`, 170, nextY);
+      nextY += 7;
+    });
+    
     doc.line(15, nextY, 195, nextY);
     nextY += 10;
 
@@ -305,7 +396,7 @@ export default function AdminPortal() {
     const data = {
       receiptNo: txn.receiptNo,
       txnId: txn.txnId,
-      dateStr: txn.date,
+      dateStr: formatToISTDate(txn.date),
       paymentMethod: txn.paymentMethod || 'Online',
       checkNo: txn.checkNo,
       bankName: txn.bankName,
@@ -317,7 +408,7 @@ export default function AdminPortal() {
       gotram: item.details?.gotram,
       nakshatram: item.details?.nakshatram,
       rasi: item.details?.rasi,
-      poojaDate: item.details?.poojaDate || txn.date,
+      poojaDate: formatToISTDate(item.details?.poojaDate || txn.date),
       poojaName: item.name,
       poojaLocation: item.details?.category,
       familyMembers: item.details?.familyMembers,
@@ -328,7 +419,8 @@ export default function AdminPortal() {
       donorName: item.details?.donorName || 'N/A',
       cause: item.cause || item.details?.cause,
       panCard: item.details?.panCard,
-      address: item.details?.address
+      address: item.details?.address,
+      items: txn.items
     };
     
     generatePdfReceipt(data);
@@ -350,7 +442,7 @@ export default function AdminPortal() {
         const data = {
           receiptNo: txn.receiptNo,
           txnId: txn.txnId,
-          dateStr: txn.date,
+          dateStr: formatToISTDate(txn.date),
           paymentMethod: txn.paymentMethod || 'Online',
           checkNo: txn.checkNo,
           bankName: txn.bankName,
@@ -362,7 +454,7 @@ export default function AdminPortal() {
           gotram: item.details?.gotram,
           nakshatram: item.details?.nakshatram,
           rasi: item.details?.rasi,
-          poojaDate: item.details?.poojaDate || txn.date,
+          poojaDate: formatToISTDate(item.details?.poojaDate || txn.date),
           poojaName: item.name,
           poojaLocation: item.details?.category,
           familyMembers: item.details?.familyMembers,
@@ -373,7 +465,8 @@ export default function AdminPortal() {
           donorName: item.details?.donorName || 'N/A',
           cause: item.cause || item.details?.cause,
           panCard: item.details?.panCard,
-          address: item.details?.address
+          address: item.details?.address,
+          items: txn.items
         };
         
         drawReceiptPage(doc, data, index === 0);
@@ -497,7 +590,7 @@ export default function AdminPortal() {
       }
     });
     const receiptNo = `${prefix}-${year}-${maxNum + 1}`;
-    const dateStr = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+    const dateStr = formatToISTDate(new Date());
     
     let txnId = '';
     let items = [];
@@ -660,28 +753,63 @@ export default function AdminPortal() {
       const bookings = [];
       const donations = [];
       
+      let modified = false;
       localTxns.forEach(txn => {
+        // Fix dynamically if seeded/stored total price is incorrect
+        const calculatedTotal = txn.items.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
+        if (txn.totalPrice !== calculatedTotal) {
+          txn.totalPrice = calculatedTotal;
+          modified = true;
+        }
+
         txn.items.forEach(item => {
           if (item.type === 'pooja') {
+            // Fix dynamically if seeded/stored pooja name is actually a devotee name
+            if (item.name === 'Mr. Harishankar') {
+              item.name = 'Panduranga Rakhumayi Archana';
+              modified = true;
+            } else if (item.name === 'Mr. Raamassubramanian') {
+              item.name = 'Panduranga Rakhumayi Abhishekham';
+              modified = true;
+            }
+
             const pooja = contentDb.poojas.find(p => p.name === item.name);
+            const rawCategory = item.details.category || (pooja ? pooja.category : 'Sree Matam Poojas');
+            
+            // Normalize categories to the 4 canonical categories used in the Admin Portal
+            let itemCategory = 'Sree Matam Poojas';
+            const nameLower = item.name.toLowerCase();
+            const catLower = rawCategory.toLowerCase();
+            
+            if (nameLower.includes('lakshmi') || nameLower.includes('anjaneyar') || catLower.includes('lakshmi')) {
+              itemCategory = 'Lakshmi Narayan Temple Poojas';
+            } else if (catLower.includes('panduranga') || catLower.includes('pandurangan')) {
+              itemCategory = 'Panduranga Rakhumayi Temple Poojas';
+            } else if (catLower.includes('meenakshi') || catLower.includes('sundareswarar')) {
+              itemCategory = 'Meenakshi Sundareswarar Temple Poojas';
+            } else {
+              // Shree Matham, Sree Matam, Paada Pooja, or anything else
+              itemCategory = 'Sree Matam Poojas';
+            }
             bookings.push({
               id: item.id,
               txnId: txn.txnId,
-              date: txn.date,
+              date: formatToISTDate(txn.date),
               poojaName: item.name,
               price: item.price,
               paymentMethod: txn.paymentMethod || 'Online',
               checkNo: txn.checkNo,
               bankName: txn.bankName,
               upiTxnId: txn.upiTxnId,
-              category: item.details.category || (pooja ? pooja.category : 'Sree Matam Poojas'),
-              ...item.details
+              category: itemCategory,
+              ...item.details,
+              poojaDate: formatToISTDate(item.details?.poojaDate || txn.date)
             });
           } else if (item.type === 'donation') {
             donations.push({
               id: item.id,
               txnId: txn.txnId,
-              date: txn.date,
+              date: formatToISTDate(txn.date),
               cause: item.cause || item.details.cause,
               amount: item.price,
               paymentMethod: txn.paymentMethod || 'Online',
@@ -694,8 +822,19 @@ export default function AdminPortal() {
         });
       });
       
+      if (modified) {
+        try {
+          localStorage.setItem('thennangur_local_txns', JSON.stringify(localTxns));
+        } catch (err) {
+          console.error('Failed to update corrected local transactions:', err);
+        }
+      }
+
       setDbData({
-        transactions: localTxns,
+        transactions: localTxns.map(txn => ({
+          ...txn,
+          date: formatToISTDate(txn.date)
+        })),
         bookings,
         donations
       });
@@ -755,7 +894,7 @@ export default function AdminPortal() {
         receiptNo: "GA-TXN-2026-88123",
         txnId: "TXN-SD1A8F9K2",
         date: "23 August 2026",
-        totalPrice: 450,
+        totalPrice: 350,
         isLocal: false,
         paymentMethod: "Online",
         items: [
@@ -869,7 +1008,7 @@ export default function AdminPortal() {
           {
             id: "seed-6",
             type: "pooja",
-            name: "Mr. Harishankar",
+            name: "Panduranga Rakhumayi Archana",
             price: 100,
             details: {
               devoteeName: "Mr. Harishankar",
@@ -903,7 +1042,7 @@ export default function AdminPortal() {
           {
             id: "seed-8",
             type: "pooja",
-            name: "Mr. Raamassubramanian",
+            name: "Panduranga Rakhumayi Abhishekham",
             price: 5000,
             details: {
               devoteeName: "Mr. Raamassubramanian",
@@ -957,7 +1096,7 @@ export default function AdminPortal() {
         receiptNo: "GA-TXN-2026-88126",
         txnId: "TXN-SD4F5G6H7",
         date: "24 August 2026",
-        totalPrice: 2700,
+        totalPrice: 2800,
         isLocal: false,
         paymentMethod: "Online",
         items: [
@@ -1182,8 +1321,9 @@ export default function AdminPortal() {
 
 
   const getPoojaListForCategory = (category, date) => {
+    const targetDate = formatToISTDate(date);
     return dbData.bookings.filter(b => {
-      return b.category === category && b.poojaDate === date;
+      return b.category === category && formatToISTDate(b.poojaDate) === targetDate;
     });
   };
 
@@ -1202,11 +1342,7 @@ export default function AdminPortal() {
 
     const priest = getPriestInfo(category);
     
-    const formattedDate = new Date(selectedSheetDate).toLocaleDateString('en-IN', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    });
+    const formattedDate = formatToISTDate(selectedSheetDate);
 
     let message = `*Thennangur Ashram Pooja Offerings*
 *Date:* ${formattedDate}
@@ -1280,7 +1416,7 @@ Radhe Krishna.`;
       if (!g.includes(search) && !n.includes(search) && !r.includes(search)) return false;
     }
     // Check Pooja Date
-    if (bookingFilters.poojaDate && b.poojaDate !== bookingFilters.poojaDate) return false;
+    if (bookingFilters.poojaDate && formatToISTDate(b.poojaDate) !== formatToISTDate(bookingFilters.poojaDate)) return false;
     // Check Contact (phone / email)
     if (bookingFilters.contact) {
       const p = b.phone || '';
@@ -1296,11 +1432,20 @@ Radhe Krishna.`;
     // Also respect global search if any
     if (searchQuery) {
       const globalSearch = searchQuery.toLowerCase();
+      const formattedPoojaDate = formatToISTDate(b.poojaDate);
       const match = 
         b.devoteeName?.toLowerCase().includes(globalSearch) ||
         b.poojaName?.toLowerCase().includes(globalSearch) ||
         b.txnId?.toLowerCase().includes(globalSearch) ||
-        b.phone?.includes(globalSearch);
+        b.receiptNo?.toLowerCase().includes(globalSearch) ||
+        b.phone?.includes(globalSearch) ||
+        b.email?.toLowerCase().includes(globalSearch) ||
+        b.gotram?.toLowerCase().includes(globalSearch) ||
+        b.nakshatram?.toLowerCase().includes(globalSearch) ||
+        b.rasi?.toLowerCase().includes(globalSearch) ||
+        b.poojaDate?.toLowerCase().includes(globalSearch) ||
+        formattedPoojaDate.toLowerCase().includes(globalSearch) ||
+        b.date?.toLowerCase().includes(globalSearch);
       if (!match) return false;
     }
     
@@ -1337,7 +1482,12 @@ Radhe Krishna.`;
         d.donorName?.toLowerCase().includes(globalSearch) ||
         d.cause?.toLowerCase().includes(globalSearch) ||
         d.txnId?.toLowerCase().includes(globalSearch) ||
-        d.phone?.includes(globalSearch);
+        d.receiptNo?.toLowerCase().includes(globalSearch) ||
+        d.phone?.includes(globalSearch) ||
+        d.email?.toLowerCase().includes(globalSearch) ||
+        d.panCard?.toLowerCase().includes(globalSearch) ||
+        d.address?.toLowerCase().includes(globalSearch) ||
+        d.date?.toLowerCase().includes(globalSearch);
       if (!match) return false;
     }
 
@@ -1348,7 +1498,11 @@ Radhe Krishna.`;
 
   const filteredTransactions = dbData.transactions.filter(t => {
     // Check Date filter
-    if (transactionDateFilter && !t.date?.toLowerCase().includes(transactionDateFilter.toLowerCase())) return false;
+    if (transactionDateFilter) {
+      const targetDate = formatToISTDate(transactionDateFilter);
+      const txnDate = formatToISTDate(t.date);
+      if (txnDate !== targetDate) return false;
+    }
 
     // Check search query
     if (searchQuery) {
@@ -1356,7 +1510,25 @@ Radhe Krishna.`;
       const match = 
         t.txnId?.toLowerCase().includes(q) ||
         t.receiptNo?.toLowerCase().includes(q) ||
-        t.items.some(item => item.name.toLowerCase().includes(q));
+        t.paymentMethod?.toLowerCase().includes(q) ||
+        t.date?.toLowerCase().includes(q) ||
+        t.items.some(item => {
+          const devotee = item.details?.devoteeName || item.details?.donorName || '';
+          const poojaDateRaw = item.details?.poojaDate || '';
+          const poojaDateFormatted = formatToISTDate(poojaDateRaw);
+          const phone = item.details?.phone || '';
+          const email = item.details?.email || '';
+          const cause = item.cause || '';
+          return (
+            item.name.toLowerCase().includes(q) ||
+            devotee.toLowerCase().includes(q) ||
+            poojaDateRaw.toLowerCase().includes(q) ||
+            poojaDateFormatted.toLowerCase().includes(q) ||
+            phone.includes(q) ||
+            email.toLowerCase().includes(q) ||
+            cause.toLowerCase().includes(q)
+          );
+        });
       if (!match) return false;
     }
 
@@ -2030,13 +2202,22 @@ Radhe Krishna.`;
                     <label className="block text-[11px] font-bold uppercase text-temple-stone-700 mb-1">
                       Filter by Transaction Date
                     </label>
-                    <input
-                      type="text"
-                      value={transactionDateFilter}
-                      onChange={e => setTransactionDateFilter(e.target.value)}
-                      placeholder="e.g. 23 August 2026, August, 2026..."
-                      className="w-full px-3 py-1.5 text-xs border border-temple-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-temple-saffron-500 bg-white placeholder-temple-stone-400"
-                    />
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="date"
+                        value={transactionDateFilter}
+                        onChange={e => setTransactionDateFilter(e.target.value)}
+                        className="flex-1 px-3 py-1.5 text-xs border border-temple-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-temple-saffron-500 bg-white cursor-pointer"
+                      />
+                      {transactionDateFilter && (
+                        <button
+                          onClick={() => setTransactionDateFilter('')}
+                          className="px-2.5 py-1.5 text-xs bg-temple-stone-200 hover:bg-temple-stone-300 text-temple-stone-700 font-semibold rounded-lg transition-colors cursor-pointer"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {filteredTransactions.length > 0 && (
