@@ -478,14 +478,15 @@ const getValidDatesForPooja = (pooja) => {
     return eventInfo.dates.filter(d => d >= tomorrowStr);
   }
   
-  // 3. Dynamic Lunar / Astronomical Calculation (Pradosham, Pournami, Ganesha Chaturthi, Mrigashirsha, Uttarathathi)
+  // 3. Dynamic Lunar / Astronomical Calculation (Pradosham, Pournami, Ganesha Chaturthi, Mrigashirsha, Uttarathathi, Krithigai)
   const isPradosham = s.includes('pradosham');
   const isPournami = s.includes('poornima') || s.includes('pournami');
   const isChaturthi = s.includes('chaturti') || s.includes('chaturthi');
   const isUttarathathi = s.includes('uttarathathi');
   const isMrigashirsha = s.includes('mrigashirsha');
+  const isKrithigai = s.includes('krithigai') || s.includes('krittika');
   
-  if (isPradosham || isPournami || isChaturthi || isUttarathathi || isMrigashirsha) {
+  if (isPradosham || isPournami || isChaturthi || isUttarathathi || isMrigashirsha || isKrithigai) {
     const dates = [];
     let current = new Date();
     current.setDate(current.getDate() + 1);
@@ -530,6 +531,10 @@ const getValidDatesForPooja = (pooja) => {
         const nakToday = panchangSunrise.nakshatra;
         const nakTomorrow = panchangTomorrowSunrise.nakshatra;
         matches = (nakToday === 5 || (nakToday === 4 && nakTomorrow === 6));
+      } else if (isKrithigai) {
+        const nakToday = panchangSunrise.nakshatra;
+        const nakTomorrow = panchangTomorrowSunrise.nakshatra;
+        matches = (nakToday === 3 || (nakToday === 2 && nakTomorrow === 4));
       }
       
       if (matches) {

@@ -373,6 +373,33 @@ Samasthi Pada Pooja performed on Namaji Aradhana Day at Thennangur Ashram.
 ₹500
 [Book Now](/product/namaji-aradhana)  [View Details](/product/namaji-aradhana)
 
+### Sahasranama Seva — Swami's Monthly Birth Star Krithigai Day
+
+Krithigai Day
+
+Sahasranama Seva performed on Swami's monthly birth star Krithigai day.
+
+₹250
+[Book Now](/product/swamijis-monthly-birth-star-krithigai-day)  [View Details](/product/swamijis-monthly-birth-star-krithigai-day)
+
+### Samasthi Pada Pooja — Swami's Monthly Birth Star Krithigai Day
+
+Krithigai Day
+
+Samasthi Pada Pooja performed on Swami's monthly birth star Krithigai day.
+
+₹500
+[Book Now](/product/swamis-monthly-birth-star-krithigai-day)  [View Details](/product/swamis-monthly-birth-star-krithigai-day)
+
+### Special Pada Pooja — Swami's Monthly Birth Star Krithigai Day
+
+Krithigai Day
+
+Special Pada Pooja performed on Swami's monthly birth star Krithigai day.
+
+₹5,000
+[Book Now](/product/special-pada-pooja-swamis-monthly-birth-star-krithigai-day)  [View Details](/product/special-pada-pooja-swamis-monthly-birth-star-krithigai-day)
+
 ### Samasthi Pada Pooja — On Tamil New Year Day
 
 Tamil New Year Day

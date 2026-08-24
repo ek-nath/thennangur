@@ -74,7 +74,9 @@ function parsePoojas(markdown) {
          firstLine.toLowerCase().includes('chaturti') ||
          firstLine.toLowerCase().includes('star') ||
          firstLine.toLowerCase().includes('new year') ||
-         firstLine.toLowerCase().includes('uttarathathi'))
+         firstLine.toLowerCase().includes('uttarathathi') ||
+         firstLine.toLowerCase().includes('krithigai') ||
+         firstLine.toLowerCase().includes('krittika'))
       ) {
         schedule = firstLine;
         startIndex = 2;
