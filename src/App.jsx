@@ -1641,7 +1641,7 @@ export default function App() {
                       loading="lazy"
                     />
                     <div className="p-4 bg-temple-stone-100 rounded-b-xl border-t border-temple-stone-200 mt-2 text-center">
-                      <span className="text-xs font-serif text-temple-saffron-700 italic">"Dakshina Halasyam — The birth place of Sri Meenakshi"</span>
+                      <span className="text-xs font-serif text-temple-saffron-700 italic">"Dakshina Halasyam — The birth place of Goddess Meenakshi"</span>
                     </div>
                   </div>
                 </div>
