@@ -3406,33 +3406,53 @@ export default function App() {
 
                 return (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {filtered.map(event => (
-                      <div key={event.id} className="bg-white rounded-xl shadow overflow-hidden flex flex-col justify-between border border-temple-stone-200 hover:shadow-md transition-shadow duration-200">
-                        <div>
-                          <div className="h-40 overflow-hidden relative bg-temple-stone-100">
-                            <img src={event.image} alt={event.title} className="w-full h-full object-cover" loading="lazy" />
-                          </div>
-                          <div className="p-5 space-y-2">
-                            <span className="text-[10px] text-temple-saffron-600 font-bold uppercase tracking-wider">{event.monthGroup}</span>
-                            <h4 className="font-serif font-bold text-temple-maroon-850 text-base leading-snug">{event.title}</h4>
-                            <p className="text-xs text-temple-stone-600 flex items-center gap-1 font-medium">
-                              <Calendar size={12} className="text-temple-stone-400" /> {event.date}
-                            </p>
-                          </div>
-                        </div>
+                    {filtered.map(event => {
+                      const todayStr = (() => {
+                        const today = new Date();
+                        const yyyy = today.getFullYear();
+                        const mm = String(today.getMonth() + 1).padStart(2, '0');
+                        const dd = String(today.getDate()).padStart(2, '0');
+                        return `${yyyy}-${mm}-${dd}`;
+                      })();
 
-                        <div className="p-5 pt-0 border-t border-temple-stone-100 mt-4 flex items-center justify-between">
-                          <a 
-                            href={getGoogleCalendarUrl(event)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[11px] text-temple-maroon-800 hover:text-temple-saffron-600 font-semibold flex items-center gap-1 hover:underline"
-                          >
-                            Add to Calendar <ExternalLink size={10} />
-                          </a>
+                      const eventDates = parseEventDateString(event.date);
+                      const maxEventDate = eventDates.length > 0 ? eventDates[eventDates.length - 1] : '';
+                      const isPassed = maxEventDate && maxEventDate < todayStr;
+
+                      return (
+                        <div key={event.id} className={`bg-white rounded-xl shadow overflow-hidden flex flex-col justify-between border border-temple-stone-200 transition-all duration-200 ${isPassed ? 'opacity-50 grayscale bg-temple-stone-50 border-temple-stone-150' : 'hover:shadow-md'}`}>
+                          <div>
+                            <div className="h-40 overflow-hidden relative bg-temple-stone-100">
+                              <img src={event.image} alt={event.title} className="w-full h-full object-cover" loading="lazy" />
+                            </div>
+                            <div className="p-5 space-y-2">
+                              <span className="text-[10px] text-temple-saffron-600 font-bold uppercase tracking-wider">{event.monthGroup}</span>
+                              <h4 className="font-serif font-bold text-temple-maroon-850 text-base leading-snug">{event.title}</h4>
+                              <p className="text-xs text-temple-stone-600 flex items-center gap-1 font-medium">
+                                <Calendar size={12} className="text-temple-stone-400" /> {event.date}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="p-5 pt-0 border-t border-temple-stone-100 mt-4 flex items-center justify-between">
+                            {isPassed ? (
+                              <span className="text-[11px] text-temple-stone-400 font-semibold flex items-center gap-1">
+                                Concluded
+                              </span>
+                            ) : (
+                              <a 
+                                href={getGoogleCalendarUrl(event)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[11px] text-temple-maroon-800 hover:text-temple-saffron-600 font-semibold flex items-center gap-1 hover:underline"
+                              >
+                                Add to Calendar <ExternalLink size={10} />
+                              </a>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 );
               })()}
