@@ -1877,9 +1877,6 @@ export default function App() {
                         className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
                         loading="lazy"
                       />
-                      {event.isSpecial && (
-                        <span className="absolute top-3 left-3 bg-temple-saffron-600 text-white text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded">Major Festival</span>
-                      )}
                     </div>
                     <div className="p-6 flex-grow flex flex-col justify-between space-y-4">
                       <div className="space-y-2">
@@ -3410,13 +3407,10 @@ export default function App() {
                 return (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {filtered.map(event => (
-                      <div key={event.id} className={`bg-white rounded-xl shadow overflow-hidden flex flex-col justify-between border hover:shadow-md transition-shadow duration-200 ${event.isSpecial ? 'border-temple-saffron-400 ring-1 ring-temple-saffron-200' : 'border-temple-stone-200'}`}>
+                      <div key={event.id} className="bg-white rounded-xl shadow overflow-hidden flex flex-col justify-between border border-temple-stone-200 hover:shadow-md transition-shadow duration-200">
                         <div>
                           <div className="h-40 overflow-hidden relative bg-temple-stone-100">
                             <img src={event.image} alt={event.title} className="w-full h-full object-cover" loading="lazy" />
-                            {event.isSpecial && (
-                              <span className="absolute top-2.5 left-2.5 bg-temple-saffron-600 text-white text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded shadow">Major festival</span>
-                            )}
                           </div>
                           <div className="p-5 space-y-2">
                             <span className="text-[10px] text-temple-saffron-600 font-bold uppercase tracking-wider">{event.monthGroup}</span>
