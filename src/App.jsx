@@ -547,15 +547,41 @@ const getValidDatesForPooja = (pooja) => {
     return eventInfo.dates.filter(d => d >= tomorrowStr);
   }
   
-  // 3. Dynamic Lunar / Astronomical Calculation (Pradosham, Pournami, Ganesha Chaturthi, Mrigashirsha, Uttarathathi, Krithigai)
-  const isPradosham = s.includes('pradosham');
-  const isPournami = s.includes('poornima') || s.includes('pournami');
-  const isChaturthi = s.includes('chaturti') || s.includes('chaturthi');
+  // 3. Static Star / Panchang calculations for Krithigai, Uthrattadhi (Uttarathathi), and Mrigashirsha
   const isUttarathathi = s.includes('uttarathathi');
   const isMrigashirsha = s.includes('mrigashirsha');
   const isKrithigai = s.includes('krithigai') || s.includes('krittika');
+
+  if (isUttarathathi) {
+    const staticUttarathathi = [
+      '2026-04-16', '2026-05-13', '2026-06-09', '2026-07-07', '2026-08-03', '2026-08-30', '2026-09-27', '2026-10-24', '2026-11-20', '2026-12-18',
+      '2027-01-14', '2027-02-10', '2027-03-10', '2027-04-04'
+    ];
+    return staticUttarathathi.filter(d => d >= tomorrowStr).sort();
+  }
   
-  if (isPradosham || isPournami || isChaturthi || isUttarathathi || isMrigashirsha || isKrithigai) {
+  if (isMrigashirsha) {
+    const staticMrigashirsha = [
+      '2026-04-21', '2026-05-19', '2026-06-15', '2026-07-12', '2026-08-09', '2026-09-05', '2026-10-02', '2026-10-30', '2026-11-26', '2026-12-23',
+      '2027-01-20', '2027-02-16', '2027-03-16', '2027-04-12'
+    ];
+    return staticMrigashirsha.filter(d => d >= tomorrowStr).sort();
+  }
+  
+  if (isKrithigai) {
+    const staticKrithigai = [
+      '2026-04-20', '2026-05-17', '2026-06-13', '2026-07-11', '2026-08-07', '2026-09-03', '2026-10-01', '2026-10-28', '2026-11-24', '2026-12-22',
+      '2027-01-18', '2027-02-14', '2027-03-14', '2027-04-10'
+    ];
+    return staticKrithigai.filter(d => d >= tomorrowStr).sort();
+  }
+  
+  // 4. Dynamic Lunar / Astronomical Calculation (Pradosham, Pournami, Ganesha Chaturthi)
+  const isPradosham = s.includes('pradosham');
+  const isPournami = s.includes('poornima') || s.includes('pournami');
+  const isChaturthi = s.includes('chaturti') || s.includes('chaturthi');
+  
+  if (isPradosham || isPournami || isChaturthi) {
     const dates = [];
     let current = new Date();
     current.setDate(current.getDate() + 1);
@@ -571,10 +597,6 @@ const getValidDatesForPooja = (pooja) => {
       // is mathematically equivalent to checking if it starts prior to 7:00 AM in our Drik-based algorithm.
       const sunriseTime = new Date(year, month, dateVal, 7, 0, 0);
       const panchangSunrise = getPanchangForDate(sunriseTime);
-      
-      // Calculate tomorrow's 7:00 AM position for skipped Nakshatra checks
-      const tomorrowSunriseTime = new Date(year, month, dateVal + 1, 7, 0, 0);
-      const panchangTomorrowSunrise = getPanchangForDate(tomorrowSunriseTime);
       
       // Calculate noon (12:00 PM) for midday positions
       const noonTime = new Date(year, month, dateVal, 12, 0, 0);
@@ -592,18 +614,6 @@ const getValidDatesForPooja = (pooja) => {
         matches = (panchangNoon.tithi === 15 || panchangSunset.tithi === 15);
       } else if (isChaturthi) {
         matches = (panchangNoon.tithi === 19 || panchangSunset.tithi === 19);
-      } else if (isUttarathathi) {
-        const nakToday = panchangSunrise.nakshatra;
-        const nakTomorrow = panchangTomorrowSunrise.nakshatra;
-        matches = (nakToday === 26 || (nakToday === 25 && nakTomorrow === 27));
-      } else if (isMrigashirsha) {
-        const nakToday = panchangSunrise.nakshatra;
-        const nakTomorrow = panchangTomorrowSunrise.nakshatra;
-        matches = (nakToday === 5 || (nakToday === 4 && nakTomorrow === 6));
-      } else if (isKrithigai) {
-        const nakToday = panchangSunrise.nakshatra;
-        const nakTomorrow = panchangTomorrowSunrise.nakshatra;
-        matches = (nakToday === 3 || (nakToday === 2 && nakTomorrow === 4));
       }
       
       if (matches) {
@@ -1025,9 +1035,30 @@ export default function App() {
     }));
     const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
 
-    const randNum = Math.floor(10000 + Math.random() * 90000);
+    const year = new Date().getFullYear();
+    const prefix = 'GAT';
+    let localTxns = [];
+    try {
+      localTxns = JSON.parse(localStorage.getItem('thennangur_local_txns') || '[]');
+    } catch (e) {
+      console.error('Failed to parse local transactions:', e);
+    }
+    const matchingTxns = localTxns.filter(txn => {
+      const txnPrefix = (txn.organization === 'Gnanananda Seva Samajam') ? 'GSS' : 'GAT';
+      return txnPrefix === prefix && txn.receiptNo && txn.receiptNo.startsWith(`${prefix}-${year}-`);
+    });
+    let maxNum = 0;
+    matchingTxns.forEach(txn => {
+      const parts = txn.receiptNo.split('-');
+      if (parts.length >= 3) {
+        const num = parseInt(parts[2], 10);
+        if (!isNaN(num) && num > maxNum) {
+          maxNum = num;
+        }
+      }
+    });
+    const receiptNo = `${prefix}-${year}-${maxNum + 1}`;
     const txnId = 'TXN-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-    const receiptNo = `GA-TXN-2026-${randNum}`;
     const date = formatToISTDate(new Date());
 
     const localReceipt = {
@@ -1036,7 +1067,8 @@ export default function App() {
       date,
       items: cartItems,
       totalPrice,
-      isLocal: false
+      isLocal: false,
+      organization: 'GA Trust'
     };
 
     try {

@@ -71,9 +71,28 @@ app.post('/api/checkout', (req, res) => {
     return res.status(400).json({ error: 'Cart is empty or invalid' });
   }
 
-  const randNum = Math.floor(10000 + Math.random() * 90000);
+  const year = new Date().getFullYear();
+  const org = req.body.organization || 'GA Trust';
+  const prefix = org === 'Gnanananda Seva Samajam' ? 'GSS' : 'GAT';
+  
+  const matchingTxns = db.transactions.filter(txn => {
+    const txnPrefix = (txn.organization === 'Gnanananda Seva Samajam') ? 'GSS' : 'GAT';
+    return txnPrefix === prefix && txn.receiptNo && txn.receiptNo.startsWith(`${prefix}-${year}-`);
+  });
+  
+  let maxNum = 0;
+  matchingTxns.forEach(txn => {
+    const parts = txn.receiptNo.split('-');
+    if (parts.length >= 3) {
+      const num = parseInt(parts[2], 10);
+      if (!isNaN(num) && num > maxNum) {
+        maxNum = num;
+      }
+    }
+  });
+  
+  const receiptNo = `${prefix}-${year}-${maxNum + 1}`;
   const txnId = 'TXN-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-  const receiptNo = `GA-TXN-2026-${randNum}`;
   const date = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 
   const receipt = {
@@ -81,7 +100,8 @@ app.post('/api/checkout', (req, res) => {
     txnId,
     date,
     items,
-    totalPrice
+    totalPrice,
+    organization: org
   };
 
   // Save transaction

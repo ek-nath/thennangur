@@ -891,12 +891,13 @@ export default function AdminPortal() {
   const handleSeedData = () => {
     const seedTransactions = [
       {
-        receiptNo: "GA-TXN-2026-88123",
+        receiptNo: "GAT-2026-1",
         txnId: "TXN-SD1A8F9K2",
         date: "23 August 2026",
         totalPrice: 350,
         isLocal: false,
         paymentMethod: "Online",
+        organization: "GA Trust",
         items: [
           {
             id: "seed-1",
@@ -935,7 +936,7 @@ export default function AdminPortal() {
         ]
       },
       {
-        receiptNo: "GA-TXN-2026-88124",
+        receiptNo: "GAT-2026-2",
         txnId: "TXN-SD2A9B8C7",
         date: "23 August 2026",
         totalPrice: 7000,
@@ -943,6 +944,7 @@ export default function AdminPortal() {
         paymentMethod: "Check",
         checkNo: "220194",
         bankName: "HDFC Bank",
+        organization: "GA Trust",
         items: [
           {
             id: "seed-3",
@@ -981,12 +983,13 @@ export default function AdminPortal() {
         ]
       },
       {
-        receiptNo: "GA-TXN-2026-88125",
+        receiptNo: "GSS-2026-1",
         txnId: "TXN-SD3C4D5E6",
         date: "24 August 2026",
         totalPrice: 10400,
         isLocal: false,
         paymentMethod: "Cash",
+        organization: "Gnanananda Seva Samajam",
         items: [
           {
             id: "seed-5",
@@ -1093,12 +1096,13 @@ export default function AdminPortal() {
         ]
       },
       {
-        receiptNo: "GA-TXN-2026-88126",
+        receiptNo: "GAT-2026-3",
         txnId: "TXN-SD4F5G6H7",
         date: "24 August 2026",
         totalPrice: 2800,
         isLocal: false,
         paymentMethod: "Online",
+        organization: "GA Trust",
         items: [
           {
             id: "seed-11",
@@ -1205,12 +1209,13 @@ export default function AdminPortal() {
         ]
       },
       {
-        receiptNo: "GA-TXN-2026-88127",
+        receiptNo: "GAT-2026-4",
         txnId: "TXN-SD5D1A2B3",
         date: "25 August 2026",
         totalPrice: 5000,
         isLocal: false,
         paymentMethod: "Cash",
+        organization: "GA Trust",
         items: [
           {
             id: "seed-17",
@@ -1229,7 +1234,7 @@ export default function AdminPortal() {
         ]
       },
       {
-        receiptNo: "GA-TXN-2026-88128",
+        receiptNo: "GSS-2026-2",
         txnId: "TXN-SD6D4E5F6",
         date: "25 August 2026",
         totalPrice: 10000,
@@ -1237,6 +1242,7 @@ export default function AdminPortal() {
         paymentMethod: "Check",
         checkNo: "889922",
         bankName: "State Bank of India",
+        organization: "Gnanananda Seva Samajam",
         items: [
           {
             id: "seed-18",
@@ -1255,7 +1261,7 @@ export default function AdminPortal() {
         ]
       },
       {
-        receiptNo: "GA-TXN-2026-88129",
+        receiptNo: "GAT-2026-5",
         txnId: "TXN-SD7D7G8H9",
         date: "25 August 2026",
         totalPrice: 25000,
@@ -1263,6 +1269,7 @@ export default function AdminPortal() {
         paymentMethod: "Check",
         checkNo: "334455",
         bankName: "ICICI Bank",
+        organization: "GA Trust",
         items: [
           {
             id: "seed-19",
@@ -1281,12 +1288,13 @@ export default function AdminPortal() {
         ]
       },
       {
-        receiptNo: "GA-TXN-2026-88130",
+        receiptNo: "GSS-2026-3",
         txnId: "TXN-SD8D0I1J2",
         date: "25 August 2026",
         totalPrice: 1500,
         isLocal: false,
         paymentMethod: "Cash",
+        organization: "Gnanananda Seva Samajam",
         items: [
           {
             id: "seed-20",
@@ -1384,6 +1392,143 @@ Radhe Krishna.`;
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${priest.phone.replace(/[^0-9+]/g, '')}?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
+  };
+
+  const handlePrintConsolidatedList = (category, templeName) => {
+    const list = getPoojaListForCategory(category, selectedSheetDate);
+    if (list.length === 0) {
+      alert(`No pooja bookings scheduled for ${templeName} on ${formatToISTDate(selectedSheetDate)}.`);
+      return;
+    }
+
+    const priest = getPriestInfo(category);
+    const formattedDate = formatToISTDate(selectedSheetDate);
+
+    try {
+      const doc = new jsPDF();
+      
+      let pageNumber = 1;
+      let y = 20;
+
+      const drawHeader = () => {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(18);
+        doc.setTextColor(128, 0, 0); // Temple maroon
+        doc.text("THENNANGUR ASHRAM POOJA OFFERINGS", 105, y, { align: "center" });
+        y += 8;
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Temple: ${templeName}   |   Date: ${formattedDate}`, 105, y, { align: "center" });
+        y += 6;
+        doc.setFont("helvetica", "normal");
+        doc.text(`Priest: ${priest.name}   |   Phone: ${priest.phone}`, 105, y, { align: "center" });
+        y += 6;
+
+        // Line separator
+        doc.setDrawColor(200, 200, 200);
+        doc.line(15, y, 195, y);
+        y += 10;
+      };
+
+      drawHeader();
+
+      // Group bookings by poojaName
+      const grouped = {};
+      list.forEach(b => {
+        if (!grouped[b.poojaName]) {
+          grouped[b.poojaName] = [];
+        }
+        grouped[b.poojaName].push(b);
+      });
+
+      Object.keys(grouped).forEach(poojaName => {
+        const bookingsForPooja = grouped[poojaName];
+
+        // Check page overflow before rendering pooja header
+        if (y > 250) {
+          doc.addPage();
+          pageNumber++;
+          y = 20;
+          drawHeader();
+        }
+
+        // Pooja Category Header
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(13);
+        doc.setTextColor(128, 0, 0);
+        doc.text(`${poojaName} (${bookingsForPooja.length} ${bookingsForPooja.length === 1 ? 'offering' : 'offerings'})`, 15, y);
+        y += 7;
+
+        bookingsForPooja.forEach((b, idx) => {
+          // Check page overflow for each devotee detail block
+          if (y > 235) {
+            doc.addPage();
+            pageNumber++;
+            y = 20;
+            drawHeader();
+            
+            // Re-draw Pooja category header on new page to show continuation
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(11);
+            doc.setTextColor(128, 0, 0);
+            doc.text(`${poojaName} (Continued)`, 15, y);
+            y += 7;
+          }
+
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(10);
+          doc.setTextColor(50, 50, 50);
+          doc.text(`${idx + 1}. Devotee: ${b.devoteeName || 'N/A'}`, 18, y);
+          y += 5;
+
+          doc.setFont("helvetica", "normal");
+          doc.text(`Gotram: ${b.gotram || 'N/A'}`, 22, y);
+          doc.text(`Nakshatram: ${b.nakshatram || 'N/A'} ${b.rasi ? `(${b.rasi})` : ''}`, 105, y);
+          y += 5;
+
+          doc.text(`Family Members: ${b.familyMembers || 'N/A'}`, 22, y);
+          y += 5;
+
+          // Handle long sankalpam wrap
+          const sankalpamText = `Sankalpam: ${b.sankalpam || 'N/A'}`;
+          const splitSankalpam = doc.splitTextToSize(sankalpamText, 165);
+          splitSankalpam.forEach(line => {
+            if (y > 270) {
+              doc.addPage();
+              pageNumber++;
+              y = 20;
+              drawHeader();
+            }
+            doc.text(line, 22, y);
+            y += 5;
+          });
+
+          // Draw a small subtle line between devotees
+          doc.setDrawColor(230, 230, 230);
+          doc.line(18, y - 2, 192, y - 2);
+          y += 4;
+        });
+
+        y += 4; // Space between different pooja groupings
+      });
+
+      // Add simple page numbering footer on all pages
+      const totalPages = pageNumber;
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(8);
+        doc.setTextColor(120, 120, 120);
+        doc.text(`Generated on ${new Date().toLocaleString('en-IN')} - Page ${i} of ${totalPages}`, 105, 285, { align: "center" });
+      }
+
+      doc.save(`Pooja_Offerings_${templeName.replace(/\s+/g, '_')}_${formattedDate}.pdf`);
+    } catch (err) {
+      console.error('Failed to generate consolidated PDF:', err);
+      alert('Failed to generate printable PDF.');
+    }
   };
 
   // Stats calculation
@@ -1730,20 +1875,43 @@ Radhe Krishna.`;
             const priest = getPriestInfo(category);
             const count = getPoojaListForCategory(category, selectedSheetDate).length;
             return (
-              <button
-                onClick={() => handleSendConsolidatedWhatsApp(category, templeName)}
-                disabled={count === 0}
-                className={`w-full flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
+              <div
+                className={`w-full flex flex-col items-center justify-between p-4 rounded-xl border transition-all duration-200 ${
                   count > 0 
-                    ? 'bg-emerald-50 border-emerald-300 hover:bg-emerald-100 hover:border-emerald-400 text-emerald-800 shadow-sm' 
-                    : 'bg-temple-stone-50 border-temple-stone-200 text-temple-stone-400 cursor-not-allowed opacity-60'
+                    ? 'bg-amber-50/60 border-amber-200 text-temple-stone-800 shadow-sm' 
+                    : 'bg-temple-stone-50 border-temple-stone-200 text-temple-stone-400 opacity-60'
                 }`}
-                title={count > 0 ? `Send consolidated sheet to: ${priest.name}` : `No bookings for this date`}
               >
-                <span className="font-bold text-[10px] uppercase tracking-wider text-center">{templeName}</span>
-                <span className="font-serif font-extrabold text-2xl mt-1">{count} {count === 1 ? 'Pooja' : 'Poojas'}</span>
-                <span className="text-[10px] opacity-75 mt-1 truncate max-w-full">{priest.name.split(' (')[0]}</span>
-              </button>
+                <div className="flex flex-col items-center text-center w-full">
+                  <span className={`font-bold text-[10px] uppercase tracking-wider ${count > 0 ? 'text-temple-stone-500' : 'text-temple-stone-400'}`}>{templeName}</span>
+                  <span className={`font-serif font-extrabold text-2xl mt-1 ${count > 0 ? 'text-temple-maroon-800' : 'text-temple-stone-400'}`}>{count} {count === 1 ? 'Pooja' : 'Poojas'}</span>
+                  <span className={`text-[10px] mt-1 truncate max-w-full ${count > 0 ? 'text-temple-stone-600' : 'text-temple-stone-400'}`}>{priest.name.split(' (')[0]}</span>
+                </div>
+                {count > 0 ? (
+                  <div className="flex gap-2 w-full mt-3 pt-3 border-t border-amber-200/50">
+                    <button
+                      onClick={() => handleSendConsolidatedWhatsApp(category, templeName)}
+                      className="flex-1 flex items-center justify-center gap-1 py-1.5 px-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-bold transition-colors shadow-xs cursor-pointer"
+                      title={`Send consolidated sheet to: ${priest.name}`}
+                    >
+                      <MessageSquare size={12} /> WhatsApp
+                    </button>
+                    <button
+                      onClick={() => handlePrintConsolidatedList(category, templeName)}
+                      className="flex-1 flex items-center justify-center gap-1 py-1.5 px-2 bg-temple-maroon-800 hover:bg-temple-maroon-900 text-white rounded-lg text-[10px] font-bold transition-colors shadow-xs cursor-pointer"
+                      title="Print consolidated daily list to paper"
+                    >
+                      <Printer size={12} /> Print
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2 w-full mt-3 pt-3 border-t border-temple-stone-200/50 opacity-40">
+                    <div className="flex-1 text-center py-1 text-[10px] font-medium text-temple-stone-400">
+                      No Bookings
+                    </div>
+                  </div>
+                )}
+              </div>
             );
           })()}
 
@@ -1754,20 +1922,43 @@ Radhe Krishna.`;
             const priest = getPriestInfo(category);
             const count = getPoojaListForCategory(category, selectedSheetDate).length;
             return (
-              <button
-                onClick={() => handleSendConsolidatedWhatsApp(category, templeName)}
-                disabled={count === 0}
-                className={`w-full flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
+              <div
+                className={`w-full flex flex-col items-center justify-between p-4 rounded-xl border transition-all duration-200 ${
                   count > 0 
-                    ? 'bg-emerald-50 border-emerald-300 hover:bg-emerald-100 hover:border-emerald-400 text-emerald-800 shadow-sm' 
-                    : 'bg-temple-stone-50 border-temple-stone-200 text-temple-stone-400 cursor-not-allowed opacity-60'
+                    ? 'bg-amber-50/60 border-amber-200 text-temple-stone-800 shadow-sm' 
+                    : 'bg-temple-stone-50 border-temple-stone-200 text-temple-stone-400 opacity-60'
                 }`}
-                title={count > 0 ? `Send consolidated sheet to: ${priest.name}` : `No bookings for this date`}
               >
-                <span className="font-bold text-[10px] uppercase tracking-wider text-center">{templeName}</span>
-                <span className="font-serif font-extrabold text-2xl mt-1">{count} {count === 1 ? 'Pooja' : 'Poojas'}</span>
-                <span className="text-[10px] opacity-75 mt-1 truncate max-w-full">{priest.name.split(' (')[0]}</span>
-              </button>
+                <div className="flex flex-col items-center text-center w-full">
+                  <span className={`font-bold text-[10px] uppercase tracking-wider ${count > 0 ? 'text-temple-stone-500' : 'text-temple-stone-400'}`}>{templeName}</span>
+                  <span className={`font-serif font-extrabold text-2xl mt-1 ${count > 0 ? 'text-temple-maroon-800' : 'text-temple-stone-400'}`}>{count} {count === 1 ? 'Pooja' : 'Poojas'}</span>
+                  <span className={`text-[10px] mt-1 truncate max-w-full ${count > 0 ? 'text-temple-stone-600' : 'text-temple-stone-400'}`}>{priest.name.split(' (')[0]}</span>
+                </div>
+                {count > 0 ? (
+                  <div className="flex gap-2 w-full mt-3 pt-3 border-t border-amber-200/50">
+                    <button
+                      onClick={() => handleSendConsolidatedWhatsApp(category, templeName)}
+                      className="flex-1 flex items-center justify-center gap-1 py-1.5 px-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-bold transition-colors shadow-xs cursor-pointer"
+                      title={`Send consolidated sheet to: ${priest.name}`}
+                    >
+                      <MessageSquare size={12} /> WhatsApp
+                    </button>
+                    <button
+                      onClick={() => handlePrintConsolidatedList(category, templeName)}
+                      className="flex-1 flex items-center justify-center gap-1 py-1.5 px-2 bg-temple-maroon-800 hover:bg-temple-maroon-900 text-white rounded-lg text-[10px] font-bold transition-colors shadow-xs cursor-pointer"
+                      title="Print consolidated daily list to paper"
+                    >
+                      <Printer size={12} /> Print
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2 w-full mt-3 pt-3 border-t border-temple-stone-200/50 opacity-40">
+                    <div className="flex-1 text-center py-1 text-[10px] font-medium text-temple-stone-400">
+                      No Bookings
+                    </div>
+                  </div>
+                )}
+              </div>
             );
           })()}
 
@@ -1778,20 +1969,43 @@ Radhe Krishna.`;
             const priest = getPriestInfo(category);
             const count = getPoojaListForCategory(category, selectedSheetDate).length;
             return (
-              <button
-                onClick={() => handleSendConsolidatedWhatsApp(category, templeName)}
-                disabled={count === 0}
-                className={`w-full flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
+              <div
+                className={`w-full flex flex-col items-center justify-between p-4 rounded-xl border transition-all duration-200 ${
                   count > 0 
-                    ? 'bg-emerald-50 border-emerald-300 hover:bg-emerald-100 hover:border-emerald-400 text-emerald-800 shadow-sm' 
-                    : 'bg-temple-stone-50 border-temple-stone-200 text-temple-stone-400 cursor-not-allowed opacity-60'
+                    ? 'bg-amber-50/60 border-amber-200 text-temple-stone-800 shadow-sm' 
+                    : 'bg-temple-stone-50 border-temple-stone-200 text-temple-stone-400 opacity-60'
                 }`}
-                title={count > 0 ? `Send consolidated sheet to: ${priest.name}` : `No bookings for this date`}
               >
-                <span className="font-bold text-[10px] uppercase tracking-wider text-center">{templeName}</span>
-                <span className="font-serif font-extrabold text-2xl mt-1">{count} {count === 1 ? 'Pooja' : 'Poojas'}</span>
-                <span className="text-[10px] opacity-75 mt-1 truncate max-w-full">{priest.name.split(' (')[0]}</span>
-              </button>
+                <div className="flex flex-col items-center text-center w-full">
+                  <span className={`font-bold text-[10px] uppercase tracking-wider ${count > 0 ? 'text-temple-stone-500' : 'text-temple-stone-400'}`}>{templeName}</span>
+                  <span className={`font-serif font-extrabold text-2xl mt-1 ${count > 0 ? 'text-temple-maroon-800' : 'text-temple-stone-400'}`}>{count} {count === 1 ? 'Pooja' : 'Poojas'}</span>
+                  <span className={`text-[10px] mt-1 truncate max-w-full ${count > 0 ? 'text-temple-stone-600' : 'text-temple-stone-400'}`}>{priest.name.split(' (')[0]}</span>
+                </div>
+                {count > 0 ? (
+                  <div className="flex gap-2 w-full mt-3 pt-3 border-t border-amber-200/50">
+                    <button
+                      onClick={() => handleSendConsolidatedWhatsApp(category, templeName)}
+                      className="flex-1 flex items-center justify-center gap-1 py-1.5 px-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-bold transition-colors shadow-xs cursor-pointer"
+                      title={`Send consolidated sheet to: ${priest.name}`}
+                    >
+                      <MessageSquare size={12} /> WhatsApp
+                    </button>
+                    <button
+                      onClick={() => handlePrintConsolidatedList(category, templeName)}
+                      className="flex-1 flex items-center justify-center gap-1 py-1.5 px-2 bg-temple-maroon-800 hover:bg-temple-maroon-900 text-white rounded-lg text-[10px] font-bold transition-colors shadow-xs cursor-pointer"
+                      title="Print consolidated daily list to paper"
+                    >
+                      <Printer size={12} /> Print
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2 w-full mt-3 pt-3 border-t border-temple-stone-200/50 opacity-40">
+                    <div className="flex-1 text-center py-1 text-[10px] font-medium text-temple-stone-400">
+                      No Bookings
+                    </div>
+                  </div>
+                )}
+              </div>
             );
           })()}
 
@@ -1802,20 +2016,43 @@ Radhe Krishna.`;
             const priest = getPriestInfo(category);
             const count = getPoojaListForCategory(category, selectedSheetDate).length;
             return (
-              <button
-                onClick={() => handleSendConsolidatedWhatsApp(category, templeName)}
-                disabled={count === 0}
-                className={`w-full flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
+              <div
+                className={`w-full flex flex-col items-center justify-between p-4 rounded-xl border transition-all duration-200 ${
                   count > 0 
-                    ? 'bg-emerald-50 border-emerald-300 hover:bg-emerald-100 hover:border-emerald-400 text-emerald-800 shadow-sm' 
-                    : 'bg-temple-stone-50 border-temple-stone-200 text-temple-stone-400 cursor-not-allowed opacity-60'
+                    ? 'bg-amber-50/60 border-amber-200 text-temple-stone-800 shadow-sm' 
+                    : 'bg-temple-stone-50 border-temple-stone-200 text-temple-stone-400 opacity-60'
                 }`}
-                title={count > 0 ? `Send consolidated sheet to: ${priest.name}` : `No bookings for this date`}
               >
-                <span className="font-bold text-[10px] uppercase tracking-wider text-center">{templeName}</span>
-                <span className="font-serif font-extrabold text-2xl mt-1">{count} {count === 1 ? 'Pooja' : 'Poojas'}</span>
-                <span className="text-[10px] opacity-75 mt-1 truncate max-w-full">{priest.name.split(' (')[0]}</span>
-              </button>
+                <div className="flex flex-col items-center text-center w-full">
+                  <span className={`font-bold text-[10px] uppercase tracking-wider ${count > 0 ? 'text-temple-stone-500' : 'text-temple-stone-400'}`}>{templeName}</span>
+                  <span className={`font-serif font-extrabold text-2xl mt-1 ${count > 0 ? 'text-temple-maroon-800' : 'text-temple-stone-400'}`}>{count} {count === 1 ? 'Pooja' : 'Poojas'}</span>
+                  <span className={`text-[10px] mt-1 truncate max-w-full ${count > 0 ? 'text-temple-stone-600' : 'text-temple-stone-400'}`}>{priest.name.split(' (')[0]}</span>
+                </div>
+                {count > 0 ? (
+                  <div className="flex gap-2 w-full mt-3 pt-3 border-t border-amber-200/50">
+                    <button
+                      onClick={() => handleSendConsolidatedWhatsApp(category, templeName)}
+                      className="flex-1 flex items-center justify-center gap-1 py-1.5 px-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-bold transition-colors shadow-xs cursor-pointer"
+                      title={`Send consolidated sheet to: ${priest.name}`}
+                    >
+                      <MessageSquare size={12} /> WhatsApp
+                    </button>
+                    <button
+                      onClick={() => handlePrintConsolidatedList(category, templeName)}
+                      className="flex-1 flex items-center justify-center gap-1 py-1.5 px-2 bg-temple-maroon-800 hover:bg-temple-maroon-900 text-white rounded-lg text-[10px] font-bold transition-colors shadow-xs cursor-pointer"
+                      title="Print consolidated daily list to paper"
+                    >
+                      <Printer size={12} /> Print
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2 w-full mt-3 pt-3 border-t border-temple-stone-200/50 opacity-40">
+                    <div className="flex-1 text-center py-1 text-[10px] font-medium text-temple-stone-400">
+                      No Bookings
+                    </div>
+                  </div>
+                )}
+              </div>
             );
           })()}
         </div>
